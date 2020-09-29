@@ -1,0 +1,595 @@
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MCU_API
+OBJECT MODULE PLACED IN .\Objects\mcu_api.obj
+COMPILER INVOKED BY: C:\Keil4\C51\BIN\C51.EXE ..\User\mcu_api.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mcu_api.lst) 
+                    -TABS(2) OBJECT(.\Objects\mcu_api.obj)
+
+line level    source
+
+   1          /****************************************Copyright (c)*************************
+   2          **                               版权所有 (C), 2015-2017, 涂鸦科技
+   3          **
+   4          **                                 http://www.tuya.com
+   5          **
+   6          **--------------文件信息-------------------------------------------------------
+   7          **文   件   名: mcu_api.c
+   8          **描        述: 下发/上报数据处理函数
+   9          **使 用 说 明 : 此文件下函数无须用户修改,用户需要调用的文件都在该文件内
+  10          **
+  11          **
+  12          **--------------当前版本修订---------------------------------------------------
+  13          ** 版  本: v1.0
+  14          ** 日　期: 2017年5月3日
+  15          ** 描　述: 1:创建涂鸦bluetooth对接MCU_SDK
+  16          **
+  17          **-----------------------------------------------------------------------------
+  18          ******************************************************************************/
+  19          #define MCU_API_GLOBAL
+  20          
+  21          #include "bluetooth.h"
+  22          
+  23          /*****************************************************************************
+  24          函数名称 : hex_to_bcd
+  25          功能描述 : hex转bcd
+  26          输入参数 : Value_H:高字节/Value_L:低字节
+  27          返回参数 : bcd_value:转换完成后数据
+  28          *****************************************************************************/
+  29          unsigned char hex_to_bcd(unsigned char Value_H,unsigned char Value_L)
+  30          {
+  31   1        unsigned char bcd_value;
+  32   1        
+  33   1        if((Value_H >= '0') && (Value_H <= '9'))
+  34   1          Value_H -= '0';
+  35   1        else if((Value_H >= 'A') && (Value_H <= 'F'))
+  36   1          Value_H = Value_H - 'A' + 10;
+  37   1        else if((Value_H >= 'a') && (Value_H <= 'f'))
+  38   1          Value_H = Value_H - 'a' + 10;
+  39   1         
+  40   1        bcd_value = Value_H & 0x0f;
+  41   1        
+  42   1        bcd_value <<= 4;
+  43   1        if((Value_L >= '0') && (Value_L <= '9'))
+  44   1          Value_L -= '0';
+  45   1        else if((Value_L >= 'A') && (Value_L <= 'F'))
+  46   1          Value_L = Value_L - 'a' + 10;
+  47   1        else if((Value_L >= 'a') && (Value_L <= 'f'))
+  48   1          Value_L = Value_L - 'a' + 10;
+  49   1        
+  50   1        bcd_value |= Value_L & 0x0f;
+  51   1      
+  52   1        return bcd_value;
+  53   1      }
+  54          /*****************************************************************************
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 2   
+
+  55          函数名称 : my_strlen
+  56          功能描述 : 求字符串长度
+  57          输入参数 : src:源地址
+  58          返回参数 : len:数据长度
+  59          *****************************************************************************/
+  60          unsigned long my_strlen(unsigned char *str)  
+  61          {
+  62   1        unsigned long len = 0;
+  63   1        if(str == NULL)
+  64   1        { 
+  65   2          return 0;
+  66   2        }
+  67   1        
+  68   1        for(len = 0; *str ++ != '\0'; )
+  69   1        {
+  70   2          len ++;
+  71   2        }
+  72   1        
+  73   1        return len;
+  74   1      }
+  75          /*****************************************************************************
+  76          函数名称 : my_memset
+  77          功能描述 : 把src所指内存区域的前count个字节设置成字符c
+  78          输入参数 : src:源地址
+  79                     ch:设置字符
+  80                     count:设置数据长度
+  81          返回参数 : src:数据处理完后的源地址
+  82          *****************************************************************************/
+  83          void *my_memset(void *src,unsigned char ch,unsigned short count)
+  84          {
+  85   1        unsigned char *tmp = (unsigned char *)src;
+  86   1        
+  87   1        if(src == NULL)
+  88   1        {
+  89   2          return NULL;
+  90   2        }
+  91   1        
+  92   1        while(count --)
+  93   1        {
+  94   2          *tmp ++ = ch;
+  95   2        }
+  96   1        
+  97   1        return src;
+  98   1      }
+  99          /*****************************************************************************
+ 100          函数名称 : mymemcpy
+ 101          功能描述 : 内存拷贝
+ 102          输入参数 : dest:目标地址
+ 103                     src:源地址
+ 104                     count:数据拷贝数量
+ 105          返回参数 : src:数据处理完后的源地址
+ 106          *****************************************************************************/
+ 107          void *my_memcpy(void *dest, const void *src, unsigned short count)  
+ 108          {  
+ 109   1        unsigned char *pdest = (unsigned char *)dest;  
+ 110   1        const unsigned char *psrc  = (const unsigned char *)src;  
+ 111   1        unsigned short i;
+ 112   1        
+ 113   1        if(dest == NULL || src == NULL)
+ 114   1        { 
+ 115   2          return NULL;
+ 116   2        }
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 3   
+
+ 117   1        
+ 118   1        if((pdest <= psrc) || (pdest > psrc + count))
+ 119   1        {  
+ 120   2          for(i = 0; i < count; i ++)
+ 121   2          {  
+ 122   3            pdest[i] = psrc[i];  
+ 123   3          }  
+ 124   2        }
+ 125   1        else
+ 126   1        {
+ 127   2          for(i = count; i > 0; i --)
+ 128   2          {  
+ 129   3            pdest[i - 1] = psrc[i - 1];  
+ 130   3          }  
+ 131   2        }  
+ 132   1        
+ 133   1        return dest;  
+ 134   1      }
+ 135          /*****************************************************************************
+ 136          函数名称 : int_to_byte
+ 137          功能描述 : 将int类型拆分四个字节
+ 138          输入参数 : number:4字节原数据;value:处理完成后4字节数据
+ 139          返回参数 :无
+ 140          ****************************************************************************/
+ 141          void int_to_byte(unsigned long number,unsigned char value[4])
+ 142          {
+ 143   1        value[0] = number >> 24;
+ 144   1        value[1] = number >> 16;
+ 145   1        value[2] = number >> 8;
+ 146   1        value[3] = number & 0xff;
+ 147   1      }
+ 148          /*****************************************************************************
+ 149          函数名称 : byte_to_int
+ 150          功能描述 : 将4字节合并为1个32bit变量
+ 151          输入参数 : value:4字节数组
+ 152          返回参数 : number:合并完成后的32bit变量
+ 153          ****************************************************************************/
+ 154          unsigned long byte_to_int(const unsigned char value[4])
+ 155          {
+ 156   1        unsigned long nubmer = 0;
+ 157   1      
+ 158   1        nubmer = (unsigned long)value[0];
+ 159   1        nubmer <<= 8;
+ 160   1        nubmer |= (unsigned long)value[1];
+ 161   1        nubmer <<= 8;
+ 162   1        nubmer |= (unsigned long)value[2];
+ 163   1        nubmer <<= 8;
+ 164   1        nubmer |= (unsigned long)value[3];
+ 165   1        
+ 166   1        return nubmer;
+ 167   1      }
+ 168          #ifndef BT_CONTROL_SELF_MODE
+ 169          /*****************************************************************************
+ 170          函数名称 : mcu_get_reset_bt_flag
+ 171          功能描述 : MCU获取复位bt成功标志
+ 172          输入参数 : 无
+ 173          返回参数 : 复位标志:RESET_BT_ERROR:失败/RESET_BT_SUCCESS:成功
+ 174          使用说明 : 1:MCU主动调用mcu_reset_bt()后调用该函数获取复位状态
+ 175                     2:如果为模块自处理模式,MCU无须调用该函数
+ 176          *****************************************************************************/
+ 177          unsigned char mcu_get_reset_bt_flag(void)
+ 178          {
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 4   
+
+ 179   1        return reset_bt_flag;
+ 180   1      }
+ 181          /*****************************************************************************
+ 182          函数名称 : mcu_reset_bt
+ 183          功能描述 : MCU主动重置bt工作模式
+ 184          输入参数 : 无
+ 185          返回参数 : 无
+ 186          使用说明 : 1:MCU主动调用,通过mcu_get_reset_bt_flag()函数获取重置bt是否成功
+ 187                     2:如果为模块自处理模式,MCU无须调用该函数
+ 188          *****************************************************************************/
+ 189          void mcu_reset_bt(void)
+ 190          {
+ 191   1        reset_bt_flag = RESET_BT_ERROR;
+ 192   1        
+ 193   1        bt_uart_write_frame(BT_RESET_CMD, 0);
+ 194   1      }
+ 195          /*****************************************************************************
+ 196          函数名称 : mcu_get_bt_work_state
+ 197          功能描述 : MCU主动获取当前bt工作状态
+ 198          输入参数 : 无
+ 199          返回参数 : BT_WORK_SATE_E:
+ 200                      BT_UN_BIND:蓝牙未绑定
+ 201                      BT_UNCONNECT:蓝牙已绑定未连接
+ 202                      BT_CONNECTED:蓝牙已绑定并已连接
+ 203          使用说明 : 无
+ 204          *****************************************************************************/
+ 205          unsigned char mcu_get_bt_work_state(void)
+ 206          {
+ 207   1        return bt_work_state;
+ 208   1      }
+ 209          #endif
+ 210          
+ 211          /*****************************************************************************
+ 212          函数名称 : mcu_dp_raw_update
+ 213          功能描述 : raw型dp数据上传
+ 214          输入参数 : dpid:id号
+ 215                     value:当前dp值指针
+ 216                     len:数据长度
+ 217          返回参数 : 无
+ 218          *****************************************************************************/
+ 219          unsigned char mcu_dp_raw_update(unsigned char dpid,const unsigned char value[],unsigned short len)
+ 220          {
+ 221   1        unsigned short length = 0;
+ 222   1        
+ 223   1        if(stop_update_flag == ENABLE)
+ 224   1          return SUCCESS;
+ 225   1        //
+ 226   1        length = set_bt_uart_byte(length,dpid);
+ 227   1        length = set_bt_uart_byte(length,DP_TYPE_RAW);
+ 228   1        //
+ 229   1        length = set_bt_uart_byte(length,len / 0x100);
+ 230   1        length = set_bt_uart_byte(length,len % 0x100);
+ 231   1        //
+ 232   1        length = set_bt_uart_buffer(length,(unsigned char *)value,len);
+ 233   1        
+ 234   1        bt_uart_write_frame(STATE_UPLOAD_CMD,length);
+ 235   1        
+ 236   1        return SUCCESS;
+ 237   1      }
+ 238          /*****************************************************************************
+ 239          函数名称 : mcu_dp_bool_update
+ 240          功能描述 : bool型dp数据上传
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 5   
+
+ 241          输入参数 : dpid:id号
+ 242                     value:当前dp值
+ 243          返回参数 : 无
+ 244          *****************************************************************************/
+ 245          unsigned char mcu_dp_bool_update(unsigned char dpid,unsigned char value)
+ 246          {
+ 247   1        unsigned short length = 0;
+ 248   1        
+ 249   1        if(stop_update_flag == ENABLE)
+ 250   1          return SUCCESS;
+ 251   1        
+ 252   1        length = set_bt_uart_byte(length,dpid);
+ 253   1        length = set_bt_uart_byte(length,DP_TYPE_BOOL);
+ 254   1        //
+ 255   1        length = set_bt_uart_byte(length,0);
+ 256   1        length = set_bt_uart_byte(length,1);
+ 257   1        //
+ 258   1        if(value == FALSE)
+ 259   1        {
+ 260   2          length = set_bt_uart_byte(length,FALSE);
+ 261   2        }
+ 262   1        else
+ 263   1        {
+ 264   2          length = set_bt_uart_byte(length,1);
+ 265   2        }
+ 266   1        
+ 267   1        bt_uart_write_frame(STATE_UPLOAD_CMD,length);
+ 268   1        
+ 269   1        return SUCCESS;
+ 270   1      }
+ 271          /*****************************************************************************
+ 272          函数名称 : mcu_dp_value_update
+ 273          功能描述 : value型dp数据上传
+ 274          输入参数 : dpid:id号
+ 275                     value:当前dp值
+ 276          返回参数 : 无
+ 277          *****************************************************************************/
+ 278          unsigned char mcu_dp_value_update(unsigned char dpid,unsigned long value)
+ 279          {
+ 280   1        unsigned short length = 0;
+ 281   1        
+ 282   1        if(stop_update_flag == ENABLE)
+ 283   1          return SUCCESS;
+ 284   1        
+ 285   1        length = set_bt_uart_byte(length,dpid);
+ 286   1        length = set_bt_uart_byte(length,DP_TYPE_VALUE);
+ 287   1        //
+ 288   1        length = set_bt_uart_byte(length,0);
+ 289   1        length = set_bt_uart_byte(length,4);
+ 290   1        //
+ 291   1        length = set_bt_uart_byte(length,value >> 24);
+ 292   1        length = set_bt_uart_byte(length,value >> 16);
+ 293   1        length = set_bt_uart_byte(length,value >> 8);
+ 294   1        length = set_bt_uart_byte(length,value & 0xff);
+ 295   1        
+ 296   1        bt_uart_write_frame(STATE_UPLOAD_CMD,length);
+ 297   1        
+ 298   1        return SUCCESS;
+ 299   1      }
+ 300          /*****************************************************************************
+ 301          函数名称 : mcu_dp_string_update
+ 302          功能描述 : rstring型dp数据上传
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 6   
+
+ 303          输入参数 : dpid:id号
+ 304                     value:当前dp值指针
+ 305                     len:数据长度
+ 306          返回参数 : 无
+ 307          *****************************************************************************/
+ 308          unsigned char mcu_dp_string_update(unsigned char dpid,const unsigned char value[],unsigned short len)
+ 309          {
+ 310   1        unsigned short length = 0;
+ 311   1        
+ 312   1        if(stop_update_flag == ENABLE)
+ 313   1          return SUCCESS;
+ 314   1        //
+ 315   1        length = set_bt_uart_byte(length,dpid);
+ 316   1        length = set_bt_uart_byte(length,DP_TYPE_STRING);
+ 317   1        //
+ 318   1        length = set_bt_uart_byte(length,len / 0x100);
+ 319   1        length = set_bt_uart_byte(length,len % 0x100);
+ 320   1        //
+ 321   1        length = set_bt_uart_buffer(length,(unsigned char *)value,len);
+ 322   1        
+ 323   1        bt_uart_write_frame(STATE_UPLOAD_CMD,length);
+ 324   1        
+ 325   1        return SUCCESS;
+ 326   1      }
+ 327          /*****************************************************************************
+ 328          函数名称 : mcu_dp_enum_update
+ 329          功能描述 : enum型dp数据上传
+ 330          输入参数 : dpid:id号
+ 331                     value:当前dp值
+ 332          返回参数 : 无
+ 333          *****************************************************************************/
+ 334          unsigned char mcu_dp_enum_update(unsigned char dpid,unsigned char value)
+ 335          {
+ 336   1        unsigned short length = 0;
+ 337   1        
+ 338   1        if(stop_update_flag == ENABLE)
+ 339   1          return SUCCESS;
+ 340   1        
+ 341   1        length = set_bt_uart_byte(length,dpid);
+ 342   1        length = set_bt_uart_byte(length,DP_TYPE_ENUM);
+ 343   1        //
+ 344   1        length = set_bt_uart_byte(length,0);
+ 345   1        length = set_bt_uart_byte(length,1);
+ 346   1        //
+ 347   1        length = set_bt_uart_byte(length,value);
+ 348   1        
+ 349   1        bt_uart_write_frame(STATE_UPLOAD_CMD,length);
+ 350   1        
+ 351   1        return SUCCESS;
+ 352   1      }
+ 353          /*****************************************************************************
+ 354          函数名称 : mcu_dp_fault_update
+ 355          功能描述 : fault型dp数据上传
+ 356          输入参数 : dpid:id号
+ 357                     value:当前dp值
+ 358          返回参数 : 无
+ 359          *****************************************************************************/
+ 360          unsigned char mcu_dp_fault_update(unsigned char dpid,unsigned long value)
+ 361          {
+ 362   1        unsigned short length = 0;
+ 363   1         
+ 364   1        if(stop_update_flag == ENABLE)
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 7   
+
+ 365   1          return SUCCESS;
+ 366   1        
+ 367   1        length = set_bt_uart_byte(length,dpid);
+ 368   1        length = set_bt_uart_byte(length,DP_TYPE_FAULT);
+ 369   1        //
+ 370   1        length = set_bt_uart_byte(length,0);
+ 371   1        
+ 372   1        if((value | 0xff) == 0xff)
+ 373   1        {
+ 374   2          length = set_bt_uart_byte(length,1);
+ 375   2          length = set_bt_uart_byte(length,value);
+ 376   2        }
+ 377   1        else if((value | 0xffff) == 0xffff)
+ 378   1        {
+ 379   2          length = set_bt_uart_byte(length,2);
+ 380   2          length = set_bt_uart_byte(length,value >> 8);
+ 381   2          length = set_bt_uart_byte(length,value & 0xff);
+ 382   2        }
+ 383   1        else
+ 384   1        {
+ 385   2          length = set_bt_uart_byte(length,4);
+ 386   2          length = set_bt_uart_byte(length,value >> 24);
+ 387   2          length = set_bt_uart_byte(length,value >> 16);
+ 388   2          length = set_bt_uart_byte(length,value >> 8);
+ 389   2          length = set_bt_uart_byte(length,value & 0xff);
+ 390   2        }    
+ 391   1        
+ 392   1        bt_uart_write_frame(STATE_UPLOAD_CMD,length);
+ 393   1      
+ 394   1        return SUCCESS;
+ 395   1      }
+ 396          /*****************************************************************************
+ 397          函数名称 : mcu_get_dp_download_bool
+ 398          功能描述 : mcu获取bool型下发dp值
+ 399          输入参数 : value:dp数据缓冲区地址
+ 400                     length:dp数据长度
+ 401          返回参数 : bool:当前dp值
+ 402          *****************************************************************************/
+ 403          unsigned char mcu_get_dp_download_bool(const unsigned char value[],unsigned short len)
+ 404          {
+ 405   1        return(value[0]);
+ 406   1      }
+*** WARNING C280 IN LINE 403 OF ..\User\mcu_api.c: 'len': unreferenced local variable
+ 407          /*****************************************************************************
+ 408          函数名称 : mcu_get_dp_download_enum
+ 409          功能描述 : mcu获取enum型下发dp值
+ 410          输入参数 : value:dp数据缓冲区地址
+ 411                     length:dp数据长度
+ 412          返回参数 : enum:当前dp值
+ 413          *****************************************************************************/
+ 414          unsigned char mcu_get_dp_download_enum(const unsigned char value[],unsigned short len)
+ 415          {
+ 416   1        return(value[0]);
+ 417   1      }
+*** WARNING C280 IN LINE 414 OF ..\User\mcu_api.c: 'len': unreferenced local variable
+ 418          /*****************************************************************************
+ 419          函数名称 : mcu_get_dp_download_value
+ 420          功能描述 : mcu获取value型下发dp值
+ 421          输入参数 : value:dp数据缓冲区地址
+ 422                     length:dp数据长度
+ 423          返回参数 : value:当前dp值
+ 424          *****************************************************************************/
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 8   
+
+ 425          unsigned long mcu_get_dp_download_value(const unsigned char value[],unsigned short len)
+ 426          {
+ 427   1        return(byte_to_int(value));
+ 428   1      }
+*** WARNING C280 IN LINE 425 OF ..\User\mcu_api.c: 'len': unreferenced local variable
+ 429          /*****************************************************************************
+ 430          函数名称 : uart_receive_input
+ 431          功能描述 : 收数据处理
+ 432          输入参数 : value:串口收到字节数据
+ 433          返回参数 : 无
+ 434          使用说明 : 在MCU串口接收函数中调用该函数,并将接收到的数据作为参数传入
+ 435          *****************************************************************************/
+ 436          void uart_receive_input(unsigned char value)
+ 437          {
+ 438   1        if((queue_in > queue_out) && ((queue_in - queue_out) >= sizeof(bt_queue_buf)))
+ 439   1        {
+ 440   2          //数据队列满
+ 441   2        }
+ 442   1        else if((queue_in < queue_out) && ((queue_out  - queue_in) == 0))
+ 443   1        {
+ 444   2          //数据队列满
+ 445   2        }
+ 446   1        else
+ 447   1        {
+ 448   2          //队列不满
+ 449   2          if(queue_in >= (unsigned char *)(bt_queue_buf + sizeof(bt_queue_buf)))
+ 450   2          {
+ 451   3            queue_in = (unsigned char *)(bt_queue_buf);
+ 452   3          }
+ 453   2          
+ 454   2          *queue_in ++ = value;
+ 455   2        }
+ 456   1      }
+ 457          /*****************************************************************************
+ 458          函数名称  : bt_uart_service
+ 459          功能描述  : bt串口处理服务
+ 460          输入参数 : 无
+ 461          返回参数 : 无
+ 462          使用说明 : 在MCU主函数while循环中调用该函数
+ 463          *****************************************************************************/
+ 464          void bt_uart_service(void)
+ 465          {
+ 466   1        static unsigned short rx_in = 0;
+ 467   1        unsigned short offset = 0;
+ 468   1        unsigned short rx_value_len = 0;             //数据帧长度
+ 469   1        
+ 470   1        
+ 471   1        
+ 472   1        while((rx_in < sizeof(bt_uart_rx_buf)) && get_queue_total_data() > 0)
+ 473   1        {
+ 474   2          bt_uart_rx_buf[rx_in ++] = Queue_Read_Byte();
+ 475   2        }
+ 476   1        
+ 477   1        if(rx_in < PROTOCOL_HEAD)
+ 478   1          return;
+ 479   1        
+ 480   1        while((rx_in - offset) >= PROTOCOL_HEAD)
+ 481   1        {
+ 482   2          if(bt_uart_rx_buf[offset + HEAD_FIRST] != FRAME_FIRST)
+ 483   2          {
+ 484   3            offset ++;
+ 485   3            continue;
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 9   
+
+ 486   3          }
+ 487   2          
+ 488   2          if(bt_uart_rx_buf[offset + HEAD_SECOND] != FRAME_SECOND)
+ 489   2          {
+ 490   3            offset ++;
+ 491   3            continue;
+ 492   3          }  
+ 493   2          
+ 494   2          if(bt_uart_rx_buf[offset + PROTOCOL_VERSION] != VERSION)
+ 495   2          {
+ 496   3            offset += 2;
+ 497   3            continue;
+ 498   3          }      
+ 499   2          
+ 500   2          rx_value_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100 + bt_uart_rx_buf[offset + LENGTH_LOW] + PR
+             -OTOCOL_HEAD;
+ 501   2          if(rx_value_len > sizeof(bt_uart_rx_buf) + PROTOCOL_HEAD)
+ 502   2          {
+ 503   3            offset += 3;
+ 504   3            continue;
+ 505   3          }
+ 506   2          
+ 507   2          if((rx_in - offset) < rx_value_len)
+ 508   2          {
+ 509   3            break;
+ 510   3          }
+ 511   2          
+ 512   2          //数据接收完成
+ 513   2          if(get_check_sum((unsigned char *)bt_uart_rx_buf + offset,rx_value_len - 1) != bt_uart_rx_buf[offset +
+             - rx_value_len - 1])
+ 514   2          {
+ 515   3            //校验出错
+ 516   3            offset += 3;
+ 517   3            continue;
+ 518   3          }
+ 519   2          
+ 520   2          data_handle(offset);
+ 521   2          offset += rx_value_len;
+ 522   2        }//end while
+ 523   1      
+ 524   1        rx_in -= offset;
+ 525   1        if(rx_in > 0)
+ 526   1        {
+ 527   2          my_memcpy(bt_uart_rx_buf,bt_uart_rx_buf + offset,rx_in);
+ 528   2        }
+ 529   1        
+ 530   1      }
+ 531          /*****************************************************************************
+ 532          函数名称 :  bt_protocol_init
+ 533          功能描述 : 协议串口初始化函数
+ 534          输入参数 : 无
+ 535          返回参数 : 无
+ 536          使用说明 : 必须在MCU初始化代码中调用该函数
+ 537          *****************************************************************************/
+ 538          void bt_protocol_init(void)
+ 539          {
+ 540   1        queue_in = (unsigned char *)bt_queue_buf;
+ 541   1        queue_out = (unsigned char *)bt_queue_buf;
+ 542   1        //
+ 543   1      #ifndef BT_CONTROL_SELF_MODE
+ 544   1        bt_work_state = BT_SATE_UNKNOW;
+ 545   1      #endif
+C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 10  
+
+ 546   1      }
+ 547          
+ 548          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1962    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2      77
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  0 ERROR(S)

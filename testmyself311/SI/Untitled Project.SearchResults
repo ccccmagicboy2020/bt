@@ -1,0 +1,15 @@
+---- WDTC Matches (14 in 2 files) ----
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):		WDTC |= 0x10;		//清看门狗
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):// 		WDTC |= 0x10;		//清看门狗
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):	WDTC = 0x5F;											 //允许WDT复位，空闲模式下禁止WDT，选择1024分频（内部低频时钟44K）
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):	WDTCCR = 0X20;	//0X20/44	=0.73秒						//0xFF;	 //溢出时间约6秒
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):	//溢出计算时间=（WDT分频系数*（WDTCCR+1））/内部低频RC频率
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):				WDTC |= 0x10;		//清看门狗
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):// 			WDTC |= 0x10;		//清看门狗
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):		//WDTC |= 0x10;		//清看门狗
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):			WDTC |= 0x10;		//清看门狗
+HC-MCU-XBR.c (e:\wuxzn\leida\project\projectwitchble\testmyself2\user):// 		WDTC |= 0x10;              //清狗
+HC89S003F4.h (e:\wuxzn\leida\project\projectwitchble\testmyself2\include):sfr WDTC       = 0xBD;
+HC89S003F4.h (e:\wuxzn\leida\project\projectwitchble\testmyself2\include):EXTERN xdata volatile BYTE WDTCCR             _AT_ 0xFEA0;  // 
+HC89S003F4.h (e:\wuxzn\leida\project\projectwitchble\testmyself2\include): /* WDTC Bit Masks */
+HC89S003F4.h (e:\wuxzn\leida\project\projectwitchble\testmyself2\include):#define bmWDTCLR             bmBIT4
