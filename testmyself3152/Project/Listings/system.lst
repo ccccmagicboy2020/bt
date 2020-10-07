@@ -1,0 +1,476 @@
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE SYSTEM
+OBJECT MODULE PLACED IN .\Objects\system.obj
+COMPILER INVOKED BY: C:\Keil4\C51\BIN\C51.EXE ..\User\system.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\system.lst) TA
+                    -BS(2) OBJECT(.\Objects\system.obj)
+
+line level    source
+
+   1          /****************************************Copyright (c)*************************
+   2          **                               版权所有 (C), 2015-2017, 涂鸦科技
+   3          **
+   4          **                                 http://www.tuya.com
+   5          **
+   6          **--------------文件信息-------------------------------------------------------
+   7          **文   件   名: system.c
+   8          **描        述: bluetooth数据处理函数
+   9          **使 用 说 明 : 用户无需关心该文件实现内容
+  10          **
+  11          **
+  12          **--------------当前版本修订---------------------------------------------------
+  13          ** 版  本: v1.0
+  14          ** 日　期: 2017年5月3日
+  15          ** 描　述: 1:创建涂鸦bluetooth对接MCU_SDK
+  16          **
+  17          **-----------------------------------------------------------------------------
+  18          ******************************************************************************/
+  19          #define SYSTEM_GLOBAL
+  20          
+  21          #include "bluetooth.h"
+  22          //
+  23          //
+  24          void savevar(void);
+  25          extern const DOWNLOAD_CMD_S xdata download_cmd[];
+  26          
+  27          /*****************************************************************************
+  28          函数名称 : set_bt_uart_byte
+  29          功能描述 : 写bt_uart字节
+  30          输入参数 : dest:缓存区其实地址;
+  31                     byte:写入字节值
+  32          返回参数 : 写入完成后的总长度
+  33          *****************************************************************************/
+  34          unsigned short set_bt_uart_byte(unsigned short dest, unsigned char byte)
+  35          {
+  36   1        unsigned char *obj = (unsigned char *)bt_uart_tx_buf + DATA_START + dest;
+  37   1        
+  38   1        *obj = byte;
+  39   1        dest += 1;
+  40   1        
+  41   1        return dest;
+  42   1      }
+  43          /*****************************************************************************
+  44          函数名称 : set_bt_uart_buffer
+  45          功能描述 : 写bt_uart_buffer
+  46          输入参数 : dest:目标地址
+  47                     src:源地址
+  48                     len:数据长度
+  49          返回参数 : 无
+  50          *****************************************************************************/
+  51          unsigned short set_bt_uart_buffer(unsigned short dest, unsigned char *src, unsigned short len)
+  52          {
+  53   1        unsigned char *obj = (unsigned char *)bt_uart_tx_buf + DATA_START + dest;
+  54   1        
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 2   
+
+  55   1        my_memcpy(obj,src,len);
+  56   1        
+  57   1        dest += len;
+  58   1        return dest;
+  59   1      }
+  60          /*****************************************************************************
+  61          函数名称 : bt_uart_write_data
+  62          功能描述 : 向bt uart写入连续数据
+  63          输入参数 : in:发送缓存指针
+  64                     len:数据发送长度
+  65          返回参数 : 无
+  66          *****************************************************************************/
+  67          static void bt_uart_write_data(unsigned char *in, unsigned short len)
+  68          {
+  69   1        if((NULL == in) || (0 == len))
+  70   1        {
+  71   2          return;
+  72   2        }
+  73   1        
+  74   1        while(len --)
+  75   1        {
+  76   2          uart_transmit_output(*in);
+  77   2          in ++;
+  78   2        }
+  79   1      }
+  80          /*****************************************************************************
+  81          函数名称 : get_check_sum
+  82          功能描述 : 计算校验和
+  83          输入参数 : pack:数据源指针
+  84                     pack_len:计算校验和长度
+  85          返回参数 : 校验和
+  86          *****************************************************************************/
+  87          unsigned char get_check_sum(unsigned char *pack, unsigned short pack_len)
+  88          {
+  89   1        unsigned short i;
+  90   1        unsigned char check_sum = 0;
+  91   1        
+  92   1        for(i = 0; i < pack_len; i ++)
+  93   1        {
+  94   2          check_sum += *pack ++;
+  95   2        }
+  96   1        
+  97   1        return check_sum;
+  98   1      }
+  99          /*****************************************************************************
+ 100          函数名称 : bt_uart_write_frame
+ 101          功能描述 : 向bt串口发送一帧数据
+ 102          输入参数 : fr_type:帧类型
+ 103                     len:数据长度
+ 104          返回参数 : 无
+ 105          *****************************************************************************/
+ 106          void bt_uart_write_frame(unsigned char fr_type, unsigned short len)
+ 107          {
+ 108   1        unsigned char check_sum = 0;
+ 109   1        
+ 110   1        bt_uart_tx_buf[HEAD_FIRST] = 0x55;
+ 111   1        bt_uart_tx_buf[HEAD_SECOND] = 0xaa;
+ 112   1        bt_uart_tx_buf[PROTOCOL_VERSION] = 0x00;
+ 113   1        bt_uart_tx_buf[FRAME_TYPE] = fr_type;
+ 114   1        bt_uart_tx_buf[LENGTH_HIGH] = len >> 8;
+ 115   1        bt_uart_tx_buf[LENGTH_LOW] = len & 0xff;
+ 116   1        
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 3   
+
+ 117   1        len += PROTOCOL_HEAD;
+ 118   1        check_sum = get_check_sum((unsigned char *)bt_uart_tx_buf, len - 1);
+ 119   1        bt_uart_tx_buf[len - 1] = check_sum;
+ 120   1        //
+ 121   1        bt_uart_write_data((unsigned char *)bt_uart_tx_buf, len);
+ 122   1      }
+ 123          
+ 124          
+ 125          void bt_uart_mesh_write_frame(unsigned char fr_type, unsigned short len)
+ 126          {
+ 127   1        unsigned char check_sum = 0;
+ 128   1      
+ 129   1      len = len+2;
+ 130   1      
+ 131   1      bt_uart_tx_buf[0] = 0x55;
+ 132   1      bt_uart_tx_buf[1] = 0xaa;
+ 133   1      bt_uart_tx_buf[2] = 0x00;
+ 134   1      bt_uart_tx_buf[3] = fr_type;
+ 135   1      
+ 136   1      bt_uart_tx_buf[4] = len >> 8;
+ 137   1      bt_uart_tx_buf[5] = len & 0xff;
+ 138   1      bt_uart_tx_buf[6] = 0XFF;
+ 139   1      bt_uart_tx_buf[7] = 0xff;
+ 140   1      
+ 141   1      
+ 142   1      len += PROTOCOL_HEAD;
+ 143   1      check_sum = get_check_sum((unsigned char *)bt_uart_tx_buf, len - 1);
+ 144   1      bt_uart_tx_buf[len - 1] = check_sum;
+ 145   1      //
+ 146   1      bt_uart_write_data((unsigned char *)bt_uart_tx_buf, len);
+ 147   1      
+ 148   1      
+ 149   1      }
+ 150          
+ 151          /*****************************************************************************
+ 152          函数名称 : heat_beat_check
+ 153          功能描述 : 心跳包检测
+ 154          输入参数 : 无
+ 155          返回参数 : 无
+ 156          *****************************************************************************/
+ 157          static void heat_beat_check(void)
+ 158          {
+ 159   1        unsigned char length = 0;
+ 160   1        static unsigned char mcu_reset_state = FALSE;
+ 161   1        
+ 162   1        if(FALSE == mcu_reset_state)
+ 163   1        {
+ 164   2          length = set_bt_uart_byte(length,FALSE);
+ 165   2          mcu_reset_state = TRUE;
+ 166   2        }
+ 167   1        else
+ 168   1        {
+ 169   2          length = set_bt_uart_byte(length,TRUE);
+ 170   2        }
+ 171   1        
+ 172   1        bt_uart_write_frame(HEAT_BEAT_CMD, length);
+ 173   1      }
+ 174          /*****************************************************************************
+ 175          函数名称  : product_info_update
+ 176          功能描述  : 产品信息上传
+ 177          输入参数 : 无
+ 178          返回参数 : 无
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 4   
+
+ 179          *****************************************************************************/
+ 180          static void product_info_update(void)
+ 181          {
+ 182   1        unsigned char length = 0;
+ 183   1        
+ 184   1        length = set_bt_uart_buffer(length,(unsigned char *)PRODUCT_KEY,my_strlen((unsigned char *)PRODUCT_KEY))
+             -;
+ 185   1        length = set_bt_uart_buffer(length,(unsigned char *)MCU_VER,my_strlen((unsigned char *)MCU_VER));
+ 186   1        
+ 187   1        bt_uart_write_frame(PRODUCT_INFO_CMD, length);
+ 188   1      }
+ 189          /*****************************************************************************
+ 190          函数名称 : get_mcu_bt_mode
+ 191          功能描述 : 查询mcu和bt的工作模式
+ 192          输入参数 : 无
+ 193          返回参数 : 无
+ 194          *****************************************************************************/
+ 195          static void get_mcu_bt_mode(void)
+ 196          {
+ 197   1        unsigned char length = 0;
+ 198   1        
+ 199   1      #ifdef BT_CONTROL_SELF_MODE                                   //模块自处理
+                length = set_bt_uart_byte(length, BT_STATE_KEY);
+                length = set_bt_uart_byte(length, BT_RESERT_KEY);
+              #else                                                           
+ 203   1        //无需处理数据
+ 204   1      #endif
+ 205   1        
+ 206   1        bt_uart_write_frame(WORK_MODE_CMD, length);
+ 207   1      }
+ 208          /*****************************************************************************
+ 209          函数名称 : get_update_dpid_index
+ 210          功能描述 : 或许制定DPID在数组中的序号
+ 211          输入参数 : dpid:dpid
+ 212          返回参数 : index:dp序号
+ 213          *****************************************************************************/
+ 214          static unsigned char get_dowmload_dpid_index(unsigned char dpid)
+ 215          {
+ 216   1        unsigned char index;
+ 217   1        unsigned char total = get_download_cmd_total();
+ 218   1        
+ 219   1        for(index = 0; index < total; index ++)
+ 220   1        {
+ 221   2          if(download_cmd[index].dp_id == dpid)
+ 222   2          {
+ 223   3            break;
+ 224   3          }
+ 225   2        }
+ 226   1        
+ 227   1        return index;
+ 228   1      }
+ 229          /*****************************************************************************
+ 230          函数名称 : data_point_handle
+ 231          功能描述 : 下发数据处理
+ 232          输入参数 : value:下发数据源指针
+ 233          返回参数 : ret:返回数据处理结果
+ 234          *****************************************************************************/
+ 235          static unsigned char data_point_handle(const unsigned char value[])
+ 236          {
+ 237   1        unsigned char dp_id,index;
+ 238   1        unsigned char dp_type;
+ 239   1        unsigned char ret;
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 5   
+
+ 240   1        unsigned short dp_len;
+ 241   1        
+ 242   1        dp_id = value[0];
+ 243   1        dp_type = value[1];
+ 244   1        dp_len = value[2] * 0x100;
+ 245   1        dp_len += value[3];
+ 246   1        
+ 247   1        index = get_dowmload_dpid_index(dp_id);
+ 248   1      
+ 249   1        if(dp_type != download_cmd[index].dp_type)
+ 250   1        {
+ 251   2          //错误提示
+ 252   2          return FALSE;
+ 253   2        }
+ 254   1        else
+ 255   1        {
+ 256   2          ret = dp_download_handle(dp_id,value + 4,dp_len);
+ 257   2        }
+ 258   1        
+ 259   1        return ret;
+ 260   1      }
+ 261          /*****************************************************************************
+ 262          函数名称 : data_handle
+ 263          功能描述 : 数据帧处理
+ 264          输入参数 : offset:数据起始位
+ 265          返回参数 : 无
+ 266          *****************************************************************************/
+ 267          void data_handle(unsigned short offset)
+ 268          {
+ 269   1      #ifdef SUPPORT_MCU_FIRM_UPDATE
+                unsigned char *firmware_addr;
+                static unsigned long firm_length;                                             //MCU升级文件长度
+                static unsigned char firm_update_flag;                                        //MCU升级标志
+                unsigned long dp_len;
+              #else
+ 275   1        unsigned short dp_len;
+ 276   1      #endif
+ 277   1        
+ 278   1        unsigned char ret;
+ 279   1        unsigned short i,total_len;
+ 280   1        unsigned char cmd_type = bt_uart_rx_buf[offset + FRAME_TYPE];
+ 281   1        
+ 282   1        switch(cmd_type)
+ 283   1        {
+ 284   2        case HEAT_BEAT_CMD:                                   //心跳包
+ 285   2          heat_beat_check();
+ 286   2          break;
+ 287   2          
+ 288   2        case PRODUCT_INFO_CMD:                                //产品信息
+ 289   2          product_info_update();
+ 290   2          break;
+ 291   2          
+ 292   2        case WORK_MODE_CMD:                                   //查询MCU设定的模块工作模式
+ 293   2          get_mcu_bt_mode();
+ 294   2          break;
+ 295   2          
+ 296   2      #ifndef BT_CONTROL_SELF_MODE
+ 297   2        case BT_STATE_CMD:                                  //bt工作状态  
+ 298   2          bt_work_state = bt_uart_rx_buf[offset + DATA_START];
+ 299   2          bt_uart_write_frame(BT_STATE_CMD,0);
+ 300   2          break;
+ 301   2      
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 6   
+
+ 302   2        case BT_RESET_CMD:                                  //重置bt(bt返回成功)
+ 303   2          reset_bt_flag = RESET_BT_SUCCESS;
+ 304   2          break;
+ 305   2      #endif
+ 306   2          
+ 307   2        case DATA_QUERT_CMD:                                  //命令下发
+ 308   2          total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
+ 309   2          total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
+ 310   2          
+ 311   2          for(i = 0;i < total_len;)
+ 312   2          {
+ 313   3            dp_len = bt_uart_rx_buf[offset + DATA_START + i + 2] * 0x100;
+ 314   3            dp_len += bt_uart_rx_buf[offset + DATA_START + i + 3];
+ 315   3            //
+ 316   3            ret = data_point_handle((unsigned char *)bt_uart_rx_buf + offset + DATA_START + i);
+ 317   3            
+ 318   3            if(SUCCESS == ret)
+ 319   3            {
+ 320   4              //成功提示
+ 321   4              savevar();
+ 322   4            }
+ 323   3            else
+ 324   3            {
+ 325   4              //错误提示
+ 326   4            }
+ 327   3            
+ 328   3            i += (dp_len + 4);
+ 329   3          }
+ 330   2          
+ 331   2          break;
+ 332   2          
+ 333   2        case STATE_QUERY_CMD:                                 //状态查询
+ 334   2          all_data_update();                               
+ 335   2          break;
+ 336   2          
+ 337   2      #ifdef SUPPORT_MCU_FIRM_UPDATE
+                case UPDATE_START_CMD:                                //升级开始
+                  firm_length = bt_uart_rx_buf[offset + DATA_START];
+                  firm_length <<= 8;
+                  firm_length |= bt_uart_rx_buf[offset + DATA_START + 1];
+                  firm_length <<= 8;
+                  firm_length |= bt_uart_rx_buf[offset + DATA_START + 2];
+                  firm_length <<= 8;
+                  firm_length |= bt_uart_rx_buf[offset + DATA_START + 3];
+                  //
+                  bt_uart_write_frame(UPDATE_START_CMD,0);
+                  firm_update_flag = UPDATE_START_CMD;
+                   break;
+                  
+                case UPDATE_TRANS_CMD:                                //升级传输
+                  if(firm_update_flag == UPDATE_START_CMD)
+                  {
+                    //停止一切数据上报
+                    stop_update_flag = ENABLE;                                                 
+                    
+                    total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
+                    total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
+                    
+                    dp_len = bt_uart_rx_buf[offset + DATA_START];
+                    dp_len <<= 8;
+                    dp_len |= bt_uart_rx_buf[offset + DATA_START + 1];
+                    dp_len <<= 8;
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 7   
+
+                    dp_len |= bt_uart_rx_buf[offset + DATA_START + 2];
+                    dp_len <<= 8;
+                    dp_len |= bt_uart_rx_buf[offset + DATA_START + 3];
+                    
+                    firmware_addr = bt_uart_rx_buf + offset + DATA_START + 4;
+                    if((total_len == 4) && (dp_len == firm_length))
+                    {
+                      //最后一包
+                      ret = mcu_firm_update_handle(firmware_addr,dp_len,0);
+                      
+                      firm_update_flag = 0;
+                    }
+                    else if((total_len - 4) <= FIRM_UPDATA_SIZE)
+                    {
+                      ret = mcu_firm_update_handle(firmware_addr,dp_len,total_len - 4);
+                    }
+                    else
+                    {
+                      firm_update_flag = 0;
+                      ret = ERROR;
+                    }
+                    
+                    if(ret == SUCCESS)
+                    {
+                      bt_uart_write_frame(UPDATE_TRANS_CMD,0);
+                    }
+                    //恢复一切数据上报
+                    stop_update_flag = DISABLE;    
+                  }
+                  break;
+              #endif      
+ 395   2      
+ 396   2        default:
+ 397   2          break;
+ 398   2        }
+ 399   1      }
+ 400          /*****************************************************************************
+ 401          函数名称 : get_queue_total_data
+ 402          功能描述 : 读取队列内数据
+ 403          输入参数 : 无
+ 404          返回参数 : 无
+ 405          *****************************************************************************/
+ 406          unsigned char get_queue_total_data(void)
+ 407          {
+ 408   1        if(queue_in != queue_out)
+ 409   1          return 1;
+ 410   1        else
+ 411   1          return 0;
+ 412   1      }
+ 413          /*****************************************************************************
+ 414          函数名称 : Queue_Read_Byte
+ 415          功能描述 : 读取队列1字节数据
+ 416          输入参数 : 无
+ 417          返回参数 : 无
+ 418          *****************************************************************************/
+ 419          unsigned char Queue_Read_Byte(void)
+ 420          {
+ 421   1        unsigned char value;
+ 422   1        
+ 423   1        if(queue_out != queue_in)
+ 424   1        {
+ 425   2          //有数据
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 8   
+
+ 426   2          if(queue_out >= (unsigned char *)(bt_queue_buf + sizeof(bt_queue_buf)))
+ 427   2          {
+ 428   3            //数据已经到末尾
+ 429   3            queue_out = (unsigned char *)(bt_queue_buf);
+ 430   3          }
+ 431   2          
+ 432   2          value = *queue_out ++;   
+ 433   2        }
+ 434   1        
+ 435   1        return value;
+ 436   1      }
+ 437          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    957    ----
+   CONSTANT SIZE    =     15    ----
+   XDATA SIZE       =     89    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      7      38
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
