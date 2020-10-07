@@ -8,7 +8,7 @@
 #define  TH_LOW		30000
 #define  TH_HIGH	4000000
 
-#define  TH_DEF		40000
+#define  TH_DEF		4000000
 	
 //允许噪声值偏差范围
 #define  MAX_DELTA0  20000
@@ -150,6 +150,7 @@ void InitSYS()
 	/***********************************看门口初始化***************************************/
 	WDTC = 0x5F;											 //允许WDT复位，空闲模式下禁止WDT，选择1024分频（内部低频时钟44K）
 	WDTCCR = 0X20;	//0X20/44	=0.73秒						//0xFF;	 //溢出时间约6秒
+	//WDTCCR = 0;
 	//溢出计算时间=（WDT分频系数*（WDTCCR+1））/内部低频RC频率
 }
 
@@ -280,6 +281,8 @@ void GPIO_Init()
 	P0M3 = P0M3&0xF0|0x03;			  //P06设置为模拟输入  //|0x08;		      //P06设置为推挽输出    没有使用
 	
 	P0M3 = P0M3&0x0F|0x20;				  //P07设置为上拉输入	  没有使用
+
+	P2M1 = P2M1&0x0F|0x80;				//P2.3
 }
 
 // u16 Read_ADC(u8 Channel)
@@ -1086,6 +1089,8 @@ void main()
 	UART1_Init();
 	ADC_Init();
 
+	P2_3 = 1;
+
 	LVDC = 0xAA;						  //LVD设置2.4V,禁止中断
 	//	消抖时间 = 	(0xFF + 2) * 1/Fcpu
 	//			 =	(0xFF + 2) / 16000000	（当前的CPU时钟）
@@ -1136,11 +1141,14 @@ void main()
 	wait2();
 
 	SUM=0;
+	P2_3 = 1;
 	while(1)
 	{
 		WDTC |= 0x10;		//清看门狗
-		bt_uart_service();
 		
+		P2_3 = 0;
+		bt_uart_service();
+		P2_3 = 1;
 
 		XBRHandle();
 	

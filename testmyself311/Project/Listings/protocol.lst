@@ -1,10 +1,10 @@
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 1   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 1   
 
 
-C51 COMPILER V9.52.0.0, COMPILATION OF MODULE PROTOCOL
+C51 COMPILER V8.02, COMPILATION OF MODULE PROTOCOL
 OBJECT MODULE PLACED IN .\Objects\protocol.obj
-COMPILER INVOKED BY: C:\Keil4\C51\BIN\C51.EXE ..\User\protocol.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\protocol.lst
-                    -) TABS(2) OBJECT(.\Objects\protocol.obj)
+COMPILER INVOKED BY: d:\cccc2020\TOOL\Keil\C51\BIN\C51.EXE ..\User\protocol.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings
+                    -\protocol.lst) TABS(2) OBJECT(.\Objects\protocol.obj)
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   52          ******************************************************************************/
   53          
   54          extern u8 xdata LIGHT_TH,light_ad;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 2   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 2   
 
   55          extern u16 xdata DELAY_NUM;
   56          extern u8 xdata SWITCHflag ;
@@ -126,7 +126,7 @@ line level    source
  114          功能描述 : 发数据处理
  115          输入参数 : value:串口收到字节数据
  116          返回参数 : 无
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 3   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 3   
 
  117          使用说明 : 请将MCU串口发送函数填入该函数内,并将接收到的数据作为参数传入串口发送函数
  118          *****************************************************************************/
@@ -135,9 +135,9 @@ line level    source
  121   1      // #error "请将MCU串口发送函数填入该函数,并删除该行"
  122   1        
  123   1        
- 124   1            SBUF = value;
- 125   1          while(!(SCON & 0x02));
- 126   1          SCON &=~ 0x02;
+ 124   1        SBUF = value;
+ 125   1        while(!(SCON & 0x02));
+ 126   1        SCON &=~ 0x02;
  127   1        
  128   1      /*
  129   1        //示例:
@@ -190,7 +190,7 @@ line level    source
  176   1          else if(LIGHT_TH==200)
  177   1            light=2;
  178   1          else if(LIGHT_TH==40)
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 4   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 4   
 
  179   1            light=3;    
  180   1          else if(LIGHT_TH==20)
@@ -254,7 +254,7 @@ line level    source
  238   1          if(switch_led == 0) {
  239   2              //开关关
  240   2              //LIGHT_OFF;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 5   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 5   
 
  241   2          }else {
  242   2              //开关开
@@ -318,7 +318,7 @@ line level    source
  300   1          
  301   1          bright_value = mcu_get_dp_download_value(value,length);
  302   1          /*
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 6   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 6   
 
  303   1          //VALUE类型数据处理
  304   1          
@@ -382,7 +382,7 @@ line level    source
  362   1          unsigned char ret;
  363   1          unsigned char cds;
  364   1          
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 7   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 7   
 
  365   1          cds = mcu_get_dp_download_enum(value,length);
  366   1          switch(cds) {
@@ -446,7 +446,7 @@ line level    source
  424   1      }
  425          /*****************************************************************************
  426          函数名称 : dp_download_pir_sensitivity_handle
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 8   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 8   
 
  427          功能描述 : 针对DPID_PIR_SENSITIVITY的处理函数
  428          输入参数 : value:数据源数据
@@ -510,7 +510,7 @@ line level    source
  485   1          ret = mcu_dp_value_update(DPID_PIR_DELAY,pir_delay);
  486   1          if(ret == SUCCESS)
  487   1              return SUCCESS;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 9   
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 9   
 
  488   1          else
  489   1              return ERROR;
@@ -574,7 +574,7 @@ line level    source
  547          /*****************************************************************************
  548          函数名称 : dp_download_sensing_radius_handle
  549          功能描述 : 针对DPID_SENSING_RADIUS的处理函数
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 10  
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 10  
 
  550          输入参数 : value:数据源数据
  551                  : length:数据长度
@@ -638,7 +638,7 @@ line level    source
  609          //static unsigned char dp_download_hang_high_handle(const unsigned char value[], unsigned short length)
  610          //{
  611          //    //示例:当前DP类型为VALUE
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 11  
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 11  
 
  612          //    unsigned char ret;
  613          //    unsigned long hang_high;
@@ -702,7 +702,7 @@ line level    source
  670          //    if(position % 1024 == 0)
  671          //    {
  672          //      if(Earse_Flash(addr + position) == ERROR)
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 12  
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 12  
 
  673          //        return ERROR;
  674          //    }
@@ -766,7 +766,7 @@ line level    source
  732   1        /*********************************
  733   1        当前函数处理可下发/可上报数据调用                    
  734   1        具体函数内需要实现下发数据处理
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 13  
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 13  
 
  735   1        完成用需要将处理结果反馈至APP端,否则APP会认为下发失败
  736   1        ***********************************/
@@ -830,7 +830,7 @@ line level    source
  794   2      //            ret = dp_download_standby_time_handle(value,length);
  795   2      //        break;
  796   2              case DPID_SENSING_RADIUS:
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 14  
+C51 COMPILER V8.02   PROTOCOL                                                              10/07/2020 16:36:20 PAGE 14  
 
  797   2                  //感应半径处理函数
  798   2                  ret = dp_download_sensing_radius_handle(value,length);

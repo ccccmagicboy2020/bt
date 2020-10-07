@@ -1,10 +1,10 @@
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 1   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 1   
 
 
-C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MCU_API
+C51 COMPILER V8.02, COMPILATION OF MODULE MCU_API
 OBJECT MODULE PLACED IN .\Objects\mcu_api.obj
-COMPILER INVOKED BY: C:\Keil4\C51\BIN\C51.EXE ..\User\mcu_api.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\mcu_api.lst) 
-                    -TABS(2) OBJECT(.\Objects\mcu_api.obj)
+COMPILER INVOKED BY: d:\cccc2020\TOOL\Keil\C51\BIN\C51.EXE ..\User\mcu_api.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\
+                    -mcu_api.lst) TABS(2) OBJECT(.\Objects\mcu_api.obj)
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   52   1        return bcd_value;
   53   1      }
   54          /*****************************************************************************
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 2   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 2   
 
   55          函数名称 : my_strlen
   56          功能描述 : 求字符串长度
@@ -126,7 +126,7 @@ line level    source
  114   1        { 
  115   2          return NULL;
  116   2        }
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 3   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 3   
 
  117   1        
  118   1        if((pdest <= psrc) || (pdest > psrc + count))
@@ -190,7 +190,7 @@ line level    source
  176          *****************************************************************************/
  177          unsigned char mcu_get_reset_bt_flag(void)
  178          {
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 4   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 4   
 
  179   1        return reset_bt_flag;
  180   1      }
@@ -254,7 +254,7 @@ line level    source
  238          /*****************************************************************************
  239          函数名称 : mcu_dp_bool_update
  240          功能描述 : bool型dp数据上传
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 5   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 5   
 
  241          输入参数 : dpid:id号
  242                     value:当前dp值
@@ -318,7 +318,7 @@ line level    source
  300          /*****************************************************************************
  301          函数名称 : mcu_dp_string_update
  302          功能描述 : rstring型dp数据上传
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 6   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 6   
 
  303          输入参数 : dpid:id号
  304                     value:当前dp值指针
@@ -382,7 +382,7 @@ line level    source
  362   1        unsigned short length = 0;
  363   1         
  364   1        if(stop_update_flag == ENABLE)
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 7   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 7   
 
  365   1          return SUCCESS;
  366   1        
@@ -426,7 +426,7 @@ line level    source
  404          {
  405   1        return(value[0]);
  406   1      }
-*** WARNING C280 IN LINE 403 OF ..\User\mcu_api.c: 'len': unreferenced local variable
+*** WARNING C280 IN LINE 403 OF ..\USER\MCU_API.C: 'len': unreferenced local variable
  407          /*****************************************************************************
  408          函数名称 : mcu_get_dp_download_enum
  409          功能描述 : mcu获取enum型下发dp值
@@ -438,7 +438,7 @@ line level    source
  415          {
  416   1        return(value[0]);
  417   1      }
-*** WARNING C280 IN LINE 414 OF ..\User\mcu_api.c: 'len': unreferenced local variable
+*** WARNING C280 IN LINE 414 OF ..\USER\MCU_API.C: 'len': unreferenced local variable
  418          /*****************************************************************************
  419          函数名称 : mcu_get_dp_download_value
  420          功能描述 : mcu获取value型下发dp值
@@ -446,13 +446,13 @@ line level    source
  422                     length:dp数据长度
  423          返回参数 : value:当前dp值
  424          *****************************************************************************/
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 8   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 8   
 
  425          unsigned long mcu_get_dp_download_value(const unsigned char value[],unsigned short len)
  426          {
  427   1        return(byte_to_int(value));
  428   1      }
-*** WARNING C280 IN LINE 425 OF ..\User\mcu_api.c: 'len': unreferenced local variable
+*** WARNING C280 IN LINE 425 OF ..\USER\MCU_API.C: 'len': unreferenced local variable
  429          /*****************************************************************************
  430          函数名称 : uart_receive_input
  431          功能描述 : 收数据处理
@@ -510,7 +510,7 @@ line level    source
  483   2          {
  484   3            offset ++;
  485   3            continue;
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 9   
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 9   
 
  486   3          }
  487   2          
@@ -574,7 +574,7 @@ line level    source
  543   1      #ifndef BT_CONTROL_SELF_MODE
  544   1        bt_work_state = BT_SATE_UNKNOW;
  545   1      #endif
-C51 COMPILER V9.52.0.0   MCU_API                                                           09/28/2020 17:37:44 PAGE 10  
+C51 COMPILER V8.02   MCU_API                                                               10/07/2020 16:36:20 PAGE 10  
 
  546   1      }
  547          
@@ -582,7 +582,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1962    ----
+   CODE SIZE        =   1949    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

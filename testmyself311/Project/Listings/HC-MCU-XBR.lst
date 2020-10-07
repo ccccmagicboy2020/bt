@@ -1,10 +1,10 @@
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 1   
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 1   
 
 
-C51 COMPILER V9.52.0.0, COMPILATION OF MODULE HC_MCU_XBR
+C51 COMPILER V8.02, COMPILATION OF MODULE HC_MCU_XBR
 OBJECT MODULE PLACED IN .\Objects\HC-MCU-XBR.obj
-COMPILER INVOKED BY: C:\Keil4\C51\BIN\C51.EXE ..\User\HC-MCU-XBR.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\HC-MCU-XBR
-                    -.lst) TABS(2) OBJECT(.\Objects\HC-MCU-XBR.obj)
+COMPILER INVOKED BY: d:\cccc2020\TOOL\Keil\C51\BIN\C51.EXE ..\User\HC-MCU-XBR.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listin
+                    -gs\HC-MCU-XBR.lst) TABS(2) OBJECT(.\Objects\HC-MCU-XBR.obj)
 
 line level    source
 
@@ -19,7 +19,7 @@ line level    source
    8          #define  TH_LOW   30000
    9          #define  TH_HIGH  4000000
   10          
-  11          #define  TH_DEF   40000
+  11          #define  TH_DEF   4000000
   12            
   13          //允许噪声值偏差范围
   14          #define  MAX_DELTA0  20000
@@ -62,7 +62,7 @@ line level    source
   51          // u16 AN7_Data = 0;
   52          // u8 Uart_Cnt = 0;
   53          
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 2   
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 2   
 
   54          
   55            u8 xdata SUM1_counter=0,SUM1_num=64,SUM0_num=12;
@@ -126,7 +126,7 @@ line level    source
  111          void Delay_us_1(uint q1)
  112          {
  113   1        uint j;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 3   
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 3   
 
  114   1        for(j=0;j<q1;j++)
  115   1        {
@@ -167,1185 +167,1199 @@ line level    source
  150   1        /***********************************看门口初始化***************************************/
  151   1        WDTC = 0x5F;                       //允许WDT复位，空闲模式下禁止WDT，选择1024分频（内部低频时钟44K）
  152   1        WDTCCR = 0X20;  //0X20/44 =0.73秒           //0xFF;  //溢出时间约6秒
- 153   1        //溢出计算时间=（WDT分频系数*（WDTCCR+1））/内部低频RC频率
- 154   1      }
- 155          
- 156          /***************************************************************************************
- 157            * @说明   定时器初始化函数
- 158            * @参数   无
- 159            * @返回值 无
- 160            * @注     无
- 161          ***************************************************************************************/
- 162          void Timer_Init()
- 163          {
- 164   1        /**********************************TIM1配置初始化**************************************/
- 165   1        TCON1 = 0x00;             //T1定时器时钟为Fosc
- 166   1        TMOD = 0x01;              //T1-16位重装载定时器/计数器,T0-16位定时器
- 167   1      
- 168   1        //Tim1计算时间  = (65536 - 0xFACB) * (1 / (Fosc /Timer分频系数))
- 169   1        //        = 1333 / (16000000 / 12)
- 170   1        //        = 1 ms
- 171   1      
- 172   1        //定时1ms
- 173   1        //反推初值  = 65536 - ((1/1000) / (1/(Fosc / Timer分频系数)))
- 174   1        //        = 65536 - ((1/1000) / (1/(16000000 / 12)))
- 175   1        //      = 65536 - 1333
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 4   
+ 153   1        //WDTCCR = 0;
+ 154   1        //溢出计算时间=（WDT分频系数*（WDTCCR+1））/内部低频RC频率
+ 155   1      }
+ 156          
+ 157          /***************************************************************************************
+ 158            * @说明   定时器初始化函数
+ 159            * @参数   无
+ 160            * @返回值 无
+ 161            * @注     无
+ 162          ***************************************************************************************/
+ 163          void Timer_Init()
+ 164          {
+ 165   1        /**********************************TIM1配置初始化**************************************/
+ 166   1        TCON1 = 0x00;             //T1定时器时钟为Fosc/12
+ 167   1        TMOD = 0x01;              //T1-16位重装载定时器/计数器,T0-16位定时器
+ 168   1      
+ 169   1        //Tim1计算时间  = (65536 - 0xFACB) * (1 / (Fosc /Timer分频系数))
+ 170   1        //        = 1333 / (16000000 / 12)
+ 171   1        //        = 1 ms
+ 172   1      
+ 173   1        //定时1ms
+ 174   1        //反推初值  = 65536 - ((1/1000) / (1/(Fosc / Timer分频系数)))
+ 175   1        //        = 65536 - ((1/1000) / (1/(16000000 / 12)))
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 4   
 
- 176   1        //      = 0xFACB
- 177   1        
- 178   1        TH1 = 0xFA;
- 179   1        TL1 = 0xCB;
- 180   1        IE |= 0x08;               //打开T1中断
- 181   1        TCON |= 0x40;             //使能T1
- 182   1          
- 183   1        
+ 176   1        //      = 65536 - 1333
+ 177   1        //      = 0xFACB
+ 178   1        
+ 179   1        TH1 = 0xFA;
+ 180   1        TL1 = 0xCB;
+ 181   1      
+ 182   1        IE |= 0x08;               //打开T1中断
+ 183   1        TCON |= 0x40;             //使能T1
  184   1          
- 185   1        TH0 = 0xCB;
- 186   1        TL0 = 0xEB;               //T0定时时间10ms
- 187   1        
- 188   1        TCON |= 0x10;             //使能T0
- 189   1      }
- 190          
- 191          /***************************************************************************************
- 192            * @说明   UART1初始化函数
- 193            * @参数   无
- 194            * @返回值 无
- 195            * @注     无
- 196          ***************************************************************************************/
- 197          void UART1_Init()
- 198          {
- 199   1        /**********************************UART配置初始化**************************************/
- 200   1        P2M0 = P2M0&0xF0|0x08;              //P20设置为推挽输出
- 201   1        P0M2 = P0M2&0xF0|0x02;              //P04设置为上拉输入
- 202   1        P0_4 = 1;
- 203   1        TXD_MAP = 0x20;                     //TXD映射P20
- 204   1        RXD_MAP = 0x04;                     //RXD映射P04    
- 205   1        T4CON = 0x06;                       //T4工作模式：UART1波特率发生器
- 206   1        
- 207   1        //波特率计算
- 208   1        //波特率 = 1/16 * (T4时钟源频率 / 定时器4预分频比) / (65536 - 0xFF98)
- 209   1        //       = 1/16 * ((16000000 / 1) / 104)
- 210   1        //     = 9615.38(误差0.16%)
+ 185   1        
+ 186   1          
+ 187   1        TH0 = 0xCB;
+ 188   1        TL0 = 0xEB;               //T0定时时间10ms
+ 189   1        
+ 190   1        TCON |= 0x10;             //使能T0
+ 191   1      }
+ 192          
+ 193          /***************************************************************************************
+ 194            * @说明   UART1初始化函数
+ 195            * @参数   无
+ 196            * @返回值 无
+ 197            * @注     无
+ 198          ***************************************************************************************/
+ 199          void UART1_Init()
+ 200          {
+ 201   1        /**********************************UART配置初始化**************************************/
+ 202   1        P2M0 = P2M0&0xF0|0x08;              //P20设置为推挽输出 txd
+ 203   1      
+ 204   1        P0M2 = P0M2&0xF0|0x02;              //P04设置为上拉输入
+ 205   1      
+ 206   1      
+ 207   1        P0_4 = 1;
+ 208   1        TXD_MAP = 0x20;                     //TXD映射P20
+ 209   1        RXD_MAP = 0x04;                     //RXD映射P04
+ 210   1      
  211   1      
- 212   1        //波特率9600
- 213   1        //反推初值 = (65536 - ((T4时钟源频率 / 定时器4预分频比) * (1 / 16)) / 波特率)
- 214   1        //       = (65536 - (16000000 * (1 / 16) / 9600))
- 215   1        //       = (65536 - 104.167)
- 216   1        //         = FF98
- 217   1        //0xFF98->9600
- 218   1        //0xFFCC->19200
- 219   1        //0xFFEF->57600
- 220   1        
- 221   1        
- 222   1        TH4 = 0xFF;
- 223   1        TL4 = 0x98; //波特率9600    //0xEE;       //波特率56000
- 224   1        SCON2 = 0x02;                        //8位UART，波特率可变
- 225   1        SCON = 0x10;                         //允许串行接收
- 226   1        IE |= 0X10;                          //使能串口中断
- 227   1        //EA = 1;                              //使能总中断
- 228   1      }
- 229          
- 230          /***************************************************************************************
- 231            * @说明   ADC初始化函数
- 232            * @参数   无
- 233            * @返回值 无
- 234            * @注     无
- 235          ***************************************************************************************/
- 236          void ADC_Init()
- 237          {
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 5   
+ 212   1        T4CON = 0x06;                       //T4工作模式：UART1波特率发生器
+ 213   1        
+ 214   1        //波特率计算
+ 215   1        //波特率 = 1/16 * (T4时钟源频率 / 定时器4预分频比) / (65536 - 0xFF98)
+ 216   1        //       = 1/16 * ((16000000 / 1) / 104)
+ 217   1        //     = 9615.38(误差0.16%)
+ 218   1      
+ 219   1        //波特率9600
+ 220   1        //反推初值 = (65536 - ((T4时钟源频率 / 定时器4预分频比) * (1 / 16)) / 波特率)
+ 221   1        //       = (65536 - (16000000 * (1 / 16) / 9600))
+ 222   1        //       = (65536 - 104.167)
+ 223   1        //         = FF98
+ 224   1        //0xFF98->9600
+ 225   1        //0xFFCC->19200
+ 226   1        //0xFFEF->57600
+ 227   1        
+ 228   1        
+ 229   1          TH4 = 0xFF;
+ 230   1        TL4 = 0x98; //波特率9600    //0xEE;       //波特率56000
+ 231   1        SCON2 = 0x02;                        //8位UART，波特率可变
+ 232   1        SCON = 0x10;                           //允许串行接收
+ 233   1        IE |= 0X10;                          //使能串口中断
+ 234   1      
+ 235   1        //EA = 1;                              //使能总中断
+ 236   1      }
+ 237          
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 5   
 
- 238   1        
- 239   1        ADCC0 |= 0x03;            //参考源为内部2V
- 240   1        ADCC0 |= 0x80;              //打开ADC转换电源
- 241   1        Delay_us(20);           //延时20us，确保ADC系统稳定
- 242   1        ADCC1 = 0x01;             //选择外部通道1
- 243   1        ADCC2 = 0x4B;         //8分频   //转换结果12位数据，数据右对齐，ADC时钟16分频-1MHZ//0X4B-8分频//0X49-4分频
- 244   1      }
- 245          
- 246          /***************************************************************************************
- 247            * @说明   IO口初始化函数
- 248            * @参数   无
- 249            * @返回值 无
- 250            * @注     无
- 251          ***************************************************************************************/
- 252          void GPIO_Init()
- 253          {
- 254   1        //P0M0分高4位与低4位，低4位控制P00输入输出，高4位控制P01输入输出，其他以此类推
- 255   1        //P0M1高4控制P03，低4控制P02
- 256   1        //P1M2高4控制P15，低4控制P14
- 257   1        
- 258   1      //  P0M0 = P0M0&0xF0|0x08;          //P00设置为推挽输出
- 259   1      //  P0M0 = P0M0&0x0F|0x30;          //P01设置为模拟输入
- 260   1      //  P0M3 = P0M3&0x0F|0x30;          //P07设置为模拟输入
- 261   1      //  P0M3 = P0M3&0xF0|0x08;          //P06设置为推挽输出
- 262   1        
- 263   1        
- 264   1        P0M0 = P0M0&0xF0|0x08;          //P00设置为推挽输出
+ 238          /***************************************************************************************
+ 239            * @说明   ADC初始化函数
+ 240            * @参数   无
+ 241            * @返回值   无
+ 242            * @注     无
+ 243          ***************************************************************************************/
+ 244          void ADC_Init()
+ 245          {
+ 246   1        
+ 247   1        ADCC0 |= 0x03;              //参考源为内部2V
+ 248   1        ADCC0 |= 0x80;              //打开ADC转换电源
+ 249   1        Delay_us(20);           //延时20us，确保ADC系统稳定
+ 250   1        ADCC1 = 0x01;             //选择外部通道1
+ 251   1        ADCC2 = 0x4B;         //8分频   //转换结果12位数据，数据右对齐，ADC时钟16分频-1MHZ//0X4B-8分频//0X49-4分频
+ 252   1      }
+ 253          
+ 254          /***************************************************************************************
+ 255            * @说明   IO口初始化函数
+ 256            * @参数   无
+ 257            * @返回值 无
+ 258            * @注     无
+ 259          ***************************************************************************************/
+ 260          void GPIO_Init()
+ 261          {
+ 262   1        //P0M0分高4位与低4位，低4位控制P00输入输出，高4位控制P01输入输出，其他以此类推
+ 263   1        //P0M1高4控制P03，低4控制P02
+ 264   1        //P1M2高4控制P15，低4控制P14
  265   1        
- 266   1        P0M0 = P0M0&0x0F|0x30;          //P01设置为模拟输入
- 267   1        //P0M3 = P0M3&0x0F|0x30;          //P07设置为模拟输入
- 268   1      //  P0M0 = P0M0&0x0F|0x80;          //P01设置为推挽输出
- 269   1        
- 270   1        P0M2 = P0M2&0x0F|0x80;          //P05设置为推挽输出
+ 266   1      //  P0M0 = P0M0&0xF0|0x08;          //P00设置为推挽输出
+ 267   1      //  P0M0 = P0M0&0x0F|0x30;          //P01设置为模拟输入
+ 268   1      //  P0M3 = P0M3&0x0F|0x30;          //P07设置为模拟输入
+ 269   1      //  P0M3 = P0M3&0xF0|0x08;          //P06设置为推挽输出
+ 270   1        
  271   1        
- 272   1        P0M3 = P0M3&0xF0|0x03;      //P06设置为模拟输入  //|0x08;         //P06设置为推挽输出
+ 272   1        P0M0 = P0M0&0xF0|0x08;              //P00设置为推挽输出     没有使用
  273   1        
- 274   1        P0M3 = P0M3&0x0F|0x20;          //P07设置为上拉输入 
- 275   1        
- 276   1      }
- 277          
- 278          // u16 Read_ADC(u8 Channel)
- 279          // {
- 280          //  u16 ADC_Temp;
- 281          //  ADCC1 = Channel;              //选择外部通道1
- 282          //   ADCC0 |= 0x40;         //启动ADC转换
- 283          //  while(!(ADCC0&0x20));   //等待ADC转换结束
- 284          //  ADCC0 &=~ 0x20;         //清除标志位
- 285          //  ADC_Temp = ADCR;        //获取ADC的值
- 286          //  return ADC_Temp;
- 287          // }
- 288          
- 289          /***************************************************************************************
- 290            * @说明   系统时钟计数函数
- 291            * @参数   无
- 292            * @返回值 无
- 293            * @注     无
- 294          ***************************************************************************************/
- 295          /*
- 296          void System_Time_Cnt(void)
- 297          {
- 298              static u32 Timer1Count1 = 0;
- 299              static u8 Timer1Count2 = 0;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 6   
+ 274   1        P0M0 = P0M0&0x0F|0x30;          //P01设置为模拟输入     雷达adc
+ 275   1      
+ 276   1      //  P0M3 = P0M3&0x0F|0x30;          //P07设置为模拟输入
+ 277   1      //  P0M0 = P0M0&0x0F|0x80;              //P01设置为推挽输出
+ 278   1        
+ 279   1        P0M2 = P0M2&0x0F|0x80;          //P05设置为推挽输出         没有使用
+ 280   1        
+ 281   1        P0M3 = P0M3&0xF0|0x03;        //P06设置为模拟输入  //|0x08;         //P06设置为推挽输出    没有使用
+ 282   1        
+ 283   1        P0M3 = P0M3&0x0F|0x20;          //P07设置为上拉输入   没有使用
+ 284   1      
+ 285   1        P2M1 = P2M1&0x0F|0x80;        //P2.3
+ 286   1      }
+ 287          
+ 288          // u16 Read_ADC(u8 Channel)
+ 289          // {
+ 290          //  u16 ADC_Temp;
+ 291          //  ADCC1 = Channel;              //选择外部通道1
+ 292          //   ADCC0 |= 0x40;         //启动ADC转换
+ 293          //  while(!(ADCC0&0x20));   //等待ADC转换结束
+ 294          //  ADCC0 &=~ 0x20;         //清除标志位
+ 295          //  ADC_Temp = ADCR;        //获取ADC的值
+ 296          //  return ADC_Temp;
+ 297          // }
+ 298          
+ 299          /***************************************************************************************
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 6   
 
- 300              u32 Tampe = 1;
- 301              if(Timer1_FLAG)              //1ms
- 302              {
- 303                  Timer1_FLAG = 0;
- 304                  Timer1Count1 ++;
- 305                  Tampe = Timer1Count1 % 10;
- 306                  if(Tampe == 0)
- 307                      Time_10mS_FLAG = 1;
- 308                  Tampe = Timer1Count1 % 100;
- 309                  if(Tampe == 0)
- 310                      Time_100mS_FLAG = 1;
- 311                  Tampe = Timer1Count1 % 200;
- 312                  if(Tampe == 0)
- 313                      Time_200mS_FLAG = 1;
- 314                  Tampe = Timer1Count1 % 500;
- 315                  if(Tampe == 0)
- 316                      Time_500mS_FLAG = 1;
- 317                  Tampe = Timer1Count1 % 1000;
- 318                  if(Tampe == 0)
- 319                      Time_1S_FLAG = 1;
- 320                  Tampe = Timer1Count1 % 10000;
- 321                  if(Tampe == 0)
- 322                  {
- 323                      Time_10S_FLAG = 1;
- 324                      Timer1Count1 = 0;
- 325                      Timer1Count2 ++;
- 326                      Tampe = Timer1Count2 % 6;
- 327                      if(Tampe == 0)
- 328                          Time_1Min_FLAG = 1;
- 329                      Tampe = Timer1Count2 % 60;
- 330                      if(Tampe == 0)
- 331                      {
- 332                          Time_1H_FLAG = 1;
- 333                          Timer1Count2 = 0;
- 334                      }
- 335                  }
- 336              }
- 337          }
- 338          */
- 339          
- 340          /***************************************************************************************
- 341            * @说明   系统任务处理函数
- 342            * @参数   无
- 343            * @返回值 无
- 344            * @注     无
- 345          ***************************************************************************************/
- 346          
- 347          /*
- 348          void System_Task(void)
- 349          {
- 350              u8 temp;
- 351              if(Time_10mS_FLAG)
- 352              {
- 353                  Time_10mS_FLAG = 0;
- 354                  //User TASK
- 355                  
- 356                  
- 357                  //User TASK
- 358                  if(Time_100mS_FLAG)
- 359                  {
- 360                      Time_100mS_FLAG = 0;
- 361                      //User TASK
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 7   
+ 300            * @说明   系统时钟计数函数
+ 301            * @参数   无
+ 302            * @返回值 无
+ 303            * @注     无
+ 304          ***************************************************************************************/
+ 305          /*
+ 306          void System_Time_Cnt(void)
+ 307          {
+ 308              static u32 Timer1Count1 = 0;
+ 309              static u8 Timer1Count2 = 0;
+ 310              u32 Tampe = 1;
+ 311              if(Timer1_FLAG)              //1ms
+ 312              {
+ 313                  Timer1_FLAG = 0;
+ 314                  Timer1Count1 ++;
+ 315                  Tampe = Timer1Count1 % 10;
+ 316                  if(Tampe == 0)
+ 317                      Time_10mS_FLAG = 1;
+ 318                  Tampe = Timer1Count1 % 100;
+ 319                  if(Tampe == 0)
+ 320                      Time_100mS_FLAG = 1;
+ 321                  Tampe = Timer1Count1 % 200;
+ 322                  if(Tampe == 0)
+ 323                      Time_200mS_FLAG = 1;
+ 324                  Tampe = Timer1Count1 % 500;
+ 325                  if(Tampe == 0)
+ 326                      Time_500mS_FLAG = 1;
+ 327                  Tampe = Timer1Count1 % 1000;
+ 328                  if(Tampe == 0)
+ 329                      Time_1S_FLAG = 1;
+ 330                  Tampe = Timer1Count1 % 10000;
+ 331                  if(Tampe == 0)
+ 332                  {
+ 333                      Time_10S_FLAG = 1;
+ 334                      Timer1Count1 = 0;
+ 335                      Timer1Count2 ++;
+ 336                      Tampe = Timer1Count2 % 6;
+ 337                      if(Tampe == 0)
+ 338                          Time_1Min_FLAG = 1;
+ 339                      Tampe = Timer1Count2 % 60;
+ 340                      if(Tampe == 0)
+ 341                      {
+ 342                          Time_1H_FLAG = 1;
+ 343                          Timer1Count2 = 0;
+ 344                      }
+ 345                  }
+ 346              }
+ 347          }
+ 348          */
+ 349          
+ 350          /***************************************************************************************
+ 351            * @说明   系统任务处理函数
+ 352            * @参数   无
+ 353            * @返回值 无
+ 354            * @注     无
+ 355          ***************************************************************************************/
+ 356          
+ 357          /*
+ 358          void System_Task(void)
+ 359          {
+ 360              u8 temp;
+ 361              if(Time_10mS_FLAG)
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 7   
 
- 362          
- 363                  
- 364                  
- 365                      //User TASK
- 366                  }
- 367                  if(Time_200mS_FLAG)
- 368                  {
- 369                      Time_200mS_FLAG = 0;
- 370                      //User TASK
- 371          
- 372                  
+ 362              {
+ 363                  Time_10mS_FLAG = 0;
+ 364                  //User TASK
+ 365                  
+ 366                  
+ 367                  //User TASK
+ 368                  if(Time_100mS_FLAG)
+ 369                  {
+ 370                      Time_100mS_FLAG = 0;
+ 371                      //User TASK
+ 372          
  373                  
- 374                      //User TASK
- 375                  }
- 376                  if(Time_500mS_FLAG)
- 377                  {
- 378                      Time_500mS_FLAG = 0;
- 379                      //User TASK
- 380                      AN1_Data = Read_ADC(0x01);
- 381                    
- 382                      //User TASK
- 383                  }
- 384                   if(Time_1S_FLAG)
- 385                  {
- 386                      Time_1S_FLAG = 0;
- 387                      //User TASK
- 388          
- 389                      temp = 0xFF & (AN1_Data >> 8);
- 390                      SBUF = temp;
- 391                      while(!(SCON & 0x02));
- 392                      SCON &=~ 0x02;                 //清除发送中断标志位
- 393                      temp = 0xFF & AN1_Data;
- 394                      SBUF = temp;
- 395                      while(!(SCON & 0x02));
- 396                      SCON &=~ 0x02;                 //清除发送中断标志位
- 397                      P0_0 =~ P0_0; 
- 398                      //User TASK
- 399                      
- 400                  }
- 401                  if(Time_10S_FLAG)
- 402                  {
- 403                      Time_10S_FLAG = 0;
- 404                      //User TASK
- 405                      
- 406          
- 407                      //User TASK
- 408                  }
- 409                  if(Time_1Min_FLAG)
- 410                  {
- 411                      Time_1Min_FLAG = 0;
- 412                      //User TASK
- 413                  
- 414                  
- 415                  
- 416                      //User TASK
- 417                  }
- 418                  if(Time_1H_FLAG)
- 419                  {
- 420                      Time_1H_FLAG = 0;
- 421                      //User TASK
- 422                  
+ 374                  
+ 375                      //User TASK
+ 376                  }
+ 377                  if(Time_200mS_FLAG)
+ 378                  {
+ 379                      Time_200mS_FLAG = 0;
+ 380                      //User TASK
+ 381          
+ 382                  
+ 383                  
+ 384                      //User TASK
+ 385                  }
+ 386                  if(Time_500mS_FLAG)
+ 387                  {
+ 388                      Time_500mS_FLAG = 0;
+ 389                      //User TASK
+ 390                      AN1_Data = Read_ADC(0x01);
+ 391                    
+ 392                      //User TASK
+ 393                  }
+ 394                   if(Time_1S_FLAG)
+ 395                  {
+ 396                      Time_1S_FLAG = 0;
+ 397                      //User TASK
+ 398          
+ 399                      temp = 0xFF & (AN1_Data >> 8);
+ 400                      SBUF = temp;
+ 401                      while(!(SCON & 0x02));
+ 402                      SCON &=~ 0x02;                 //清除发送中断标志位
+ 403                      temp = 0xFF & AN1_Data;
+ 404                      SBUF = temp;
+ 405                      while(!(SCON & 0x02));
+ 406                      SCON &=~ 0x02;                 //清除发送中断标志位
+ 407                      P0_0 =~ P0_0; 
+ 408                      //User TASK
+ 409                      
+ 410                  }
+ 411                  if(Time_10S_FLAG)
+ 412                  {
+ 413                      Time_10S_FLAG = 0;
+ 414                      //User TASK
+ 415                      
+ 416          
+ 417                      //User TASK
+ 418                  }
+ 419                  if(Time_1Min_FLAG)
+ 420                  {
+ 421                      Time_1Min_FLAG = 0;
+ 422                      //User TASK
  423                  
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 8   
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 8   
 
  424                  
- 425                      //User TASK
- 426                  }
- 427              }
- 428          }
- 429          */
- 430          
- 431          void send_data(u8 d)
- 432          {
- 433   1          SBUF = d;
- 434   1          while(!(SCON & 0x02));
- 435   1          SCON &=~ 0x02;
- 436   1      }
- 437          
- 438          uchar read_ad(uchar ch)
- 439          {
- 440   1        u8 i;
- 441   1        uint  ad_sum;
- 442   1        
- 443   1      //  switch (ch)
- 444   1      //  {
- 445   1      //    case 3:
- 446   1      //      ADC_P16_AN3;
- 447   1      //      break;
- 448   1      //    case 4:
- 449   1      //      ADC_P15_AN4;
- 450   1      //      break;
- 451   1      //    case 5:
- 452   1      //      ADC_P14_AN5;
- 453   1      //      break;
- 454   1      //  }
- 455   1        
- 456   1        
- 457   1      //  if(ch==3)
- 458   1      //  {
- 459   1      //    ADC_P16_AN3;
- 460   1      //  }
- 461   1      //  else if(ch==4)
- 462   1      //  {
- 463   1      //    ADC_P15_AN4;
+ 425                  
+ 426                      //User TASK
+ 427                  }
+ 428                  if(Time_1H_FLAG)
+ 429                  {
+ 430                      Time_1H_FLAG = 0;
+ 431                      //User TASK
+ 432                  
+ 433                  
+ 434                  
+ 435                      //User TASK
+ 436                  }
+ 437              }
+ 438          }
+ 439          */
+ 440          
+ 441          void send_data(u8 d)
+ 442          {
+ 443   1        SBUF = d;
+ 444   1        while(!(SCON & 0x02));
+ 445   1        SCON &=~ 0x02;
+ 446   1      }
+ 447          
+ 448          uchar read_ad(uchar ch)
+ 449          {
+ 450   1        u8 i;
+ 451   1        uint  ad_sum;
+ 452   1        
+ 453   1      //  switch (ch)
+ 454   1      //  {
+ 455   1      //    case 3:
+ 456   1      //      ADC_P16_AN3;
+ 457   1      //      break;
+ 458   1      //    case 4:
+ 459   1      //      ADC_P15_AN4;
+ 460   1      //      break;
+ 461   1      //    case 5:
+ 462   1      //      ADC_P14_AN5;
+ 463   1      //      break;
  464   1      //  }
  465   1        
- 466   1        ADCC1 = ch;             //选择外部通道
- 467   1        ADCC0 |= 0x40;          //启动ADC转换
- 468   1        while(!(ADCC0&0x20));   //等待ADC转换结束
- 469   1        ADCC0 &=~ 0x20;         //清除标志位
- 470   1        
- 471   1        //ADC_Temp = ADCR;        //获取ADC的值 
- 472   1        
- 473   1      //  delay_ms(1);
- 474   1      //  
- 475   1      //  ADC_TG; 
- 476   1        Delay_us(100);
- 477   1        
- 478   1        ad_sum=0;
- 479   1        //ADC_INT_IF_CLR; //清中断标志位
+ 466   1        
+ 467   1      //  if(ch==3)
+ 468   1      //  {
+ 469   1      //    ADC_P16_AN3;
+ 470   1      //  }
+ 471   1      //  else if(ch==4)
+ 472   1      //  {
+ 473   1      //    ADC_P15_AN4;
+ 474   1      //  }
+ 475   1        
+ 476   1        ADCC1 = ch;             //选择外部通道
+ 477   1        ADCC0 |= 0x40;          //启动ADC转换
+ 478   1        while(!(ADCC0&0x20));   //等待ADC转换结束
+ 479   1        ADCC0 &=~ 0x20;         //清除标志位
  480   1        
- 481   1        
- 482   1        for(i=0;i<16;i++)
- 483   1        {
- 484   2      //    ADC_TG; 
- 485   2      //    while(ADC_IF==0){};
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 9   
+ 481   1        //ADC_Temp = ADCR;        //获取ADC的值 
+ 482   1        
+ 483   1      //  delay_ms(1);
+ 484   1      //  
+ 485   1      //  ADC_TG; 
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 9   
 
- 486   2      //    //adc_data = ADC_DATA_RD();
- 487   2      //      
- 488   2      //    k=ADC_DH;
- 489   2      //    k =k <<8;
- 490   2      //    k+=ADC_DL;
- 491   2      //      
- 492   2      //    ADC_INT_IF_CLR; //清中断标志位
- 493   2      //    ad_sum+=k;
- 494   2            
- 495   2      
- 496   2          ADCC0 |= 0x40;          //启动ADC转换
- 497   2          while(!(ADCC0&0x20));   //等待ADC转换结束
- 498   2          ADCC0 &=~ 0x20;         //清除标志位
- 499   2          ad_sum += ADCR;       //获取ADC的值
- 500   2          
- 501   2          Delay_us(20);
- 502   2        }
- 503   1        
- 504   1        //ADC_P14_AN5;
- 505   1        ADCC1 =1;
- 506   1        i=ad_sum>>8;
- 507   1        
- 508   1        Delay_us(100);
- 509   1        return(i);
- 510   1        
- 511   1      }
- 512          
- 513          void set_var(void)
- 514          {
- 515   1        
- 516   1        Flash_ReadArr(0X2f00,6,guc_Read_a); //读取地址0x2F00所在扇区
+ 486   1        Delay_us(100);
+ 487   1        
+ 488   1        ad_sum=0;
+ 489   1        //ADC_INT_IF_CLR; //清中断标志位
+ 490   1        
+ 491   1        
+ 492   1        for(i=0;i<16;i++)
+ 493   1        {
+ 494   2      //    ADC_TG; 
+ 495   2      //    while(ADC_IF==0){};
+ 496   2      //    //adc_data = ADC_DATA_RD();
+ 497   2      //      
+ 498   2      //    k=ADC_DH;
+ 499   2      //    k =k <<8;
+ 500   2      //    k+=ADC_DL;
+ 501   2      //      
+ 502   2      //    ADC_INT_IF_CLR; //清中断标志位
+ 503   2      //    ad_sum+=k;
+ 504   2            
+ 505   2      
+ 506   2          ADCC0 |= 0x40;          //启动ADC转换
+ 507   2          while(!(ADCC0&0x20));   //等待ADC转换结束
+ 508   2          ADCC0 &=~ 0x20;         //清除标志位
+ 509   2          ad_sum += ADCR;       //获取ADC的值
+ 510   2          
+ 511   2          Delay_us(20);
+ 512   2        }
+ 513   1        
+ 514   1        //ADC_P14_AN5;
+ 515   1        ADCC1 =1;
+ 516   1        i=ad_sum>>8;
  517   1        
- 518   1        TH=guc_Read_a[0];
- 519   1        TH<<=8;
- 520   1        TH+=guc_Read_a[1];
- 521   1        TH*=1000;
- 522   1        if(TH<TH_LOW||TH>TH_HIGH)TH=TH_DEF;
- 523   1        
- 524   1          
- 525   1        LIGHT_TH=guc_Read_a[2];
- 526   1      
- 527   1        if(LIGHT_TH==0)LIGHT_TH=LIGHT_TH0;
- 528   1        else 
- 529   1          if(LIGHT_TH==0XFE)LIGHT_TH=255;
- 530   1      
- 531   1        DELAY_NUM=guc_Read_a[3];
- 532   1        DELAY_NUM<<=8;
- 533   1        DELAY_NUM+=guc_Read_a[4];
- 534   1        if(DELAY_NUM==0||DELAY_NUM>MAX_DELAY)DELAY_NUM=5;
- 535   1        
- 536   1        DELAY_NUM<<=2;
- 537   1        lightvalue=guc_Read_a[5];
- 538   1      }
- 539          
- 540          
- 541          void XBRHandle(void)
- 542          {
- 543   1        u8 i,j;
- 544   1        u16 k;
- 545   1      //    if(while_1flag==0)
- 546   1      //    send_data(0x55);
- 547   1          //while(1)
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 10  
+ 518   1        Delay_us(100);
+ 519   1        return(i);
+ 520   1        
+ 521   1      }
+ 522          
+ 523          void set_var(void)
+ 524          {
+ 525   1        
+ 526   1        Flash_ReadArr(0X2f00,6,guc_Read_a); //读取地址0x2F00所在扇区
+ 527   1        
+ 528   1        TH=guc_Read_a[0];
+ 529   1        TH<<=8;
+ 530   1        TH+=guc_Read_a[1];
+ 531   1        TH*=1000;
+ 532   1        if(TH<TH_LOW||TH>TH_HIGH)TH=TH_DEF;
+ 533   1        
+ 534   1          
+ 535   1        LIGHT_TH=guc_Read_a[2];
+ 536   1      
+ 537   1        if(LIGHT_TH==0)LIGHT_TH=LIGHT_TH0;
+ 538   1        else 
+ 539   1          if(LIGHT_TH==0XFE)LIGHT_TH=255;
+ 540   1      
+ 541   1        DELAY_NUM=guc_Read_a[3];
+ 542   1        DELAY_NUM<<=8;
+ 543   1        DELAY_NUM+=guc_Read_a[4];
+ 544   1        if(DELAY_NUM==0||DELAY_NUM>MAX_DELAY)DELAY_NUM=5;
+ 545   1        
+ 546   1        DELAY_NUM<<=2;
+ 547   1        lightvalue=guc_Read_a[5];
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 10  
 
- 548   1          if(while_1flag==0)
- 549   1          {
- 550   2            //send_data(0x66);
- 551   2      //        ADC_TG; 
- 552   2      //        while(ADC_IF==0){};
- 553   2      //        //adc_data = ADC_DATA_RD();
- 554   2      //          
- 555   2      //        k = ADC_DH<<8;
- 556   2      //        //adc_data =adc_data <<8;
- 557   2      //        k+= ADC_DL;
- 558   2      //          
- 559   2      //        ADC_INT_IF_CLR; //清中断标志位
- 560   2      
- 561   2            ADCC0 |= 0x40;          //启动ADC转换
- 562   2            while(!(ADCC0&0x20));   //等待ADC转换结束
- 563   2            ADCC0 &=~ 0x20;         //清除标志位
- 564   2            k = ADCR;       //获取ADC的值
- 565   2            
- 566   2            times++;
- 567   2            
- 568   2            SUM+=k;
- 569   2      
- 570   2            //计算信号值与直流电压偏差值
- 571   2            if(k>average){k-=average;}
- 572   2            else {k=average-k;}
- 573   2            SUM1+=k;
- 574   2      
- 575   2      
- 576   2            if(times>=8192) //250ms   //12800)  //330ms
- 577   2            {
- 578   3      
- 579   3              WDTC |= 0x10;   //清看门狗
- 580   3              
- 581   3              times=0;
- 582   3      
- 583   3              calc_average_times++;
- 584   3            
- 585   3              SUM16+=SUM;
- 586   3              
- 587   3              if(calc_average_times>=8) //每2.5S重新计算一次直流电压值
- 588   3              {
- 589   4                calc_average_times=0;
- 590   4                
- 591   4                SUM16>>=16;
- 592   4                //SUM16/=96000;//102400;
- 593   4                average+=SUM16;
- 594   4                average/=2;
- 595   4                SUM16=0;
- 596   4              }
- 597   3              
- 598   3              if(check_light_times<8) //2s  读取一次感光AD值
- 599   3              {
- 600   4                check_light_times++;
- 601   4              }
- 602   3              else
- 603   3              {
- 604   4                if(LIGHT==0)  
- 605   4                {
- 606   5                  //light_ad=READ_LIGHT();
- 607   5                  light_ad=read_ad(7);
- 608   5      
- 609   5                  if((light_ad<=(light_ad0+2))&&(light_ad0<=(light_ad+2)))
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 11  
+ 548   1      }
+ 549          
+ 550          
+ 551          void XBRHandle(void)
+ 552          {
+ 553   1        u8 i,j;
+ 554   1        u16 k;
+ 555   1      //    if(while_1flag==0)
+ 556   1      //    send_data(0x55);
+ 557   1          //while(1)
+ 558   1          if(while_1flag==0)
+ 559   1          {
+ 560   2            //send_data(0x66);
+ 561   2      //        ADC_TG; 
+ 562   2      //        while(ADC_IF==0){};
+ 563   2      //        //adc_data = ADC_DATA_RD();
+ 564   2      //          
+ 565   2      //        k = ADC_DH<<8;
+ 566   2      //        //adc_data =adc_data <<8;
+ 567   2      //        k+= ADC_DL;
+ 568   2      //          
+ 569   2      //        ADC_INT_IF_CLR; //清中断标志位
+ 570   2      
+ 571   2            ADCC0 |= 0x40;          //启动ADC转换
+ 572   2            while(!(ADCC0&0x20));   //等待ADC转换结束
+ 573   2            ADCC0 &=~ 0x20;         //清除标志位
+ 574   2            k = ADCR;       //获取ADC的值
+ 575   2            
+ 576   2            times++;
+ 577   2            
+ 578   2            SUM+=k;
+ 579   2      
+ 580   2            //计算信号值与直流电压偏差值
+ 581   2            if(k>average){k-=average;}
+ 582   2            else {k=average-k;}
+ 583   2            SUM1+=k;
+ 584   2      
+ 585   2      
+ 586   2            if(times>=8192) //250ms   //12800)  //330ms
+ 587   2            {
+ 588   3      
+ 589   3              WDTC |= 0x10;   //清看门狗
+ 590   3              
+ 591   3              times=0;
+ 592   3      
+ 593   3              calc_average_times++;
+ 594   3            
+ 595   3              SUM16+=SUM;
+ 596   3              
+ 597   3              if(calc_average_times>=8) //每2.5S重新计算一次直流电压值
+ 598   3              {
+ 599   4                calc_average_times=0;
+ 600   4                
+ 601   4                SUM16>>=16;
+ 602   4                //SUM16/=96000;//102400;
+ 603   4                average+=SUM16;
+ 604   4                average/=2;
+ 605   4                SUM16=0;
+ 606   4              }
+ 607   3              
+ 608   3              if(check_light_times<8) //2s  读取一次感光AD值
+ 609   3              {
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 11  
 
- 610   5                    light_ad=light_ad0;
- 611   5      
- 612   5                  light_ad0=light_ad;
- 613   5      
- 614   5                  check_light_times=0;
- 615   5                }
- 616   4              }
- 617   3      
- 618   3              if(SUM0==0)
- 619   3              {
- 620   4                SUM0=SUM1+5000; 
- 621   4                if(start_times==0&&SUM0>1000000)SUM0=1000000;
- 622   4              }
- 623   3      
- 624   3              if(SUM1_counter==0)
- 625   3              {
- 626   4                SUM10=SUM1;
- 627   4                MAX_DELTA=1;//SUM10>>3;   
- 628   4                //if(MAX_DELTA<MAX_DELTA0)MAX_DELTA=MAX_DELTA0;
- 629   4              }
- 630   3              
- 631   3                if((SUM10<(SUM1+MAX_DELTA))&&(SUM1<(SUM10+MAX_DELTA)))//???????????
- 632   3                {
- 633   4                  SUM1_counter++;
- 634   4                  ALL_SUM1+=SUM1;
- 635   4                  SUM10=ALL_SUM1/SUM1_counter;
- 636   4                  MAX_DELTA=SUM10>>3;
- 637   4                  if(MAX_DELTA<MAX_DELTA0)MAX_DELTA=MAX_DELTA0;
- 638   4                  if(MAX_DELTA>MAX_DELTA1)MAX_DELTA=MAX_DELTA1;
- 639   4                  
- 640   4                  if(SUM0>SUM10)
- 641   4                  {
- 642   5                    SUM=SUM0-SUM10;
- 643   5                    if(SUM>80000)SUM0_num=6;
- 644   5                    else if(SUM>40000)SUM0_num=9;
- 645   5                    else SUM0_num=12;
- 646   5                  }
- 647   4                  else
- 648   4                  {
- 649   5                    SUM0_num=12;
- 650   5                  }
- 651   4                  
- 652   4                  if((SUM1_counter>=SUM0_num)&&(SUM10<SUM0))
- 653   4                  {
- 654   5                    if(SUM1_num>16) //???????????????
- 655   5                    {
- 656   6                      if(SUM0_num<=9)SUM0=SUM10;
- 657   6                      else if(SUM0>(SUM10+4000))
- 658   6                      {
- 659   7                        SUM0+=SUM10;
- 660   7                        SUM0/=2;
- 661   7                      }
- 662   6                      SUM1_counter=0;
- 663   6                      ALL_SUM1=0;
- 664   6                    }
- 665   5                  }
- 666   4      
- 667   4                  else if(SUM1_counter>=SUM1_num)
- 668   4                  {
- 669   5                    
- 670   5      //              if(SUM0>SUM10)
- 671   5      //              {
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 12  
+ 610   4                check_light_times++;
+ 611   4              }
+ 612   3              else
+ 613   3              {
+ 614   4                if(LIGHT==0)  
+ 615   4                {
+ 616   5                  //light_ad=READ_LIGHT();
+ 617   5                  light_ad=read_ad(7);
+ 618   5      
+ 619   5                  if((light_ad<=(light_ad0+2))&&(light_ad0<=(light_ad+2)))
+ 620   5                    light_ad=light_ad0;
+ 621   5      
+ 622   5                  light_ad0=light_ad;
+ 623   5      
+ 624   5                  check_light_times=0;
+ 625   5                }
+ 626   4              }
+ 627   3      
+ 628   3              if(SUM0==0)
+ 629   3              {
+ 630   4                SUM0=SUM1+5000; 
+ 631   4                if(start_times==0&&SUM0>1000000)SUM0=1000000;
+ 632   4              }
+ 633   3      
+ 634   3              if(SUM1_counter==0)
+ 635   3              {
+ 636   4                SUM10=SUM1;
+ 637   4                MAX_DELTA=1;//SUM10>>3;   
+ 638   4                //if(MAX_DELTA<MAX_DELTA0)MAX_DELTA=MAX_DELTA0;
+ 639   4              }
+ 640   3              
+ 641   3                if((SUM10<(SUM1+MAX_DELTA))&&(SUM1<(SUM10+MAX_DELTA)))//???????????
+ 642   3                {
+ 643   4                  SUM1_counter++;
+ 644   4                  ALL_SUM1+=SUM1;
+ 645   4                  SUM10=ALL_SUM1/SUM1_counter;
+ 646   4                  MAX_DELTA=SUM10>>3;
+ 647   4                  if(MAX_DELTA<MAX_DELTA0)MAX_DELTA=MAX_DELTA0;
+ 648   4                  if(MAX_DELTA>MAX_DELTA1)MAX_DELTA=MAX_DELTA1;
+ 649   4                  
+ 650   4                  if(SUM0>SUM10)
+ 651   4                  {
+ 652   5                    SUM=SUM0-SUM10;
+ 653   5                    if(SUM>80000)SUM0_num=6;
+ 654   5                    else if(SUM>40000)SUM0_num=9;
+ 655   5                    else SUM0_num=12;
+ 656   5                  }
+ 657   4                  else
+ 658   4                  {
+ 659   5                    SUM0_num=12;
+ 660   5                  }
+ 661   4                  
+ 662   4                  if((SUM1_counter>=SUM0_num)&&(SUM10<SUM0))
+ 663   4                  {
+ 664   5                    if(SUM1_num>16) //???????????????
+ 665   5                    {
+ 666   6                      if(SUM0_num<=9)SUM0=SUM10;
+ 667   6                      else if(SUM0>(SUM10+4000))
+ 668   6                      {
+ 669   7                        SUM0+=SUM10;
+ 670   7                        SUM0/=2;
+ 671   7                      }
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 12  
 
- 672   5      //                if(SUM1_num>16)SUM0=SUM10;  //???????????????
- 673   5      //              }
- 674   5      //              else 
- 675   5                      
- 676   5                    if(SUM10>(SUM0+4000))
- 677   5                    {
- 678   6                      SUM=SUM10-SUM0;
- 679   6      
- 680   6                      if((SUM10<8000000)&&(SUM<400000))
- 681   6          //????????????,???????????????100000?,???????
- 682   6                      {
- 683   7                        if(SUM1_num>16) //????????????
- 684   7                        {
- 685   8                          SUM0+=SUM10;
- 686   8                          SUM0/=2;
- 687   8                        }
- 688   7                        else
- 689   7                        {
- 690   8                          if(SUM>300000)SUM1_num=16;
- 691   8                          else if(SUM>150000)SUM1_num=12;
- 692   8                          else SUM1_num=8;
- 693   8                          if(SUM1_counter>=SUM1_num)
- 694   8                          {
- 695   9                            SUM0+=SUM10;
- 696   9                            SUM0/=2;
- 697   9                          }
- 698   8                        }
- 699   7                      }
- 700   6                    }
- 701   5      //              else if((LIGHT>0)&&(TH==TH_LOW))
- 702   5      //              {
- 703   5      //                SUM=SUM10-SUM0; 
- 704   5      //                TH+=SUM;    //?????????????
- 705   5      //              }
- 706   5      
- 707   5                    if(SUM1_counter>=SUM1_num)
- 708   5                    {
- 709   6                      SUM1_counter=0;
- 710   6                      ALL_SUM1=0;
- 711   6                    }
- 712   5                  }
- 713   4                }
- 714   3                else
- 715   3                {
- 716   4                  SUM1_counter=0;
- 717   4                  ALL_SUM1=0;
- 718   4                }
- 719   3      
- 720   3      
- 721   3      //        //send_byte=0x35;
- 722   3      //        check_sum=0xFa;
- 723   3              //send_data(0xFa);
- 724   3      
- 725   3      //        send_byte=TH>>15;
- 726   3      //        check_sum+=send_byte;
- 727   3      //        send_data(send_byte);
- 728   3      
- 729   3      //        //k=TH;
- 730   3      //        send_byte=TH>>10;
- 731   3      //        check_sum+=send_byte;
- 732   3      //        send_data(send_byte);
- 733   3      //          
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 13  
+ 672   6                      SUM1_counter=0;
+ 673   6                      ALL_SUM1=0;
+ 674   6                    }
+ 675   5                  }
+ 676   4      
+ 677   4                  else if(SUM1_counter>=SUM1_num)
+ 678   4                  {
+ 679   5                    
+ 680   5      //              if(SUM0>SUM10)
+ 681   5      //              {
+ 682   5      //                if(SUM1_num>16)SUM0=SUM10;  //???????????????
+ 683   5      //              }
+ 684   5      //              else 
+ 685   5                      
+ 686   5                    if(SUM10>(SUM0+4000))
+ 687   5                    {
+ 688   6                      SUM=SUM10-SUM0;
+ 689   6      
+ 690   6                      if((SUM10<8000000)&&(SUM<400000))
+ 691   6          //????????????,???????????????100000?,???????
+ 692   6                      {
+ 693   7                        if(SUM1_num>16) //????????????
+ 694   7                        {
+ 695   8                          SUM0+=SUM10;
+ 696   8                          SUM0/=2;
+ 697   8                        }
+ 698   7                        else
+ 699   7                        {
+ 700   8                          if(SUM>300000)SUM1_num=16;
+ 701   8                          else if(SUM>150000)SUM1_num=12;
+ 702   8                          else SUM1_num=8;
+ 703   8                          if(SUM1_counter>=SUM1_num)
+ 704   8                          {
+ 705   9                            SUM0+=SUM10;
+ 706   9                            SUM0/=2;
+ 707   9                          }
+ 708   8                        }
+ 709   7                      }
+ 710   6                    }
+ 711   5      //              else if((LIGHT>0)&&(TH==TH_LOW))
+ 712   5      //              {
+ 713   5      //                SUM=SUM10-SUM0; 
+ 714   5      //                TH+=SUM;    //?????????????
+ 715   5      //              }
+ 716   5      
+ 717   5                    if(SUM1_counter>=SUM1_num)
+ 718   5                    {
+ 719   6                      SUM1_counter=0;
+ 720   6                      ALL_SUM1=0;
+ 721   6                    }
+ 722   5                  }
+ 723   4                }
+ 724   3                else
+ 725   3                {
+ 726   4                  SUM1_counter=0;
+ 727   4                  ALL_SUM1=0;
+ 728   4                }
+ 729   3      
+ 730   3      
+ 731   3      //        //send_byte=0x35;
+ 732   3      //        check_sum=0xFa;
+ 733   3              //send_data(0xFa);
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 13  
 
- 734   3      //        send_byte=LIGHT_TH;
- 735   3      //        check_sum+=send_byte;
- 736   3      //        send_data(send_byte);         
- 737   3      
- 738   3      //        //send_byte=light_ad;
- 739   3      //        check_sum+=light_ad;
- 740   3      //        send_data(light_ad);
- 741   3      
- 742   3      //        send_byte=average>>4;
- 743   3      //        check_sum+=send_byte;
- 744   3      //        send_data(send_byte);
- 745   3      
- 746   3      //        send_byte=SUM0>>16;
- 747   3      //        check_sum+=send_byte;
- 748   3      //        send_data(send_byte);
- 749   3      
- 750   3      //        send_byte=SUM0>>8;
- 751   3      //        check_sum+=send_byte;
- 752   3      //        send_data(send_byte);
- 753   3      
- 754   3      //        send_byte=SUM1>>16;
- 755   3      //        check_sum+=send_byte;
- 756   3      //        send_data(send_byte);
- 757   3      
- 758   3      //        send_byte=SUM1>>8;
- 759   3      //        check_sum+=send_byte;
- 760   3      //        send_data(send_byte);
- 761   3      
- 762   3      //        check_sum+=1;
- 763   3      //        send_data(check_sum);
- 764   3      
- 765   3              if(stop_times>0)  //
- 766   3              {
- 767   4                stop_times--; 
- 768   4                if((SUM0>(SUM01+6000))&&(SUM1<(SUM01+15000)))SUM0=SUM01+6000;
- 769   4              }
- 770   3              else
- 771   3              {
- 772   4              
- 773   4                if(start_times>0)
- 774   4                {
- 775   5                  start_times--;
- 776   5                  
- 777   5                  if(start_times>0) //???????????,???????250*88ms=22S?????????          
- 778   5                  {
- 779   6                    //start_times++;
- 780   6      /*
- 781   6                    if(SUM0>600000)
- 782   6                    {
- 783   6                      TH=10000;
- 784   6                    }
- 785   6                    else */
- 786   6                    if(SUM0>8000000)
- 787   6                    {
- 788   7                      TH=800000;
- 789   7                    }
- 790   6                    else
- 791   6                    {
- 792   7                      SUM=SUM0+TH;
- 793   7                      if(SUM>9000000)
- 794   7                      {
- 795   8                        TH=9000000-SUM0;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 14  
+ 734   3      
+ 735   3      //        send_byte=TH>>15;
+ 736   3      //        check_sum+=send_byte;
+ 737   3      //        send_data(send_byte);
+ 738   3      
+ 739   3      //        //k=TH;
+ 740   3      //        send_byte=TH>>10;
+ 741   3      //        check_sum+=send_byte;
+ 742   3      //        send_data(send_byte);
+ 743   3      //          
+ 744   3      //        send_byte=LIGHT_TH;
+ 745   3      //        check_sum+=send_byte;
+ 746   3      //        send_data(send_byte);         
+ 747   3      
+ 748   3      //        //send_byte=light_ad;
+ 749   3      //        check_sum+=light_ad;
+ 750   3      //        send_data(light_ad);
+ 751   3      
+ 752   3      //        send_byte=average>>4;
+ 753   3      //        check_sum+=send_byte;
+ 754   3      //        send_data(send_byte);
+ 755   3      
+ 756   3      //        send_byte=SUM0>>16;
+ 757   3      //        check_sum+=send_byte;
+ 758   3      //        send_data(send_byte);
+ 759   3      
+ 760   3      //        send_byte=SUM0>>8;
+ 761   3      //        check_sum+=send_byte;
+ 762   3      //        send_data(send_byte);
+ 763   3      
+ 764   3      //        send_byte=SUM1>>16;
+ 765   3      //        check_sum+=send_byte;
+ 766   3      //        send_data(send_byte);
+ 767   3      
+ 768   3      //        send_byte=SUM1>>8;
+ 769   3      //        check_sum+=send_byte;
+ 770   3      //        send_data(send_byte);
+ 771   3      
+ 772   3      //        check_sum+=1;
+ 773   3      //        send_data(check_sum);
+ 774   3      
+ 775   3              if(stop_times>0)  //
+ 776   3              {
+ 777   4                stop_times--; 
+ 778   4                if((SUM0>(SUM01+6000))&&(SUM1<(SUM01+15000)))SUM0=SUM01+6000;
+ 779   4              }
+ 780   3              else
+ 781   3              {
+ 782   4              
+ 783   4                if(start_times>0)
+ 784   4                {
+ 785   5                  start_times--;
+ 786   5                  
+ 787   5                  if(start_times>0) //???????????,???????250*88ms=22S?????????          
+ 788   5                  {
+ 789   6                    //start_times++;
+ 790   6      /*
+ 791   6                    if(SUM0>600000)
+ 792   6                    {
+ 793   6                      TH=10000;
+ 794   6                    }
+ 795   6                    else */
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 14  
 
- 796   8                      }
- 797   7                      //if(TH<30000)TH=30000;
- 798   7                    }
- 799   6      
- 800   6                  }
- 801   5                  else
- 802   5                  {
- 803   6                    //TH=TH_LOW;
- 804   6                    //start_times=0;
- 805   6      //              EA=0;
- 806   6      //              set_var();
- 807   6      //              EA=1;
- 808   6                  }
- 809   5      
- 810   5                }
- 811   4      
- 812   4                if(SUM1>(SUM0+TH))
- 813   4                {
- 814   5                  //SUM=SUM1-SUM0;
- 815   5      
- 816   5                //  if(SUM>TH)
- 817   5                //  {
- 818   5                    if((light_ad<=LIGHT_TH)||(start_times>0))
- 819   5                    {
- 820   6      //                send_data(0xaa);
- 821   6      
- 822   6                      
- 823   6                      //if(alarm_times<2)
- 824   6                      //{
- 825   6                      //  alarm_times++;
- 826   6                    //    }
- 827   6                      //if(alarm_times>=2)  //??????????????
- 828   6                      {
- 829   7                        if(LIGHT==0)SUM01=SUM0;
- 830   7                        LIGHT=1;
- 831   7                    
- 832   7                        //PC3=0;
- 833   7                        LIGHT_ON;
- 834   7                        PWM3init(100);
- 835   7                        //P0_6=0;
- 836   7                        send_data(0xaa);
- 837   7                        send_data((TH/1000)>>8);
- 838   7                        send_data((TH/1000)&0xff);
- 839   7                        send_data(LIGHT_TH);
- 840   7                        send_data(DELAY_NUM>>10);
- 841   7                        send_data(DELAY_NUM>>2);    //测试用
- 842   7                        send_data(0xaa);  
- 843   7                        SUM1_num=8;
- 844   7      
- 845   7        //                send_data(0xaa);
- 846   7      
- 847   7                      }
- 848   6                    }
- 849   5                
- 850   5                  }
- 851   4      
- 852   4              }
- 853   3      
- 854   3              SUM2=SUM1;
- 855   3              send_data(average>>4);
- 856   3              send_data(SUM0>>16);
- 857   3              send_data(SUM0>>8);
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 15  
+ 796   6                    if(SUM0>8000000)
+ 797   6                    {
+ 798   7                      TH=800000;
+ 799   7                    }
+ 800   6                    else
+ 801   6                    {
+ 802   7                      SUM=SUM0+TH;
+ 803   7                      if(SUM>9000000)
+ 804   7                      {
+ 805   8                        TH=9000000-SUM0;
+ 806   8                      }
+ 807   7                      //if(TH<30000)TH=30000;
+ 808   7                    }
+ 809   6      
+ 810   6                  }
+ 811   5                  else
+ 812   5                  {
+ 813   6                    //TH=TH_LOW;
+ 814   6                    //start_times=0;
+ 815   6      //              EA=0;
+ 816   6      //              set_var();
+ 817   6      //              EA=1;
+ 818   6                  }
+ 819   5      
+ 820   5                }
+ 821   4      
+ 822   4                if(SUM1>(SUM0+TH))
+ 823   4                {
+ 824   5                  //SUM=SUM1-SUM0;
+ 825   5      
+ 826   5                //  if(SUM>TH)
+ 827   5                //  {
+ 828   5                    if((light_ad<=LIGHT_TH)||(start_times>0))
+ 829   5                    {
+ 830   6      //                send_data(0xaa);
+ 831   6      
+ 832   6                      
+ 833   6                      //if(alarm_times<2)
+ 834   6                      //{
+ 835   6                      //  alarm_times++;
+ 836   6                    //    }
+ 837   6                      //if(alarm_times>=2)  //??????????????
+ 838   6                      {
+ 839   7                        if(LIGHT==0)SUM01=SUM0;
+ 840   7                        LIGHT=1;
+ 841   7                    
+ 842   7                        //PC3=0;
+ 843   7                        LIGHT_ON;
+ 844   7                        PWM3init(100);
+ 845   7                        //P0_6=0;
+ 846   7                        send_data(0xaa);
+ 847   7                        send_data((TH/1000)>>8);
+ 848   7                        send_data((TH/1000)&0xff);
+ 849   7                        send_data(LIGHT_TH);
+ 850   7                        send_data(DELAY_NUM>>10);
+ 851   7                        send_data(DELAY_NUM>>2);    //测试用
+ 852   7                        send_data(0xaa);  
+ 853   7                        SUM1_num=8;
+ 854   7      
+ 855   7        //                send_data(0xaa);
+ 856   7      
+ 857   7                      }
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 15  
 
- 858   3              send_data(SUM2>>16);
- 859   3              send_data(SUM2>>8);     //20200927  测试用        
- 860   3              
- 861   3              SUM=0;
- 862   3              SUM1=0;
- 863   3              
- 864   3              if(LIGHT>0) //????
- 865   3              {
- 866   4                LIGHT++;
- 867   4                if(LIGHT>DELAY_NUM)
- 868   4                {
- 869   5                  LIGHT=0;
- 870   5                  while_1flag=1;
- 871   5                  while_2flag = 0;
- 872   5                  //break;
- 873   5                }
- 874   4              }       
- 875   3              
- 876   3            }
- 877   2      
- 878   2      
- 879   2          }
- 880   1          else
- 881   1          {
- 882   2          
- 883   2              while_1flag=0;
- 884   2              if(while_2flag==0)
- 885   2              {
- 886   3                while_2flag = 1;
- 887   3                send_data(0x55);
- 888   3              }
- 889   2              //PC3=1;
- 890   2              LIGHT_OFF;
- 891   2              PWM3init(lightvalue);
- 892   2              //P0_6=1;
- 893   2              //send_data(0x55);
- 894   2              Delay_ms(250);
- 895   2      
- 896   2      
- 897   2              
- 898   2          //    SUM=0;
- 899   2          //    SUM1=0;
- 900   2          //    times=0;
- 901   2              
- 902   2              SUM16=0;
- 903   2              calc_average_times=0;
- 904   2              SUM1_num=64;
- 905   2              
- 906   2              stop_times=2;
- 907   2              //if(start_times==0)TH=TH_LOW;
- 908   2              check_light_times=6;
- 909   2              
- 910   2              SUM1_counter=0;
- 911   2              ALL_SUM1=0;
- 912   2      
- 913   2          //    send_data(0xdd);
- 914   2          //    send_data(0xdd);
- 915   2          }
- 916   1      
- 917   1      }
-*** WARNING C280 IN LINE 543 OF ..\User\HC-MCU-XBR.c: 'i': unreferenced local variable
-*** WARNING C280 IN LINE 543 OF ..\User\HC-MCU-XBR.c: 'j': unreferenced local variable
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 16  
+ 858   6                    }
+ 859   5                
+ 860   5                  }
+ 861   4      
+ 862   4              }
+ 863   3      
+ 864   3              SUM2=SUM1;
+ 865   3              send_data(average>>4);
+ 866   3              send_data(SUM0>>16);
+ 867   3              send_data(SUM0>>8);
+ 868   3              send_data(SUM2>>16);
+ 869   3              send_data(SUM2>>8);     //20200927  测试用        
+ 870   3              
+ 871   3              SUM=0;
+ 872   3              SUM1=0;
+ 873   3              
+ 874   3              if(LIGHT>0) //????
+ 875   3              {
+ 876   4                LIGHT++;
+ 877   4                if(LIGHT>DELAY_NUM)
+ 878   4                {
+ 879   5                  LIGHT=0;
+ 880   5                  while_1flag=1;
+ 881   5                  while_2flag = 0;
+ 882   5                  //break;
+ 883   5                }
+ 884   4              }       
+ 885   3              
+ 886   3            }
+ 887   2      
+ 888   2      
+ 889   2          }
+ 890   1          else
+ 891   1          {
+ 892   2          
+ 893   2              while_1flag=0;
+ 894   2              if(while_2flag==0)
+ 895   2              {
+ 896   3                while_2flag = 1;
+ 897   3                send_data(0x55);
+ 898   3              }
+ 899   2              //PC3=1;
+ 900   2              LIGHT_OFF;
+ 901   2              PWM3init(lightvalue);
+ 902   2              //P0_6=1;
+ 903   2              //send_data(0x55);
+ 904   2              Delay_ms(250);
+ 905   2      
+ 906   2      
+ 907   2              
+ 908   2          //    SUM=0;
+ 909   2          //    SUM1=0;
+ 910   2          //    times=0;
+ 911   2              
+ 912   2              SUM16=0;
+ 913   2              calc_average_times=0;
+ 914   2              SUM1_num=64;
+ 915   2              
+ 916   2              stop_times=2;
+ 917   2              //if(start_times==0)TH=TH_LOW;
+ 918   2              check_light_times=6;
+ 919   2              
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 16  
 
- 918          
- 919          
- 920          void wait1(void)
- 921          {
- 922   1        u8 i,j;
- 923   1      
- 924   1        //等待直流电压稳定
- 925   1        j=0;
- 926   1        while(1)
- 927   1        {
- 928   2          SUM=0;
- 929   2          
- 930   2          
- 931   2      //    for(i=0;i<4;i++)  //0.52s
- 932   2      //    {
- 933   2      //      for(t=0;t<8192;t++) //0.13s
- 934   2      //      {
- 935   2      
- 936   2      //        ADCC0 |= 0x40;          //启动ADC转换
- 937   2      //        while(!(ADCC0&0x20));   //等待ADC转换结束
- 938   2      //        ADCC0 &=~ 0x20;         //清除标志位
- 939   2      //        k = ADCR;       //获取ADC的值
- 940   2      //        
- 941   2      //        SUM+=k;
- 942   2      //  
- 943   2      //      }
- 944   2      //      
- 945   2      //      WDTC |= 0x10;   //清看门狗
- 946   2            
- 947   2      
- 948   2            for(i=0;i<128;i++)  //
- 949   2            {
- 950   3      
- 951   3              ADCC0 |= 0x40;          //启动ADC转换
- 952   3              while(!(ADCC0&0x20));   //等待ADC转换结束
- 953   3              ADCC0 &=~ 0x20;         //清除标志位
- 954   3              //k = ADCR;       //获取ADC的值
- 955   3              
- 956   3              SUM+=ADCR;
- 957   3              
- 958   3            }
- 959   2      
- 960   2      //发送感光AD值
- 961   2      //        send_byte=0xFA;
- 962   2      //        check_sum=send_byte;
- 963   2      //        send_data(send_byte);
- 964   2      
- 965   2      //        //send_byte=light_ad;
- 966   2      //        check_sum+=light_ad;
- 967   2      //        send_data(light_ad);
- 968   2      
- 969   2      //        check_sum+=light_ad;
- 970   2      //        send_data(light_ad);
- 971   2      //        
- 972   2      //        check_sum+=1;
- 973   2      //        send_data(check_sum);
+ 920   2              SUM1_counter=0;
+ 921   2              ALL_SUM1=0;
+ 922   2      
+ 923   2          //    send_data(0xdd);
+ 924   2          //    send_data(0xdd);
+ 925   2          }
+ 926   1      
+ 927   1      }
+*** WARNING C280 IN LINE 553 OF ..\USER\HC-MCU-XBR.C: 'i': unreferenced local variable
+*** WARNING C280 IN LINE 553 OF ..\USER\HC-MCU-XBR.C: 'j': unreferenced local variable
+ 928          
+ 929          
+ 930          void wait1(void)
+ 931          {
+ 932   1        u8 i,j;
+ 933   1      
+ 934   1        //等待直流电压稳定
+ 935   1        j=0;
+ 936   1        while(1)
+ 937   1        {
+ 938   2          SUM=0;
+ 939   2          
+ 940   2          
+ 941   2      //    for(i=0;i<4;i++)  //0.52s
+ 942   2      //    {
+ 943   2      //      for(t=0;t<8192;t++) //0.13s
+ 944   2      //      {
+ 945   2      
+ 946   2      //        ADCC0 |= 0x40;          //启动ADC转换
+ 947   2      //        while(!(ADCC0&0x20));   //等待ADC转换结束
+ 948   2      //        ADCC0 &=~ 0x20;         //清除标志位
+ 949   2      //        k = ADCR;       //获取ADC的值
+ 950   2      //        
+ 951   2      //        SUM+=k;
+ 952   2      //  
+ 953   2      //      }
+ 954   2      //      
+ 955   2      //      WDTC |= 0x10;   //清看门狗
+ 956   2            
+ 957   2      
+ 958   2            for(i=0;i<128;i++)  //
+ 959   2            {
+ 960   3      
+ 961   3              ADCC0 |= 0x40;          //启动ADC转换
+ 962   3              while(!(ADCC0&0x20));   //等待ADC转换结束
+ 963   3              ADCC0 &=~ 0x20;         //清除标志位
+ 964   3              //k = ADCR;       //获取ADC的值
+ 965   3              
+ 966   3              SUM+=ADCR;
+ 967   3              
+ 968   3            }
+ 969   2      
+ 970   2      //发送感光AD值
+ 971   2      //        send_byte=0xFA;
+ 972   2      //        check_sum=send_byte;
+ 973   2      //        send_data(send_byte);
  974   2      
- 975   2      
- 976   2      
- 977   2        //}
- 978   2          
- 979   2          Delay_ms(400);
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 17  
+ 975   2      //        //send_byte=light_ad;
+ 976   2      //        check_sum+=light_ad;
+ 977   2      //        send_data(light_ad);
+ 978   2      
+ 979   2      //        check_sum+=light_ad;
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 17  
 
- 980   2            
- 981   2      
- 982   2          
- 983   2          //WDTC |= 0x10;   //清看门狗
+ 980   2      //        send_data(light_ad);
+ 981   2      //        
+ 982   2      //        check_sum+=1;
+ 983   2      //        send_data(check_sum);
  984   2      
- 985   2          i=SUM>>11;
- 986   2          if((i>12)&&(i<141)&&(j>20))break;
- 987   2      
- 988   2          j++;
- 989   2      
- 990   2          if(j>80)break;  //??35????????????1.1V???????
+ 985   2      
+ 986   2      
+ 987   2        //}
+ 988   2          
+ 989   2          Delay_ms(400);
+ 990   2            
  991   2      
- 992   2        }
- 993   1      }
- 994          void wait2(void)
- 995          {
- 996   1        u8 i,j;
- 997   1        u16 k,t;
- 998   1      
- 999   1        SUM=0;
-1000   1      
-1001   1      
-1002   1          for(i=0;i<8;i++)
-1003   1          {
-1004   2            for(t=0;t<8192;t++) 
-1005   2            {
-1006   3      //        ADC_TG; 
-1007   3      //        while(ADC_IF==0){};
-1008   3      //        //adc_data = ADC_DATA_RD();
-1009   3      //          
-1010   3      //        k = ADC_DH<<8;
-1011   3      //        //adc_data =adc_data <<8;
-1012   3      //        k+= ADC_DL;
-1013   3      //          
-1014   3      //        ADC_INT_IF_CLR; //清中断标志位
-1015   3          
-1016   3              ADCC0 |= 0x40;          //启动ADC转换
-1017   3              while(!(ADCC0&0x20));   //等待ADC转换结束
-1018   3              ADCC0 &=~ 0x20;         //清除标志位
-1019   3              k = ADCR;       //获取ADC的值
-1020   3              
-1021   3              SUM+=k;
-1022   3        
-1023   3            }
-1024   2            WDTC |= 0x10;   //清看门狗
-1025   2      
-1026   2          }
-1027   1      
-1028   1          average=SUM>>16;
-1029   1      
-1030   1      
-1031   1      //  light_ad=read_ad(7);
-1032   1      //  light_ad0=light_ad;
-1033   1      
-1034   1      //  Delay_ms(4);  //4ms
-1035   1      }
-*** WARNING C280 IN LINE 996 OF ..\User\HC-MCU-XBR.c: 'j': unreferenced local variable
-1036          
-1037          unsigned char PWM3init(unsigned char ab)
-1038          {
-1039   1         float i11;
-1040   1        unsigned char j11;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 18  
+ 992   2          
+ 993   2          //WDTC |= 0x10;   //清看门狗
+ 994   2      
+ 995   2          i=SUM>>11;
+ 996   2          if((i>12)&&(i<141)&&(j>20))break;
+ 997   2      
+ 998   2          j++;
+ 999   2      
+1000   2          if(j>80)break;  //??35????????????1.1V???????
+1001   2      
+1002   2        }
+1003   1      }
+1004          void wait2(void)
+1005          {
+1006   1        u8 i,j;
+1007   1        u16 k,t;
+1008   1      
+1009   1        SUM=0;
+1010   1      
+1011   1      
+1012   1          for(i=0;i<8;i++)
+1013   1          {
+1014   2            for(t=0;t<8192;t++) 
+1015   2            {
+1016   3      //        ADC_TG; 
+1017   3      //        while(ADC_IF==0){};
+1018   3      //        //adc_data = ADC_DATA_RD();
+1019   3      //          
+1020   3      //        k = ADC_DH<<8;
+1021   3      //        //adc_data =adc_data <<8;
+1022   3      //        k+= ADC_DL;
+1023   3      //          
+1024   3      //        ADC_INT_IF_CLR; //清中断标志位
+1025   3          
+1026   3              ADCC0 |= 0x40;          //启动ADC转换
+1027   3              while(!(ADCC0&0x20));   //等待ADC转换结束
+1028   3              ADCC0 &=~ 0x20;         //清除标志位
+1029   3              k = ADCR;       //获取ADC的值
+1030   3              
+1031   3              SUM+=k;
+1032   3        
+1033   3            }
+1034   2            WDTC |= 0x10;   //清看门狗
+1035   2      
+1036   2          }
+1037   1      
+1038   1          average=SUM>>16;
+1039   1      
+1040   1      
+1041   1      //  light_ad=read_ad(7);
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 18  
 
-1041   1        i11=ab*255/100;
-1042   1        j11=i11;
-1043   1      /************************************PWM3初始化****************************************/
-1044   1        //P0M3 = P0M3&0xF0|0x08;    //P06设置为推挽输出
-1045   1        PWM3_MAP = 0x05;          //PWM3映射P05口
-1046   1        
-1047   1          //周期计算  = 0xFF / (Fosc / PWM分频系数)   （Fosc见系统时钟配置的部分）
-1048   1        //      = 0xFF /(16000000 / 4)      
-1049   1        //      = 255 /4000000
-1050   1        //      = 63.75us   即15.69KHZ    
-1051   1      
-1052   1        PWM3P = 0xFF;             //PWM周期为0xFF
-1053   1        //有效电平时间计算（即占空比）  
-1054   1        //      = 0x55 / (Fosc / PWM分频系数)   （Fosc见系统时钟配置的部分）
-1055   1        //      = 0x55 /(16000000 / 4)      
-1056   1        //      = 85 /4000000
-1057   1        //      = 21.25us   占空比为 21.25 / 63.75 = 34%
-1058   1      
-1059   1        PWM3D = j11;              //PWM占空比设置
-1060   1        PWM3C = 0x94;             //使能PWM3，关闭中断，允许输出，时钟16分频
-1061   1      }
-*** WARNING C173 IN LINE 1061 OF ..\User\HC-MCU-XBR.c: missing return-expression
-1062          
-1063          /***************************************************************************************
-1064            * @说明   主函数
-1065            * @参数   无
-1066            * @返回值 无
-1067            * @注     无
-1068          ***************************************************************************************/
-1069          void main()
-1070          {
-1071   1        u8 i,j;
-1072   1        bt_protocol_init();
-1073   1        InitSYS();
-1074   1        GPIO_Init();
-1075   1        LIGHT_ON;
-1076   1        //P0_6=0;
-1077   1        PWM3init(100);
-1078   1        Timer_Init();
-1079   1        UART1_Init();
-1080   1        ADC_Init();
-1081   1      
-1082   1        LVDC = 0xAA;              //LVD设置2.4V,禁止中断
-1083   1        //  消抖时间 =  (0xFF + 2) * 1/Fcpu
-1084   1        //       =  (0xFF + 2) / 16000000 （当前的CPU时钟）
-1085   1        //       =  16.0625us
-1086   1        LVDDBC = 0xFF;            //设置消抖时间
-1087   1        LVDC &=~ 0x08;            //清除LVD中断标志位   
-1088   1      //  
-1089   1        EA=1;
-1090   1        
-1091   1        Delay_ms(200);
-1092   1        
-1093   1        LIGHT_ON;
-1094   1        PWM3init(100);
-1095   1        SWITCHflag = 1;
-1096   1        light_ad=read_ad(7);
-1097   1        light_ad0=light_ad;
-1098   1        
-1099   1        EA=0;
-1100   1        set_var();
-1101   1        
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 19  
+1042   1      //  light_ad0=light_ad;
+1043   1      
+1044   1      //  Delay_ms(4);  //4ms
+1045   1      }
+*** WARNING C280 IN LINE 1006 OF ..\USER\HC-MCU-XBR.C: 'j': unreferenced local variable
+1046          
+1047          unsigned char PWM3init(unsigned char ab)
+1048          {
+1049   1        float i11;
+1050   1        unsigned char j11;
+1051   1        i11=ab*255/100;
+1052   1        j11=i11;
+1053   1      /************************************PWM3初始化****************************************/
+1054   1        //P0M3 = P0M3&0xF0|0x08;    //P06设置为推挽输出
+1055   1        PWM3_MAP = 0x05;          //PWM3映射P05口
+1056   1        
+1057   1          //周期计算  = 0xFF / (Fosc / PWM分频系数)   （Fosc见系统时钟配置的部分）
+1058   1        //      = 0xFF /(16000000 / 4)      
+1059   1        //      = 255 /4000000
+1060   1        //      = 63.75us   即15.69KHZ    
+1061   1      
+1062   1        PWM3P = 0xFF;             //PWM周期为0xFF
+1063   1        //有效电平时间计算（即占空比）  
+1064   1        //      = 0x55 / (Fosc / PWM分频系数)   （Fosc见系统时钟配置的部分）
+1065   1        //      = 0x55 /(16000000 / 4)      
+1066   1        //      = 85 /4000000
+1067   1        //      = 21.25us   占空比为 21.25 / 63.75 = 34%
+1068   1      
+1069   1        PWM3D = j11;              //PWM占空比设置
+1070   1        PWM3C = 0x94;             //使能PWM3，关闭中断，允许输出，时钟16分频
+1071   1      }
+*** WARNING C173 IN LINE 1071 OF ..\USER\HC-MCU-XBR.C: missing return-expression
+1072          
+1073          /***************************************************************************************
+1074            * @说明   主函数
+1075            * @参数   无
+1076            * @返回值 无
+1077            * @注     无
+1078          ***************************************************************************************/
+1079          void main()
+1080          {
+1081   1        u8 i,j;
+1082   1        bt_protocol_init();
+1083   1        InitSYS();
+1084   1        GPIO_Init();
+1085   1        LIGHT_ON;
+1086   1        //P0_6=0;
+1087   1        PWM3init(100);
+1088   1        Timer_Init();
+1089   1        UART1_Init();
+1090   1        ADC_Init();
+1091   1      
+1092   1        P2_3 = 1;
+1093   1      
+1094   1        LVDC = 0xAA;              //LVD设置2.4V,禁止中断
+1095   1        //  消抖时间 =  (0xFF + 2) * 1/Fcpu
+1096   1        //       =  (0xFF + 2) / 16000000 （当前的CPU时钟）
+1097   1        //       =  16.0625us
+1098   1        LVDDBC = 0xFF;            //设置消抖时间
+1099   1        LVDC &=~ 0x08;            //清除LVD中断标志位   
+1100   1      //  
+1101   1        EA=1;
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 19  
 
-1102   1        //for(i=0;i<5;i++)send_data(guc_Read_a[i]);
-1103   1        
-1104   1      //  TXdata[0]=VERSION;
-1105   1      //  t=TH/1000;
-1106   1      //  TXdata[1]=t>>8;
-1107   1      //  TXdata[2]=t;
-1108   1      //  TXdata[3]=LIGHT_TH;
-1109   1      //  t=DELAY_NUM/4;
-1110   1      //  TXdata[4]=t>>8;
-1111   1      //  TXdata[5]=t;
-1112   1      
-1113   1      //  TXdata[6]=light_ad;
-1114   1      
-1115   1      //  for(i=0;i<7;i++)send_data(TXdata[i]); 
-1116   1        
-1117   1        EA=1;
-1118   1        
-1119   1      
-1120   1        wait1();
-1121   1      
-1122   1        
-1123   1        //Delay_ms(200);
-1124   1        PWM3init(lightvalue);
-1125   1        LIGHT_OFF;
-1126   1        //P0_6=1;
-1127   1        Delay_ms(300);
+1102   1        
+1103   1        Delay_ms(200);
+1104   1        
+1105   1        LIGHT_ON;
+1106   1        PWM3init(100);
+1107   1        SWITCHflag = 1;
+1108   1        light_ad=read_ad(7);
+1109   1        light_ad0=light_ad;
+1110   1        
+1111   1        EA=0;
+1112   1        set_var();
+1113   1        
+1114   1        //for(i=0;i<5;i++)send_data(guc_Read_a[i]);
+1115   1        
+1116   1      //  TXdata[0]=VERSION;
+1117   1      //  t=TH/1000;
+1118   1      //  TXdata[1]=t>>8;
+1119   1      //  TXdata[2]=t;
+1120   1      //  TXdata[3]=LIGHT_TH;
+1121   1      //  t=DELAY_NUM/4;
+1122   1      //  TXdata[4]=t>>8;
+1123   1      //  TXdata[5]=t;
+1124   1      
+1125   1      //  TXdata[6]=light_ad;
+1126   1      
+1127   1      //  for(i=0;i<7;i++)send_data(TXdata[i]); 
 1128   1        
-1129   1        wait2();
-1130   1      
-1131   1        SUM=0;
-1132   1        while(1)
-1133   1        {
-1134   2          WDTC |= 0x10;   //清看门狗
-1135   2          bt_uart_service();
-1136   2          
-1137   2      
-1138   2          XBRHandle();
-1139   2        
-1140   2      
-1141   2      
-1142   2        } 
-1143   1        
-1144   1      //  while(1)
-1145   1      //  {
-1146   1      //    System_Time_Cnt();
-1147   1      //    System_Task();
-1148   1      //    WDTC |= 0x10;              //清狗
-1149   1      //  }
-1150   1      
-1151   1        
-1152   1        
-1153   1      }
-*** WARNING C280 IN LINE 1071 OF ..\User\HC-MCU-XBR.c: 'i': unreferenced local variable
-*** WARNING C280 IN LINE 1071 OF ..\User\HC-MCU-XBR.c: 'j': unreferenced local variable
-1154          
-1155          /***************************************************************************************
-1156            * @说明   T1中断服务函数
-1157            * @参数   无
-1158            * @返回值 无
-1159            * @注     无
-1160          ***************************************************************************************/
-1161          void TIMER1_Rpt(void) interrupt TIMER1_VECTOR
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 20  
+1129   1        EA=1;
+1130   1        
+1131   1      
+1132   1        wait1();
+1133   1      
+1134   1        
+1135   1        //Delay_ms(200);
+1136   1        PWM3init(lightvalue);
+1137   1        LIGHT_OFF;
+1138   1        //P0_6=1;
+1139   1        Delay_ms(300);
+1140   1        
+1141   1        wait2();
+1142   1      
+1143   1        SUM=0;
+1144   1        P2_3 = 1;
+1145   1        while(1)
+1146   1        {
+1147   2          WDTC |= 0x10;   //清看门狗
+1148   2          
+1149   2          P2_3 = 0;
+1150   2          bt_uart_service();
+1151   2          P2_3 = 1;
+1152   2      
+1153   2          XBRHandle();
+1154   2        
+1155   2      
+1156   2      
+1157   2        } 
+1158   1        
+1159   1      //  while(1)
+1160   1      //  {
+1161   1      //    System_Time_Cnt();
+1162   1      //    System_Task();
+1163   1      //    WDTC |= 0x10;              //清狗
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 20  
 
-1162          {
-1163   1        //Timer1_FLAG = 1;    //1mS
-1164   1        Timer_Counter++;
+1164   1      //  }
 1165   1      
-1166   1        //if(SWITCHflag==1)
-1167   1        //{
-1168   1        //  colorRcnt++;
-1169   1        //  if(colorRcnt)
-1170   1      ///
-1171   1      
-1172   1        //}
-1173   1      
-1174   1      
-1175   1        
-1176   1      }
-1177          
-1178          /***************************************************************************************
-1179            * @说明   UART1中断服务函数
-1180            * @参数   无
-1181            * @返回值 无
-1182            * @注     无
-1183          ***************************************************************************************/
-1184          
-1185          void UART1_Rpt(void) interrupt UART1_VECTOR
-1186          {
-1187   1        u8 i;
-1188   1        //u16 t;
-1189   1        
-1190   1        if(SCON & 0x01)                       //判断接收中断标志位
-1191   1        {
-1192   2            i=SBUF;
-1193   2            uart_receive_input(i);
-1194   2            SCON &=~ 0x01;                    //清除接收中断标志位
-1195   2            EA=1;
-1196   2        }
-1197   1      }
-1198          
-1199          void UART2_Rpt(void) interrupt UART2_VECTOR
-1200          {
-1201   1      }
-1202          
-1203          // void Delay_2us(u16 Cnt)
-1204          // {
-1205          //  while(Cnt--); 
-1206          // }
-1207          
-1208          void Flash_EraseBlock(unsigned int fui_Address)
-1209          {
-1210   1        while(1)
-1211   1        {
-1212   2          LVDC &=~ 0x08;        //清除LVD中断标志位
-1213   2          P0_0=0;   
-1214   2          if((LVDC&0x08)==0)    break;
-1215   2        }
-1216   1        P0_0=1;   
-1217   1        EA=0;
-1218   1        IAP_CMD = 0xF00F;       //Flash解锁
-1219   1        IAP_ADDR = fui_Address; //写入擦除地址
-1220   1        IAP_CMD = 0xD22D;       //选择操作方式， 扇区擦除
-1221   1        IAP_CMD = 0xE11E;       //触发后IAP_ADDRL&IAP_ADDRH指向0xFF，同时自动锁定
-1222   1        //EA=1;
-1223   1      }
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 21  
+1166   1        
+1167   1        
+1168   1      }
+*** WARNING C280 IN LINE 1081 OF ..\USER\HC-MCU-XBR.C: 'i': unreferenced local variable
+*** WARNING C280 IN LINE 1081 OF ..\USER\HC-MCU-XBR.C: 'j': unreferenced local variable
+1169          
+1170          /***************************************************************************************
+1171            * @说明   T1中断服务函数
+1172            * @参数   无
+1173            * @返回值 无
+1174            * @注     无
+1175          ***************************************************************************************/
+1176          void TIMER1_Rpt(void) interrupt TIMER1_VECTOR
+1177          {
+1178   1        //Timer1_FLAG = 1;    //1mS
+1179   1        Timer_Counter++;
+1180   1      
+1181   1        //if(SWITCHflag==1)
+1182   1        //{
+1183   1        //  colorRcnt++;
+1184   1        //  if(colorRcnt)
+1185   1      ///
+1186   1      
+1187   1        //}
+1188   1      
+1189   1      
+1190   1        
+1191   1      }
+1192          
+1193          /***************************************************************************************
+1194            * @说明   UART1中断服务函数
+1195            * @参数   无
+1196            * @返回值 无
+1197            * @注     无
+1198          ***************************************************************************************/
+1199          
+1200          void UART1_Rpt(void) interrupt UART1_VECTOR
+1201          {
+1202   1        u8 i;
+1203   1        //u16 t;
+1204   1        
+1205   1        if(SCON & 0x01)                       //判断接收中断标志位
+1206   1        {
+1207   2            i=SBUF;
+1208   2            uart_receive_input(i);
+1209   2            SCON &=~ 0x01;                    //清除接收中断标志位
+1210   2            EA=1;
+1211   2        }
+1212   1      }
+1213          
+1214          void UART2_Rpt(void) interrupt UART2_VECTOR
+1215          {
+1216   1      }
+1217          
+1218          // void Delay_2us(u16 Cnt)
+1219          // {
+1220          //  while(Cnt--); 
+1221          // }
+1222          
+1223          void Flash_EraseBlock(unsigned int fui_Address)
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 21  
 
-1224          
-1225          /**
-1226            * @说明   写入一个字节数据到Flash里面
-1227            *         该函数需绝对地址编译，详情请查阅IAP操作应用手册
-1228            * @参数   fui_Address ：FLASH地址
-1229            * @参数   fucp_SaveData：写入的数据
-1230            * @返回值 无
-1231            * @注     写之前必须先对操作的扇区进行擦除
-1232            */
-1233          void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address)
-1234          {
-1235   1        while(1)
-1236   1        {
-1237   2          LVDC &=~ 0x08;         //清除LVD中断标志位
-1238   2          P0_0=0;   
-1239   2          if((LVDC&0x08)==0)    break;
-1240   2        }
-1241   1        P0_0=1; 
-1242   1        EA=0;
-1243   1        IAP_DATA = fuc_SaveData;
-1244   1        IAP_CMD=0xF00F;          //Flash解锁
-1245   1        IAP_ADDR = fui_Address;
-1246   1        IAP_CMD=0xB44B;          //字节编程
-1247   1        IAP_CMD=0xE11E;          //触发一次操作
-1248   1        //EA=1;
-1249   1      }
-1250          
-1251          /**
-1252            * @说明   写入任意长度的数据到FLASH里面
-1253            *         该函数需绝对地址编译，详情请查阅IAP操作应用手册
-1254            * @参数   fui_Address ：FLASH起始地址
-1255            * @参数   fuc_Length ： 写入数据长度
-1256            *         取值范围：0x00-0xFF
-1257            * @参数  *fucp_SaveArr：写入的数据存放区域的首地址
-1258            * @返回值 无
-1259            * @注     写之前必须先对操作的扇区进行擦除
-1260            */
-1261          
-1262          // void Flash_WriteArr(unsigned int fui_Address,unsigned char fuc_Length,unsigned char *fucp_SaveArr)
-1263          // {
-1264          //  unsigned char fui_i = 0;
-1265          //  EA=0;
-1266          //  for(fui_i=0;fui_i<fuc_Length;fui_i++)
-1267          //  {
-1268          //    FLASH_WriteData(*(fucp_SaveArr++), fui_Address++); 
-1269          //  }
-1270          //  EA=1;
-1271          // }
-1272          
-1273          /**
-1274            * @说明   从FLASH里面读取任意长度的数据
-1275            * @参数   fui_Address ：FLASH起始地址
-1276            * @参数   fuc_Length ：读取数据长度
-1277            *         取值范围：0x00-0xFF
-1278            * @参数  *fucp_SaveArr：读取数据存放的区域首地址
-1279            * @返回值 无
-1280            * @注     无
-1281            */
-1282          
-*** WARNING C290 IN LINE 1061 OF ..\User\HC-MCU-XBR.c: missing return value
+1224          {
+1225   1        while(1)
+1226   1        {
+1227   2          LVDC &=~ 0x08;        //清除LVD中断标志位
+1228   2          P0_0=0;   
+1229   2          if((LVDC&0x08)==0)    break;
+1230   2        }
+1231   1        P0_0=1;   
+1232   1        EA=0;
+1233   1        IAP_CMD = 0xF00F;       //Flash解锁
+1234   1        IAP_ADDR = fui_Address; //写入擦除地址
+1235   1        IAP_CMD = 0xD22D;       //选择操作方式， 扇区擦除
+1236   1        IAP_CMD = 0xE11E;       //触发后IAP_ADDRL&IAP_ADDRH指向0xFF，同时自动锁定
+1237   1        //EA=1;
+1238   1      }
+1239          
+1240          /**
+1241            * @说明   写入一个字节数据到Flash里面
+1242            *         该函数需绝对地址编译，详情请查阅IAP操作应用手册
+1243            * @参数   fui_Address ：FLASH地址
+1244            * @参数   fucp_SaveData：写入的数据
+1245            * @返回值 无
+1246            * @注     写之前必须先对操作的扇区进行擦除
+1247            */
+1248          void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address)
+1249          {
+1250   1        while(1)
+1251   1        {
+1252   2          LVDC &=~ 0x08;         //清除LVD中断标志位
+1253   2          P0_0=0;   
+1254   2          if((LVDC&0x08)==0)    break;
+1255   2        }
+1256   1        P0_0=1; 
+1257   1        EA=0;
+1258   1        IAP_DATA = fuc_SaveData;
+1259   1        IAP_CMD=0xF00F;          //Flash解锁
+1260   1        IAP_ADDR = fui_Address;
+1261   1        IAP_CMD=0xB44B;          //字节编程
+1262   1        IAP_CMD=0xE11E;          //触发一次操作
+1263   1        //EA=1;
+1264   1      }
+1265          
+1266          /**
+1267            * @说明   写入任意长度的数据到FLASH里面
+1268            *         该函数需绝对地址编译，详情请查阅IAP操作应用手册
+1269            * @参数   fui_Address ：FLASH起始地址
+1270            * @参数   fuc_Length ： 写入数据长度
+1271            *         取值范围：0x00-0xFF
+1272            * @参数  *fucp_SaveArr：写入的数据存放区域的首地址
+1273            * @返回值 无
+1274            * @注     写之前必须先对操作的扇区进行擦除
+1275            */
+1276          
+1277          // void Flash_WriteArr(unsigned int fui_Address,unsigned char fuc_Length,unsigned char *fucp_SaveArr)
+1278          // {
+1279          //  unsigned char fui_i = 0;
+1280          //  EA=0;
+1281          //  for(fui_i=0;fui_i<fuc_Length;fui_i++)
+1282          //  {
+1283          //    FLASH_WriteData(*(fucp_SaveArr++), fui_Address++); 
+1284          //  }
+1285          //  EA=1;
+C51 COMPILER V8.02   HC_MCU_XBR                                                            10/07/2020 16:36:19 PAGE 22  
 
+1286          // }
+1287          
+1288          /**
+1289            * @说明   从FLASH里面读取任意长度的数据
+1290            * @参数   fui_Address ：FLASH起始地址
+1291            * @参数   fuc_Length ：读取数据长度
+1292            *         取值范围：0x00-0xFF
+1293            * @参数  *fucp_SaveArr：读取数据存放的区域首地址
+1294            * @返回值 无
+1295            * @注     无
+1296            */
+1297          
 
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        09/28/2020 17:37:44 PAGE 22  
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   3700    ----
+   CODE SIZE        =   3703    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =     72    ----
    PDATA SIZE       =   ----    ----
@@ -1355,4 +1369,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  8 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  7 WARNING(S),  0 ERROR(S)
