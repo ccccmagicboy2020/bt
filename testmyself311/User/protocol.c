@@ -1,213 +1,129 @@
 /****************************************Copyright (c)*************************
-**                               °æÈ¨ËùÓĞ (C), 2015-2017, Í¿Ñ»¿Æ¼¼
+**                               ç‰ˆæƒæ‰€æœ‰ (C), 2015-2017, æ¶‚é¸¦ç§‘æŠ€
 **
 **                                 http://www.tuya.com
 **
-**--------------ÎÄ¼şĞÅÏ¢-------------------------------------------------------
-**ÎÄ   ¼ş   Ãû: protocol.c
-**Ãè        Êö: ÏÂ·¢/ÉÏ±¨Êı¾İ´¦Àíº¯Êı
-**Ê¹ ÓÃ Ëµ Ã÷ :
+**--------------æ–‡ä»¶ä¿¡æ¯-------------------------------------------------------
+**æ–‡   ä»¶   å: protocol.c
+**æ        è¿°: ä¸‹å‘/ä¸ŠæŠ¥æ•°æ®å¤„ç†å‡½æ•°
+**ä½¿ ç”¨ è¯´ æ˜ :
 
-                  *******·Ç³£ÖØÒª£¬Ò»¶¨Òª¿´Å¶£¡£¡£¡********
+                  *******éå¸¸é‡è¦ï¼Œä¸€å®šè¦çœ‹å“¦ï¼ï¼ï¼********
 
-** 1¡¢ÓÃ»§ÔÚ´ËÎÄ¼şÖĞÊµÏÖÊı¾İÏÂ·¢/ÉÏ±¨¹¦ÄÜ
-** 2¡¢DPµÄID/TYPE¼°Êı¾İ´¦Àíº¯Êı¶¼ĞèÒªÓÃ»§°´ÕÕÊµ¼Ê¶¨ÒåÊµÏÖ
-** 3¡¢µ±¿ªÊ¼Ä³Ğ©ºê¶¨ÒåºóĞèÒªÓÃ»§ÊµÏÖ´úÂëµÄº¯ÊıÄÚ²¿ÓĞ#errÌáÊ¾,Íê³Éº¯ÊıºóÇëÉ¾³ı¸Ã#err
+** 1ã€ç”¨æˆ·åœ¨æ­¤æ–‡ä»¶ä¸­å®ç°æ•°æ®ä¸‹å‘/ä¸ŠæŠ¥åŠŸèƒ½
+** 2ã€DPçš„ID/TYPEåŠæ•°æ®å¤„ç†å‡½æ•°éƒ½éœ€è¦ç”¨æˆ·æŒ‰ç…§å®é™…å®šä¹‰å®ç°
+** 3ã€å½“å¼€å§‹æŸäº›å®å®šä¹‰åéœ€è¦ç”¨æˆ·å®ç°ä»£ç çš„å‡½æ•°å†…éƒ¨æœ‰#erræç¤º,å®Œæˆå‡½æ•°åè¯·åˆ é™¤è¯¥#err
 **
-**--------------µ±Ç°°æ±¾ĞŞ¶©---------------------------------------------------
-** °æ  ±¾: v1.0
-** ÈÕ¡¡ÆÚ: 2017Äê5ÔÂ3ÈÕ
-** Ãè¡¡Êö: 1:´´½¨Í¿Ñ»bluetooth¶Ô½ÓMCU_SDK
+**--------------å½“å‰ç‰ˆæœ¬ä¿®è®¢---------------------------------------------------
+** ç‰ˆ  æœ¬: v1.0
+** æ—¥ã€€æœŸ: 2017å¹´5æœˆ3æ—¥
+** æã€€è¿°: 1:åˆ›å»ºæ¶‚é¸¦bluetoothå¯¹æ¥MCU_SDK
 **
 **-----------------------------------------------------------------------------
 ******************************************************************************/
-//#include "include.h"
-
+#include "HC89S003F4.h"
+#include "HC-MCU-XBR.h"
 #include "bluetooth.h"
 
-#define RADIUS_1M 5000000
-#define RADIUS_2M 3200000
-#define RADIUS_3M 2000000
-#define RADIUS_4M 1000000
-#define RADIUS_5M 400000
-
-  
-//extern TYPE_BUFFER_S FlashBuffer;
-
 /******************************************************************************
-                                ÒÆÖ²ĞëÖª:
-1:MCU±ØĞëÔÚwhileÖĞÖ±½Óµ÷ÓÃmcu_api.cÄÚµÄbt_uart_service()º¯Êı
-2:³ÌĞòÕı³£³õÊ¼»¯Íê³Éºó,½¨Òé²»½øĞĞ¹Ø´®¿ÚÖĞ¶Ï,Èç±ØĞë¹ØÖĞ¶Ï,¹ØÖĞ¶ÏÊ±¼ä±ØĞë¶Ì,¹ØÖĞ¶Ï»áÒıÆğ´®¿ÚÊı¾İ°ü¶ªÊ§
-3:ÇëÎğÔÚÖĞ¶Ï/¶¨Ê±Æ÷ÖĞ¶ÏÄÚµ÷ÓÃÉÏ±¨º¯Êı
+                                ç§»æ¤é¡»çŸ¥:
+1:MCUå¿…é¡»åœ¨whileä¸­ç›´æ¥è°ƒç”¨mcu_api.cå†…çš„bt_uart_service()å‡½æ•°
+2:ç¨‹åºæ­£å¸¸åˆå§‹åŒ–å®Œæˆå,å»ºè®®ä¸è¿›è¡Œå…³ä¸²å£ä¸­æ–­,å¦‚å¿…é¡»å…³ä¸­æ–­,å…³ä¸­æ–­æ—¶é—´å¿…é¡»çŸ­,å…³ä¸­æ–­ä¼šå¼•èµ·ä¸²å£æ•°æ®åŒ…ä¸¢å¤±
+3:è¯·å‹¿åœ¨ä¸­æ–­/å®šæ—¶å™¨ä¸­æ–­å†…è°ƒç”¨ä¸ŠæŠ¥å‡½æ•°
 ******************************************************************************/
 
          
 /******************************************************************************
-                              µÚÒ»²½:³õÊ¼»¯
-1:ÔÚĞèÒªÊ¹ÓÃµ½btÏà¹ØÎÄ¼şµÄÎÄ¼şÖĞinclude "bt.h"
-2:ÔÚMCU³õÊ¼»¯ÖĞµ÷ÓÃmcu_api.cÎÄ¼şÖĞµÄbt_protocol_init()º¯Êı
-3:½«MCU´®¿Úµ¥×Ö½Ú·¢ËÍº¯ÊıÌîÈëprotocol.cÎÄ¼şÖĞuart_transmit_outputº¯ÊıÄÚ,²¢É¾³ı#error
-4:ÔÚMCU´®¿Ú½ÓÊÕº¯ÊıÖĞµ÷ÓÃmcu_api.cÎÄ¼şÄÚµÄuart_receive_inputº¯Êı,²¢½«½ÓÊÕµ½µÄ×Ö½Ú×÷Îª²ÎÊı´«Èë
-5:µ¥Æ¬»ú½øÈëwhileÑ­»·ºóµ÷ÓÃmcu_api.cÎÄ¼şÄÚµÄbt_uart_service()º¯Êı
+                              ç¬¬ä¸€æ­¥:åˆå§‹åŒ–
+1:åœ¨éœ€è¦ä½¿ç”¨åˆ°btç›¸å…³æ–‡ä»¶çš„æ–‡ä»¶ä¸­include "bt.h"
+2:åœ¨MCUåˆå§‹åŒ–ä¸­è°ƒç”¨mcu_api.cæ–‡ä»¶ä¸­çš„bt_protocol_init()å‡½æ•°
+3:å°†MCUä¸²å£å•å­—èŠ‚å‘é€å‡½æ•°å¡«å…¥protocol.cæ–‡ä»¶ä¸­uart_transmit_outputå‡½æ•°å†…,å¹¶åˆ é™¤#error
+4:åœ¨MCUä¸²å£æ¥æ”¶å‡½æ•°ä¸­è°ƒç”¨mcu_api.cæ–‡ä»¶å†…çš„uart_receive_inputå‡½æ•°,å¹¶å°†æ¥æ”¶åˆ°çš„å­—èŠ‚ä½œä¸ºå‚æ•°ä¼ å…¥
+5:å•ç‰‡æœºè¿›å…¥whileå¾ªç¯åè°ƒç”¨mcu_api.cæ–‡ä»¶å†…çš„bt_uart_service()å‡½æ•°
 ******************************************************************************/
-
-extern u8 xdata LIGHT_TH,light_ad;
-extern u16 xdata DELAY_NUM;
-extern u8 xdata SWITCHflag ;
-extern u8 xdata lightvalue ;
-extern ulong xdata TH ;
-extern	u8 xdata switchcnt ;
-void Flash_EraseBlock(unsigned int fui_Address);//ÉÈÇø²Á³ı
-void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address);
-void Delay_us_1(uint q1);
-void send_data(u8 d);
-void savevar(void);
-//u8 test_LIGHT_TH;
-//u8 test_DELAY_NUM;
-//u8 test_lightvalue;
-//u8 test_TH;
 
 /******************************************************************************
-                        1:dpÊı¾İµãĞòÁĞÀàĞÍ¶ÔÕÕ±í
-          **´ËÎª×Ô¶¯Éú³É´úÂë,ÈçÔÚ¿ª·¢Æ½Ì¨ÓĞÏà¹ØĞŞ¸ÄÇëÖØĞÂÏÂÔØMCU_SDK**         
+                        1:dpæ•°æ®ç‚¹åºåˆ—ç±»å‹å¯¹ç…§è¡¨
+          **æ­¤ä¸ºè‡ªåŠ¨ç”Ÿæˆä»£ç ,å¦‚åœ¨å¼€å‘å¹³å°æœ‰ç›¸å…³ä¿®æ”¹è¯·é‡æ–°ä¸‹è½½MCU_SDK**         
 ******************************************************************************/
-const DOWNLOAD_CMD_S  xdata download_cmd[] =
+const DOWNLOAD_CMD_S download_cmd[] =
 {
   {DPID_SWITCH_LED, DP_TYPE_BOOL},
-  //{DPID_WORK_MODE, DP_TYPE_ENUM},
   {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
-  //{DPID_DEVICE_MODE, DP_TYPE_ENUM},
-  //{DPID_PIR_STATE, DP_TYPE_ENUM},
-  {DPID_CDS, DP_TYPE_ENUM},
-  //{DPID_PIR_SENSITIVITY, DP_TYPE_ENUM},
-  {DPID_PIR_DELAY, DP_TYPE_VALUE},
-  //{DPID_SWITCH_PIR, DP_TYPE_BOOL},
-  //{DPID_PIR_RESUME_COUNTDOWN, DP_TYPE_VALUE},
-  //{DPID_STANDBY_TIME, DP_TYPE_VALUE},
-  {DPID_SENSING_RADIUS, DP_TYPE_VALUE},
-  //{DPID_HANG_HIGH, DP_TYPE_VALUE},
-//	{DPID_SWITCH_LED, DP_TYPE_BOOL},
-//  {DPID_WORK_MODE, DP_TYPE_ENUM},
-//  {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
-//  {DPID_DEVICE_MODE, DP_TYPE_ENUM},
-//  {DPID_PIR_STATE, DP_TYPE_ENUM},
-//  {DPID_CDS, DP_TYPE_ENUM},
-//  {DPID_PIR_SENSITIVITY, DP_TYPE_ENUM},
-//  {DPID_PIR_DELAY, DP_TYPE_VALUE},
-//  {DPID_SWITCH_PIR, DP_TYPE_BOOL},
-//  {DPID_PIR_RESUME_COUNTDOWN, DP_TYPE_VALUE},
-//  {DPID_STANDBY_TIME, DP_TYPE_VALUE},
-//  {DPID_SENSING_RADIUS, DP_TYPE_VALUE},
-//  {DPID_HANG_HIGH, DP_TYPE_VALUE},
+  {DPID_LIGHT_PARAMETER, DP_TYPE_VALUE},
+  {DPID_SENSE_DELAY, DP_TYPE_VALUE},
+  {DPID_SENSE_SWITCH, DP_TYPE_BOOL},
+  {DPID_STAYON_DELAY, DP_TYPE_VALUE},
+  {DPID_SENSE_STRESS, DP_TYPE_VALUE},
+  {DPID_SENSE_CIRCLE_R, DP_TYPE_VALUE},
 };
 
 
 
 
 /******************************************************************************
-                           2:´®¿Úµ¥×Ö½Ú·¢ËÍº¯Êı
-Çë½«MCU´®¿Ú·¢ËÍº¯ÊıÌîÈë¸Ãº¯ÊıÄÚ,²¢½«½ÓÊÕµ½µÄÊı¾İ×÷Îª²ÎÊı´«Èë´®¿Ú·¢ËÍº¯Êı
+                           2:ä¸²å£å•å­—èŠ‚å‘é€å‡½æ•°
+è¯·å°†MCUä¸²å£å‘é€å‡½æ•°å¡«å…¥è¯¥å‡½æ•°å†…,å¹¶å°†æ¥æ”¶åˆ°çš„æ•°æ®ä½œä¸ºå‚æ•°ä¼ å…¥ä¸²å£å‘é€å‡½æ•°
 ******************************************************************************/
 
 /*****************************************************************************
-º¯ÊıÃû³Æ : uart_transmit_output
-¹¦ÄÜÃèÊö : ·¢Êı¾İ´¦Àí
-ÊäÈë²ÎÊı : value:´®¿ÚÊÕµ½×Ö½ÚÊı¾İ
-·µ»Ø²ÎÊı : ÎŞ
-Ê¹ÓÃËµÃ÷ : Çë½«MCU´®¿Ú·¢ËÍº¯ÊıÌîÈë¸Ãº¯ÊıÄÚ,²¢½«½ÓÊÕµ½µÄÊı¾İ×÷Îª²ÎÊı´«Èë´®¿Ú·¢ËÍº¯Êı
+å‡½æ•°åç§° : uart_transmit_output
+åŠŸèƒ½æè¿° : å‘æ•°æ®å¤„ç†
+è¾“å…¥å‚æ•° : value:ä¸²å£æ”¶åˆ°å­—èŠ‚æ•°æ®
+è¿”å›å‚æ•° : æ— 
+ä½¿ç”¨è¯´æ˜ : è¯·å°†MCUä¸²å£å‘é€å‡½æ•°å¡«å…¥è¯¥å‡½æ•°å†…,å¹¶å°†æ¥æ”¶åˆ°çš„æ•°æ®ä½œä¸ºå‚æ•°ä¼ å…¥ä¸²å£å‘é€å‡½æ•°
 *****************************************************************************/
 void uart_transmit_output(unsigned char value)
 {
-// #error "Çë½«MCU´®¿Ú·¢ËÍº¯ÊıÌîÈë¸Ãº¯Êı,²¢É¾³ı¸ÃĞĞ"
-	
-	
-	SBUF = value;
-	while(!(SCON & 0x02));
-	SCON &=~ 0x02;
-	
+ //#error "è¯·å°†MCUä¸²å£å‘é€å‡½æ•°å¡«å…¥è¯¥å‡½æ•°,å¹¶åˆ é™¤è¯¥è¡Œ"
+    send_data(value);
 /*
-  //Ê¾Àı:
+  //ç¤ºä¾‹:
   extern void Uart_PutChar(unsigned char value);
-  Uart_PutChar(value);	                                //´®¿Ú·¢ËÍº¯Êı
+  Uart_PutChar(value);	                                //ä¸²å£å‘é€å‡½æ•°
 */  
 }
 /******************************************************************************
-                           µÚ¶ş²½:ÊµÏÖ¾ßÌåÓÃ»§º¯Êı
-1:APPÏÂ·¢Êı¾İ´¦Àí
-2:Êı¾İÉÏ±¨´¦Àí
+                           ç¬¬äºŒæ­¥:å®ç°å…·ä½“ç”¨æˆ·å‡½æ•°
+1:APPä¸‹å‘æ•°æ®å¤„ç†
+2:æ•°æ®ä¸ŠæŠ¥å¤„ç†
 ******************************************************************************/
 
 /******************************************************************************
-                            1:ËùÓĞÊı¾İÉÏ±¨´¦Àí
-µ±Ç°º¯Êı´¦ÀíÈ«²¿Êı¾İÉÏ±¨(°üÀ¨¿ÉÏÂ·¢/¿ÉÉÏ±¨ºÍÖ»ÉÏ±¨)
-  ĞèÒªÓÃ»§°´ÕÕÊµ¼ÊÇé¿öÊµÏÖ:
-  1:ĞèÒªÊµÏÖ¿ÉÏÂ·¢/¿ÉÉÏ±¨Êı¾İµãÉÏ±¨
-  2:ĞèÒªÊµÏÖÖ»ÉÏ±¨Êı¾İµãÉÏ±¨
-´Ëº¯ÊıÎªMCUÄÚ²¿±ØĞëµ÷ÓÃ
-ÓÃ»§Ò²¿Éµ÷ÓÃ´Ëº¯ÊıÊµÏÖÈ«²¿Êı¾İÉÏ±¨
+                            1:æ‰€æœ‰æ•°æ®ä¸ŠæŠ¥å¤„ç†
+å½“å‰å‡½æ•°å¤„ç†å…¨éƒ¨æ•°æ®ä¸ŠæŠ¥(åŒ…æ‹¬å¯ä¸‹å‘/å¯ä¸ŠæŠ¥å’Œåªä¸ŠæŠ¥)
+  éœ€è¦ç”¨æˆ·æŒ‰ç…§å®é™…æƒ…å†µå®ç°:
+  1:éœ€è¦å®ç°å¯ä¸‹å‘/å¯ä¸ŠæŠ¥æ•°æ®ç‚¹ä¸ŠæŠ¥
+  2:éœ€è¦å®ç°åªä¸ŠæŠ¥æ•°æ®ç‚¹ä¸ŠæŠ¥
+æ­¤å‡½æ•°ä¸ºMCUå†…éƒ¨å¿…é¡»è°ƒç”¨
+ç”¨æˆ·ä¹Ÿå¯è°ƒç”¨æ­¤å‡½æ•°å®ç°å…¨éƒ¨æ•°æ®ä¸ŠæŠ¥
 ******************************************************************************/
 
-//×Ô¶¯»¯Éú³ÉÊı¾İÉÏ±¨º¯Êı
+//è‡ªåŠ¨åŒ–ç”Ÿæˆæ•°æ®ä¸ŠæŠ¥å‡½æ•°
 
 /*****************************************************************************
-º¯ÊıÃû³Æ : all_data_update
-¹¦ÄÜÃèÊö : ÏµÍ³ËùÓĞdpµãĞÅÏ¢ÉÏ´«,ÊµÏÖAPPºÍmucÊı¾İÍ¬²½
-ÊäÈë²ÎÊı : ÎŞ
-·µ»Ø²ÎÊı : ÎŞ
-Ê¹ÓÃËµÃ÷ : ´Ëº¯ÊıSDKÄÚ²¿Ğèµ÷ÓÃ;
-           MCU±ØĞëÊµÏÖ¸Ãº¯ÊıÄÚÊı¾İÉÏ±¨¹¦ÄÜ;°üÀ¨Ö»ÉÏ±¨ºÍ¿ÉÉÏ±¨¿ÉÏÂ·¢ĞÍÊı¾İ
+å‡½æ•°åç§° : all_data_update
+åŠŸèƒ½æè¿° : ç³»ç»Ÿæ‰€æœ‰dpç‚¹ä¿¡æ¯ä¸Šä¼ ,å®ç°APPå’Œmucæ•°æ®åŒæ­¥
+è¾“å…¥å‚æ•° : æ— 
+è¿”å›å‚æ•° : æ— 
+ä½¿ç”¨è¯´æ˜ : æ­¤å‡½æ•°SDKå†…éƒ¨éœ€è°ƒç”¨;
+           MCUå¿…é¡»å®ç°è¯¥å‡½æ•°å†…æ•°æ®ä¸ŠæŠ¥åŠŸèƒ½;åŒ…æ‹¬åªä¸ŠæŠ¥å’Œå¯ä¸ŠæŠ¥å¯ä¸‹å‘å‹æ•°æ®
 *****************************************************************************/
 void all_data_update(void)
 {
-	u8 radius,light;
-  //#error "ÇëÔÚ´Ë´¦Àí¿ÉÏÂ·¢¿ÉÉÏ±¨Êı¾İ¼°Ö»ÉÏ±¨Êı¾İÊ¾Àı,´¦ÀíÍê³ÉºóÉ¾³ı¸ÃĞĞ"
-  //´Ë´úÂëÎªÆ½Ì¨×Ô¶¯Éú³É£¬Çë°´ÕÕÊµ¼ÊÊı¾İĞŞ¸ÄÃ¿¸ö¿ÉÏÂ·¢¿ÉÉÏ±¨º¯ÊıºÍÖ»ÉÏ±¨º¯Êı
-  	
-    mcu_dp_bool_update(DPID_SWITCH_LED,SWITCHflag); //BOOLĞÍÊı¾İÉÏ±¨;
-    //mcu_dp_enum_update(DPID_WORK_MODE,SWITCHflag); //Ã¶¾ÙĞÍÊı¾İÉÏ±¨;
-    mcu_dp_value_update(DPID_BRIGHT_VALUE,lightvalue); //VALUEĞÍÊı¾İÉÏ±¨;
-    //mcu_dp_enum_update(DPID_DEVICE_MODE,SWITCHflag); //Ã¶¾ÙĞÍÊı¾İÉÏ±¨;
-    //mcu_dp_enum_update(DPID_PIR_STATE,SWITCHflag); //Ã¶¾ÙĞÍÊı¾İÉÏ±¨;
-	
-   // mcu_dp_enum_update(DPID_CDS,LIGHT_TH/4); //Ã¶¾ÙĞÍÊı¾İÉÏ±¨;
-	
-		if(LIGHT_TH==255)
-			light=0;
-		else if(LIGHT_TH==200)
-			light=2;
-		else if(LIGHT_TH==40)
-			light=3;		
-		else if(LIGHT_TH==20)
-			light=4;
-		else //if(LIGHT_TH==200)
-			light=5;
-		mcu_dp_enum_update(DPID_CDS,light); //Ã¶¾ÙĞÍÊı¾İÉÏ±¨;
-	
-    //mcu_dp_enum_update(DPID_PIR_SENSITIVITY,SWITCHflag); //Ã¶¾ÙĞÍÊı¾İÉÏ±¨;
-    mcu_dp_value_update(DPID_PIR_DELAY,DELAY_NUM/4); //VALUEĞÍÊı¾İÉÏ±¨;
-//    mcu_dp_bool_update(DPID_SWITCH_PIR,SWITCHflag); //BOOLĞÍÊı¾İÉÏ±¨;
-//    mcu_dp_value_update(DPID_PIR_RESUME_COUNTDOWN,DELAY_NUM); //VALUEĞÍÊı¾İÉÏ±¨;
-//    mcu_dp_value_update(DPID_STANDBY_TIME,DELAY_NUM); //VALUEĞÍÊı¾İÉÏ±¨;
-	
-	
-		if(TH==RADIUS_1M)
-			radius=1;
-		else if(TH==RADIUS_2M)
-			radius=2;
-		else if(TH==RADIUS_3M)
-			radius=3;	
-		else if(TH==RADIUS_4M)
-			radius=4;
-		else
-			radius=5;
-		
-		//savevar();
-	
-    mcu_dp_value_update(DPID_SENSING_RADIUS,radius);
-		
- //   mcu_dp_value_update(DPID_SENSING_RADIUS,TH/1000); //VALUEĞÍÊı¾İÉÏ±¨;
-//    mcu_dp_value_update(DPID_HANG_HIGH,SWITCHflag); //VALUEĞÍÊı¾İÉÏ±¨;
+  //#error "è¯·åœ¨æ­¤å¤„ç†å¯ä¸‹å‘å¯ä¸ŠæŠ¥æ•°æ®åŠåªä¸ŠæŠ¥æ•°æ®ç¤ºä¾‹,å¤„ç†å®Œæˆååˆ é™¤è¯¥è¡Œ"
+  //æ­¤ä»£ç ä¸ºå¹³å°è‡ªåŠ¨ç”Ÿæˆï¼Œè¯·æŒ‰ç…§å®é™…æ•°æ®ä¿®æ”¹æ¯ä¸ªå¯ä¸‹å‘å¯ä¸ŠæŠ¥å‡½æ•°å’Œåªä¸ŠæŠ¥å‡½æ•°
 
+    /*
+    mcu_dp_bool_update(DPID_SWITCH_LED,å½“å‰å¼€å…³); //BOOLå‹æ•°æ®ä¸ŠæŠ¥;
+    mcu_dp_value_update(DPID_BRIGHT_VALUE,å½“å‰äº®åº¦å€¼); //VALUEå‹æ•°æ®ä¸ŠæŠ¥;
+    mcu_dp_value_update(DPID_LIGHT_PARAMETER,å½“å‰å…‰æ•å‚æ•°); //VALUEå‹æ•°æ®ä¸ŠæŠ¥;
+    mcu_dp_value_update(DPID_SENSE_DELAY,å½“å‰æ„Ÿåº”å»¶æ—¶); //VALUEå‹æ•°æ®ä¸ŠæŠ¥;
+    mcu_dp_bool_update(DPID_SENSE_SWITCH,å½“å‰æ„Ÿåº”å¼€å…³); //BOOLå‹æ•°æ®ä¸ŠæŠ¥;
+    mcu_dp_value_update(DPID_STAYON_DELAY,å½“å‰ä¼´äº®å»¶æ—¶); //VALUEå‹æ•°æ®ä¸ŠæŠ¥;
+    mcu_dp_value_update(DPID_SENSE_STRESS,å½“å‰æ„Ÿåº”å¼ºåº¦); //VALUEå‹æ•°æ®ä¸ŠæŠ¥;
+    mcu_dp_value_update(DPID_SENSE_CIRCLE_R,å½“å‰æ„Ÿåº”åŠå¾„); //VALUEå‹æ•°æ®ä¸ŠæŠ¥;
+    */
 
 
 }
@@ -215,35 +131,33 @@ void all_data_update(void)
 
 /******************************************************************************
                                 WARNING!!!    
-                            2:ËùÓĞÊı¾İÉÏ±¨´¦Àí
-×Ô¶¯»¯´úÂëÄ£°åº¯Êı,¾ßÌåÇëÓÃ»§×ÔĞĞÊµÏÖÊı¾İ´¦Àí
+                            2:æ‰€æœ‰æ•°æ®ä¸ŠæŠ¥å¤„ç†
+è‡ªåŠ¨åŒ–ä»£ç æ¨¡æ¿å‡½æ•°,å…·ä½“è¯·ç”¨æˆ·è‡ªè¡Œå®ç°æ•°æ®å¤„ç†
 ******************************************************************************/
 
 /*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_switch_led_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_SWITCH_LEDµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
+å‡½æ•°åç§° : dp_download_switch_led_handle
+åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SWITCH_LEDçš„å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+        : length:æ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERROR
+ä½¿ç”¨è¯´æ˜ : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»å‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åä¸ŠæŠ¥å¤„ç†ç»“æœè‡³app
 *****************************************************************************/
 static unsigned char dp_download_switch_led_handle(const unsigned char value[], unsigned short length)
 {
-    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªBOOL
+    //ç¤ºä¾‹:å½“å‰DPç±»å‹ä¸ºBOOL
     unsigned char ret;
-    //0:¹Ø/1:¿ª
+    //0:å…³/1:å¼€
     unsigned char switch_led;
     
     switch_led = mcu_get_dp_download_bool(value,length);
     if(switch_led == 0) {
-        //¿ª¹Ø¹Ø
-        //LIGHT_OFF;
+        //å¼€å…³å…³
     }else {
-        //¿ª¹Ø¿ª
-        //LIGHT_ON;
+        //å¼€å…³å¼€
     }
   
-    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
+    //å¤„ç†å®ŒDPæ•°æ®ååº”æœ‰åé¦ˆ
     ret = mcu_dp_bool_update(DPID_SWITCH_LED,switch_led);
     if(ret == SUCCESS)
         return SUCCESS;
@@ -251,63 +165,26 @@ static unsigned char dp_download_switch_led_handle(const unsigned char value[], 
         return ERROR;
 }
 /*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_work_mode_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_WORK_MODEµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
-*****************************************************************************/
-//static unsigned char dp_download_work_mode_handle(const unsigned char value[], unsigned short length)
-//{
-//    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªENUM
-//    unsigned char ret;
-//    unsigned char work_mode;
-//    
-//    work_mode = mcu_get_dp_download_enum(value,length);
-//    switch(work_mode) {
-//        case 0:
-//        break;
-//        
-//        case 1:
-//        break;
-//        
-//        default:
-//    
-//        break;
-//    }
-//    
-//    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-//    ret = mcu_dp_enum_update(DPID_WORK_MODE, work_mode);
-//    if(ret == SUCCESS)
-//        return SUCCESS;
-//    else
-//        return ERROR;
-//}
-/*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_bright_value_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_BRIGHT_VALUEµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
+å‡½æ•°åç§° : dp_download_bright_value_handle
+åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_BRIGHT_VALUEçš„å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+        : length:æ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERROR
+ä½¿ç”¨è¯´æ˜ : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»å‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åä¸ŠæŠ¥å¤„ç†ç»“æœè‡³app
 *****************************************************************************/
 static unsigned char dp_download_bright_value_handle(const unsigned char value[], unsigned short length)
 {
-    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªVALUE
+    //ç¤ºä¾‹:å½“å‰DPç±»å‹ä¸ºVALUE
     unsigned char ret;
     unsigned long bright_value;
     
     bright_value = mcu_get_dp_download_value(value,length);
     /*
-    //VALUEÀàĞÍÊı¾İ´¦Àí
-    
+    //VALUEç±»å‹æ•°æ®å¤„ç†
     
     */
-    lightvalue = bright_value;
-		savevar();
-	
-    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
+    
+    //å¤„ç†å®ŒDPæ•°æ®ååº”æœ‰åé¦ˆ
     ret = mcu_dp_value_update(DPID_BRIGHT_VALUE,bright_value);
     if(ret == SUCCESS)
         return SUCCESS;
@@ -315,511 +192,293 @@ static unsigned char dp_download_bright_value_handle(const unsigned char value[]
         return ERROR;
 }
 /*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_device_mode_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_DEVICE_MODEµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
+å‡½æ•°åç§° : dp_download_light_parameter_handle
+åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_LIGHT_PARAMETERçš„å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+        : length:æ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERROR
+ä½¿ç”¨è¯´æ˜ : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»å‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åä¸ŠæŠ¥å¤„ç†ç»“æœè‡³app
 *****************************************************************************/
-//static unsigned char dp_download_device_mode_handle(const unsigned char value[], unsigned short length)
-//{
-//    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªENUM
-//    unsigned char ret;
-//    unsigned char device_mode;
-//    
-//    device_mode = mcu_get_dp_download_enum(value,length);
-//    switch(device_mode) {
-//        case 0:
-//        break;
-//        
-//        case 1:
-//        break;
-//        
-//        default:
-//    
-//        break;
-//    }
-//    
-//    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-//    ret = mcu_dp_enum_update(DPID_DEVICE_MODE, device_mode);
-//    if(ret == SUCCESS)
-//        return SUCCESS;
-//    else
-//        return ERROR;
-//}
-/*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_cds_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_CDSµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
-*****************************************************************************/
-static unsigned char dp_download_cds_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_light_parameter_handle(const unsigned char value[], unsigned short length)
 {
-    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªENUM
+    //ç¤ºä¾‹:å½“å‰DPç±»å‹ä¸ºVALUE
     unsigned char ret;
-    unsigned char cds;
+    unsigned long light_parameter;
     
-    cds = mcu_get_dp_download_enum(value,length);
-    switch(cds) {
-//         case 5:
-// 			LIGHT_TH=cds*4;
-//         break;
-//         
-//         case 10:
-// 			LIGHT_TH=cds*4;
-//         break;
-//         
-//         case 50:
-// 			LIGHT_TH=cds*4;
-//         break;
-//         
-//         case 300:
-//         break;
-//         
-//         case 2000:
-//         break;
-        
-        case 0:		//2000LUS
-			LIGHT_TH=255;//cds*4;
-        break;
-        
-        case 1:		//300LUX
-			LIGHT_TH=255;//cds*4;
-        break;
-        
-        case 2:		//50LUX
-			LIGHT_TH=200;
-        break;
-        
-        case 3:	//10LUX
-					LIGHT_TH=40;
-			
-        break;
-        
-        case 4:	//5LUX
-					LIGHT_TH=20;
-        break;
-        
-				case 5:
-					LIGHT_TH=light_ad;
-					break;
-				
-        default:
+    light_parameter = mcu_get_dp_download_value(value,length);
+    /*
+    //VALUEç±»å‹æ•°æ®å¤„ç†
     
-        break;
+    */
+    
+    //å¤„ç†å®ŒDPæ•°æ®ååº”æœ‰åé¦ˆ
+    ret = mcu_dp_value_update(DPID_LIGHT_PARAMETER,light_parameter);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+/*****************************************************************************
+å‡½æ•°åç§° : dp_download_sense_delay_handle
+åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SENSE_DELAYçš„å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+        : length:æ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERROR
+ä½¿ç”¨è¯´æ˜ : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»å‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åä¸ŠæŠ¥å¤„ç†ç»“æœè‡³app
+*****************************************************************************/
+static unsigned char dp_download_sense_delay_handle(const unsigned char value[], unsigned short length)
+{
+    //ç¤ºä¾‹:å½“å‰DPç±»å‹ä¸ºVALUE
+    unsigned char ret;
+    unsigned long sense_delay;
+    
+    sense_delay = mcu_get_dp_download_value(value,length);
+    /*
+    //VALUEç±»å‹æ•°æ®å¤„ç†
+    
+    */
+    
+    //å¤„ç†å®ŒDPæ•°æ®ååº”æœ‰åé¦ˆ
+    ret = mcu_dp_value_update(DPID_SENSE_DELAY,sense_delay);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+/*****************************************************************************
+å‡½æ•°åç§° : dp_download_sense_switch_handle
+åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SENSE_SWITCHçš„å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+        : length:æ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERROR
+ä½¿ç”¨è¯´æ˜ : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»å‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åä¸ŠæŠ¥å¤„ç†ç»“æœè‡³app
+*****************************************************************************/
+static unsigned char dp_download_sense_switch_handle(const unsigned char value[], unsigned short length)
+{
+    //ç¤ºä¾‹:å½“å‰DPç±»å‹ä¸ºBOOL
+    unsigned char ret;
+    //0:å…³/1:å¼€
+    unsigned char sense_switch;
+    
+    sense_switch = mcu_get_dp_download_bool(value,length);
+    if(sense_switch == 0) {
+        //å¼€å…³å…³
+    }else {
+        //å¼€å…³å¼€
     }
-	
-	 
-		savevar();
-	
-    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-    ret = mcu_dp_enum_update(DPID_CDS, cds);
+  
+    //å¤„ç†å®ŒDPæ•°æ®ååº”æœ‰åé¦ˆ
+    ret = mcu_dp_bool_update(DPID_SENSE_SWITCH,sense_switch);
     if(ret == SUCCESS)
         return SUCCESS;
     else
         return ERROR;
 }
 /*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_pir_sensitivity_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_PIR_SENSITIVITYµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
+å‡½æ•°åç§° : dp_download_stayon_delay_handle
+åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_STAYON_DELAYçš„å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+        : length:æ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERROR
+ä½¿ç”¨è¯´æ˜ : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»å‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åä¸ŠæŠ¥å¤„ç†ç»“æœè‡³app
 *****************************************************************************/
-//static unsigned char dp_download_pir_sensitivity_handle(const unsigned char value[], unsigned short length)
-//{
-//    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªENUM
-//    unsigned char ret;
-//    unsigned char pir_sensitivity;
-//    
-//    pir_sensitivity = mcu_get_dp_download_enum(value,length);
-//    switch(pir_sensitivity) {
-//        case 0:
-//        break;
-//        
-//        case 1:
-//        break;
-//        
-//        case 2:
-//        break;
-//        
-//        default:
-//    
-//        break;
-//    }
-//    
-//    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-//    ret = mcu_dp_enum_update(DPID_PIR_SENSITIVITY, pir_sensitivity);
-//    if(ret == SUCCESS)
-//        return SUCCESS;
-//    else
-//        return ERROR;
-//}
-/*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_pir_delay_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_PIR_DELAYµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
-*****************************************************************************/
-static unsigned char dp_download_pir_delay_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_stayon_delay_handle(const unsigned char value[], unsigned short length)
 {
-    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªVALUE
+    //ç¤ºä¾‹:å½“å‰DPç±»å‹ä¸ºVALUE
     unsigned char ret;
-    unsigned long pir_delay;
+    unsigned long stayon_delay;
     
-    pir_delay = mcu_get_dp_download_value(value,length);
+    stayon_delay = mcu_get_dp_download_value(value,length);
     /*
-    //VALUEÀàĞÍÊı¾İ´¦Àí
+    //VALUEç±»å‹æ•°æ®å¤„ç†
     
     */
-    DELAY_NUM = pir_delay*4;
-		savevar();
-	
-    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-    ret = mcu_dp_value_update(DPID_PIR_DELAY,pir_delay);
+    
+    //å¤„ç†å®ŒDPæ•°æ®ååº”æœ‰åé¦ˆ
+    ret = mcu_dp_value_update(DPID_STAYON_DELAY,stayon_delay);
     if(ret == SUCCESS)
         return SUCCESS;
     else
         return ERROR;
 }
 /*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_switch_pir_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_SWITCH_PIRµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
+å‡½æ•°åç§° : dp_download_sense_stress_handle
+åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SENSE_STRESSçš„å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+        : length:æ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERROR
+ä½¿ç”¨è¯´æ˜ : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»å‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åä¸ŠæŠ¥å¤„ç†ç»“æœè‡³app
 *****************************************************************************/
-//static unsigned char dp_download_switch_pir_handle(const unsigned char value[], unsigned short length)
-//{
-//    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªBOOL
-//    unsigned char ret;
-//    //0:¹Ø/1:¿ª
-//    unsigned char switch_pir;
-//    
-//    switch_pir = mcu_get_dp_download_bool(value,length);
-//    if(switch_pir == 0) {
-//        //¿ª¹Ø¹Ø
-//    }else {
-//        //¿ª¹Ø¿ª
-//    }
-//  
-//    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-//    ret = mcu_dp_bool_update(DPID_SWITCH_PIR,switch_pir);
-//    if(ret == SUCCESS)
-//        return SUCCESS;
-//    else
-//        return ERROR;
-//}
-/*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_standby_time_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_STANDBY_TIMEµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
-*****************************************************************************/
-//static unsigned char dp_download_standby_time_handle(const unsigned char value[], unsigned short length)
-//{
-//    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªVALUE
-//    unsigned char ret;
-//    unsigned long standby_time;
-//    
-//    standby_time = mcu_get_dp_download_value(value,length);
-//    /*
-//    //VALUEÀàĞÍÊı¾İ´¦Àí
-//    
-//    */
-//    
-//    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-//    ret = mcu_dp_value_update(DPID_STANDBY_TIME,standby_time);
-//    if(ret == SUCCESS)
-//        return SUCCESS;
-//    else
-//        return ERROR;
-//}
-/*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_sensing_radius_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_SENSING_RADIUSµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
-*****************************************************************************/
-static unsigned char dp_download_sensing_radius_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_sense_stress_handle(const unsigned char value[], unsigned short length)
 {
-    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªVALUE
-    unsigned char ret;//,radius;
-    unsigned long sensing_radius;
+    //ç¤ºä¾‹:å½“å‰DPç±»å‹ä¸ºVALUE
+    unsigned char ret;
+    unsigned long sense_stress;
     
-    sensing_radius = mcu_get_dp_download_value(value,length);
+    sense_stress = mcu_get_dp_download_value(value,length);
     /*
-    //VALUEÀàĞÍÊı¾İ´¦Àí
+    //VALUEç±»å‹æ•°æ®å¤„ç†
     
     */
-   // TH=sensing_radius*1000;
-	
-		if(sensing_radius>5)sensing_radius=5;
-		else if(sensing_radius==0)sensing_radius=1;
-		//radius=sensing_radius;
-	
-		if(sensing_radius==1)
-			TH=RADIUS_1M;
-		else if(sensing_radius==2)
-			TH=RADIUS_2M;
-		else if(sensing_radius==3)
-			TH=RADIUS_3M;
-		else if(sensing_radius==4)
-			TH=RADIUS_4M;
-		else 
-			TH=RADIUS_5M;
-		
-	//	sensing_radius*=4;
-		
-	//	sensing_radius=24-sensing_radius;
-		
-		
-		//TH=sensing_radius*10000;	//5m-60000,4m-110000,3m-160000 ....1m-260000---³õ²½¹ÀËãÖµ	-20200927
-	
-		savevar();
-		
-    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-    //ret = mcu_dp_value_update(DPID_SENSING_RADIUS,sensing_radius);
-		ret = mcu_dp_value_update(DPID_SENSING_RADIUS,sensing_radius);	//-20200927
-		
+    
+    //å¤„ç†å®ŒDPæ•°æ®ååº”æœ‰åé¦ˆ
+    ret = mcu_dp_value_update(DPID_SENSE_STRESS,sense_stress);
     if(ret == SUCCESS)
         return SUCCESS;
     else
         return ERROR;
 }
 /*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_hang_high_handle
-¹¦ÄÜÃèÊö : Õë¶ÔDPID_HANG_HIGHµÄ´¦Àíº¯Êı
-ÊäÈë²ÎÊı : value:Êı¾İÔ´Êı¾İ
-        : length:Êı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
-Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàĞÍ,ĞèÒªÔÚ´¦ÀíÍêÊı¾İºóÉÏ±¨´¦Àí½á¹ûÖÁapp
+å‡½æ•°åç§° : dp_download_sense_circle_r_handle
+åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SENSE_CIRCLE_Rçš„å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+        : length:æ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERROR
+ä½¿ç”¨è¯´æ˜ : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»å‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åä¸ŠæŠ¥å¤„ç†ç»“æœè‡³app
 *****************************************************************************/
-//static unsigned char dp_download_hang_high_handle(const unsigned char value[], unsigned short length)
-//{
-//    //Ê¾Àı:µ±Ç°DPÀàĞÍÎªVALUE
-//    unsigned char ret;
-//    unsigned long hang_high;
-//    
-//    hang_high = mcu_get_dp_download_value(value,length);
-//    /*
-//    //VALUEÀàĞÍÊı¾İ´¦Àí
-//    
-//    */
-//    
-//    //´¦ÀíÍêDPÊı¾İºóÓ¦ÓĞ·´À¡
-//    ret = mcu_dp_value_update(DPID_HANG_HIGH,hang_high);
-//    if(ret == SUCCESS)
-//        return SUCCESS;
-//    else
-//        return ERROR;
-//}
+static unsigned char dp_download_sense_circle_r_handle(const unsigned char value[], unsigned short length)
+{
+    //ç¤ºä¾‹:å½“å‰DPç±»å‹ä¸ºVALUE
+    unsigned char ret;
+    unsigned long sense_circle_r;
+    
+    sense_circle_r = mcu_get_dp_download_value(value,length);
+    /*
+    //VALUEç±»å‹æ•°æ®å¤„ç†
+    
+    */
+    
+    //å¤„ç†å®ŒDPæ•°æ®ååº”æœ‰åé¦ˆ
+    ret = mcu_dp_value_update(DPID_SENSE_CIRCLE_R,sense_circle_r);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
 
 
-///******************************************************************************
-//                                WARNING!!!                     
-//´Ë´úÂëÎªSDKÄÚ²¿µ÷ÓÃ,Çë°´ÕÕÊµ¼ÊdpÊı¾İÊµÏÖº¯ÊıÄÚ²¿Êı¾İ
-//******************************************************************************/
-//#ifdef SUPPORT_MCU_FIRM_UPDATE
-///*****************************************************************************
-//º¯ÊıÃû³Æ : mcu_firm_update_handle
-//¹¦ÄÜÃèÊö : MCU½øÈë¹Ì¼şÉı¼¶Ä£Ê½
-//ÊäÈë²ÎÊı : value:¹Ì¼ş»º³åÇø
-//           position:µ±Ç°Êı¾İ°üÔÚÓÚ¹Ì¼şÎ»ÖÃ
-//           length:µ±Ç°¹Ì¼ş°ü³¤¶È(¹Ì¼ş°ü³¤¶ÈÎª0Ê±,±íÊ¾¹Ì¼ş°ü·¢ËÍÍê³É)
-//·µ»Ø²ÎÊı : ÎŞ
-//Ê¹ÓÃËµÃ÷ : MCUĞèÒª×ÔĞĞÊµÏÖ¸Ã¹¦ÄÜ
-//*****************************************************************************/
-//unsigned char mcu_firm_update_handle(const unsigned char value[],unsigned long position,unsigned short length)
-//{
-//  #error "Çë×ÔĞĞÍê³ÉMCU¹Ì¼şÉı¼¶´úÂë,Íê³ÉºóÇëÉ¾³ı¸ÃĞĞ"
-//  unsigned long addr;
-// 
-//  if(length == 0)
-//  {
-//#ifdef ENABLE_BOOT
-//    //¹Ì¼şÊı¾İ·¢ËÍÍê³É
-//    FlashBuffer.magic_code = FIREWARE_UPDATE_FLAG;
-//    
-//    if(Earse_Flash(PARA_ADDR) == ERROR)
-//      return ERROR;
-//    
-//    //Ğ´ÈëÉı¼¶±êÖ¾
-//    if(Write_Flash(PARA_ADDR,(unsigned char *)&FlashBuffer,sizeof(FlashBuffer)) == ERROR)
-//      return ERROR;
-//    
-//    Reset();
-//#endif
-//  }
-//  else
-//  {
-//    //¹Ì¼şÊı¾İ´¦Àí
-//    addr = FIREWARE_ADDR_H;
-//     
-//    if(position % 1024 == 0)
-//    {
-//      if(Earse_Flash(addr + position) == ERROR)
-//        return ERROR;
-//    }
-//    
-//    if(Write_Flash(addr + position,(unsigned char *)value,length) == ERROR)
-//      return ERROR;
-//  }
-
-//  return SUCCESS;
-//}
-//#endif
 /******************************************************************************
                                 WARNING!!!                     
-ÒÔÏÂº¯ÊıÓÃ»§ÇëÎğĞŞ¸Ä!!
+æ­¤ä»£ç ä¸ºSDKå†…éƒ¨è°ƒç”¨,è¯·æŒ‰ç…§å®é™…dpæ•°æ®å®ç°å‡½æ•°å†…éƒ¨æ•°æ®
+******************************************************************************/
+#ifdef SUPPORT_MCU_FIRM_UPDATE
+/*****************************************************************************
+å‡½æ•°åç§° : mcu_firm_update_handle
+åŠŸèƒ½æè¿° : MCUè¿›å…¥å›ºä»¶å‡çº§æ¨¡å¼
+è¾“å…¥å‚æ•° : value:å›ºä»¶ç¼“å†²åŒº
+           position:å½“å‰æ•°æ®åŒ…åœ¨äºå›ºä»¶ä½ç½®
+           length:å½“å‰å›ºä»¶åŒ…é•¿åº¦(å›ºä»¶åŒ…é•¿åº¦ä¸º0æ—¶,è¡¨ç¤ºå›ºä»¶åŒ…å‘é€å®Œæˆ)
+è¿”å›å‚æ•° : æ— 
+ä½¿ç”¨è¯´æ˜ : MCUéœ€è¦è‡ªè¡Œå®ç°è¯¥åŠŸèƒ½
+*****************************************************************************/
+unsigned char mcu_firm_update_handle(const unsigned char value[],unsigned long position,unsigned short length)
+{
+  #error "è¯·è‡ªè¡Œå®ŒæˆMCUå›ºä»¶å‡çº§ä»£ç ,å®Œæˆåè¯·åˆ é™¤è¯¥è¡Œ"
+  unsigned long addr;
+ 
+  if(length == 0)
+  {
+#ifdef ENABLE_BOOT
+    //å›ºä»¶æ•°æ®å‘é€å®Œæˆ
+    FlashBuffer.magic_code = FIREWARE_UPDATE_FLAG;
+    
+    if(Earse_Flash(PARA_ADDR) == ERROR)
+      return ERROR;
+    
+    //å†™å…¥å‡çº§æ ‡å¿—
+    if(Write_Flash(PARA_ADDR,(unsigned char *)&FlashBuffer,sizeof(FlashBuffer)) == ERROR)
+      return ERROR;
+    
+    Reset();
+#endif
+  }
+  else
+  {
+    //å›ºä»¶æ•°æ®å¤„ç†
+    addr = FIREWARE_ADDR_H;
+     
+    if(position % 1024 == 0)
+    {
+      if(Earse_Flash(addr + position) == ERROR)
+        return ERROR;
+    }
+    
+    if(Write_Flash(addr + position,(unsigned char *)value,length) == ERROR)
+      return ERROR;
+  }
+
+  return SUCCESS;
+}
+#endif
+/******************************************************************************
+                                WARNING!!!                     
+ä»¥ä¸‹å‡½æ•°ç”¨æˆ·è¯·å‹¿ä¿®æ”¹!!
 ******************************************************************************/
 
-void savevar(void)
-{
-	unsigned char i;
-	Flash_EraseBlock(0X2F00);
-	Delay_us_1(10000);
-	i=(TH/1000)>>8;
-	FLASH_WriteData(i,0X2F00+0);
-	Delay_us_1(100);
-	i=(TH/1000)&0xff;
-	FLASH_WriteData(i,0X2F00+1);
-	Delay_us_1(100);
-	i=LIGHT_TH;
-	FLASH_WriteData(i,0X2F00+2);
-	Delay_us_1(100);
-	
-	i=DELAY_NUM>>10;
-	FLASH_WriteData(i,0X2F00+3);
-	Delay_us_1(100);
-	i=DELAY_NUM>>2;//&0xff;
-	FLASH_WriteData(i,0X2F00+4);
-	Delay_us_1(100);
-	
-	i=lightvalue;
-	FLASH_WriteData(i,0X2F00+5);
-	Delay_us_1(100);
-	
-	EA=1;				//-20200927
-
-}
-
-
-
-
 /*****************************************************************************
-º¯ÊıÃû³Æ : dp_download_handle
-¹¦ÄÜÃèÊö : dpÏÂ·¢´¦Àíº¯Êı
-ÊäÈë²ÎÊı : dpid:DPĞòºÅ
-           value:dpÊı¾İ»º³åÇøµØÖ·
-           length:dpÊı¾İ³¤¶È
-·µ»Ø²ÎÊı : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERRO
-Ê¹ÓÃËµÃ÷ : ¸Ãº¯ÊıÓÃ»§²»ÄÜĞŞ¸Ä
+å‡½æ•°åç§° : dp_download_handle
+åŠŸèƒ½æè¿° : dpä¸‹å‘å¤„ç†å‡½æ•°
+è¾“å…¥å‚æ•° : dpid:DPåºå·
+           value:dpæ•°æ®ç¼“å†²åŒºåœ°å€
+           length:dpæ•°æ®é•¿åº¦
+è¿”å›å‚æ•° : æˆåŠŸè¿”å›:SUCCESS/å¤±è´¥è¿”å›:ERRO
+ä½¿ç”¨è¯´æ˜ : è¯¥å‡½æ•°ç”¨æˆ·ä¸èƒ½ä¿®æ”¹
 *****************************************************************************/
 unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[], unsigned short length)
 {
   /*********************************
-  µ±Ç°º¯Êı´¦Àí¿ÉÏÂ·¢/¿ÉÉÏ±¨Êı¾İµ÷ÓÃ                    
-  ¾ßÌåº¯ÊıÄÚĞèÒªÊµÏÖÏÂ·¢Êı¾İ´¦Àí
-  Íê³ÉÓÃĞèÒª½«´¦Àí½á¹û·´À¡ÖÁAPP¶Ë,·ñÔòAPP»áÈÏÎªÏÂ·¢Ê§°Ü
+  å½“å‰å‡½æ•°å¤„ç†å¯ä¸‹å‘/å¯ä¸ŠæŠ¥æ•°æ®è°ƒç”¨                    
+  å…·ä½“å‡½æ•°å†…éœ€è¦å®ç°ä¸‹å‘æ•°æ®å¤„ç†
+  å®Œæˆç”¨éœ€è¦å°†å¤„ç†ç»“æœåé¦ˆè‡³APPç«¯,å¦åˆ™APPä¼šè®¤ä¸ºä¸‹å‘å¤±è´¥
   ***********************************/
   unsigned char ret;
   switch(dpid)
   {
         case DPID_SWITCH_LED:
-            //¿ª¹Ø´¦Àíº¯Êı
+            //å¼€å…³å¤„ç†å‡½æ•°
             ret = dp_download_switch_led_handle(value,length);
-						if(ret==1)
-						{
-								switchcnt ++;
-								if(switchcnt>=5)
-								{
-										switchcnt = 0;
-										send_data(0x55);
-										send_data(0xAA);
-										send_data(0X00);
-										send_data(0X04);
-										send_data(0X00);
-										send_data(0X00);
-										send_data(0X03);
-								}
-						
-						}
-						
         break;
-//        case DPID_WORK_MODE:
-//            //Ä£Ê½´¦Àíº¯Êı
-//            ret = dp_download_work_mode_handle(value,length);
-//        break;
         case DPID_BRIGHT_VALUE:
-            //ÁÁ¶ÈÖµ´¦Àíº¯Êı
+            //äº®åº¦å€¼å¤„ç†å‡½æ•°
             ret = dp_download_bright_value_handle(value,length);
-						switchcnt=0;
         break;
-//        case DPID_DEVICE_MODE:
-//            //Éè±¸Ä£Ê½´¦Àíº¯Êı
-//            ret = dp_download_device_mode_handle(value,length);
-//        break;
-        case DPID_CDS:
-            //¹âÃô²ÎÊı´¦Àíº¯Êı
-            ret = dp_download_cds_handle(value,length);
-						switchcnt=0;
+        case DPID_LIGHT_PARAMETER:
+            //å…‰æ•å‚æ•°å¤„ç†å‡½æ•°
+            ret = dp_download_light_parameter_handle(value,length);
         break;
-//        case DPID_PIR_SENSITIVITY:
-//            //ÁéÃô¶È´¦Àíº¯Êı
-//            ret = dp_download_pir_sensitivity_handle(value,length);
-//        break;
-        case DPID_PIR_DELAY:
-            //¸ĞÓ¦ÑÓÊ±´¦Àíº¯Êı
-            ret = dp_download_pir_delay_handle(value,length);
-						switchcnt=0;
+        case DPID_SENSE_DELAY:
+            //æ„Ÿåº”å»¶æ—¶å¤„ç†å‡½æ•°
+            ret = dp_download_sense_delay_handle(value,length);
         break;
-//        case DPID_SWITCH_PIR:
-//            //¸ĞÓ¦¿ª¹Ø´¦Àíº¯Êı
-//            ret = dp_download_switch_pir_handle(value,length);
-//        break;
-//        case DPID_STANDBY_TIME:
-//            //°éÁÁÑÓÊ±´¦Àíº¯Êı
-//            ret = dp_download_standby_time_handle(value,length);
-//        break;
-        case DPID_SENSING_RADIUS:
-            //¸ĞÓ¦°ë¾¶´¦Àíº¯Êı
-            ret = dp_download_sensing_radius_handle(value,length);
-						switchcnt=0;
+        case DPID_SENSE_SWITCH:
+            //æ„Ÿåº”å¼€å…³å¤„ç†å‡½æ•°
+            ret = dp_download_sense_switch_handle(value,length);
         break;
-//        case DPID_HANG_HIGH:
-//            //¹Ò¸ß´¦Àíº¯Êı
-//            ret = dp_download_hang_high_handle(value,length);
-//        break;
+        case DPID_STAYON_DELAY:
+            //ä¼´äº®å»¶æ—¶å¤„ç†å‡½æ•°
+            ret = dp_download_stayon_delay_handle(value,length);
+        break;
+        case DPID_SENSE_STRESS:
+            //æ„Ÿåº”å¼ºåº¦å¤„ç†å‡½æ•°
+            ret = dp_download_sense_stress_handle(value,length);
+        break;
+        case DPID_SENSE_CIRCLE_R:
+            //æ„Ÿåº”åŠå¾„å¤„ç†å‡½æ•°
+            ret = dp_download_sense_circle_r_handle(value,length);
+        break;
 
 
   default:
     break;
   }
-
-	
-
-
-  
   return ret;
 }
 /*****************************************************************************
-º¯ÊıÃû³Æ : get_download_cmd_total
-¹¦ÄÜÃèÊö : »ñÈ¡ËùÓĞdpÃüÁî×ÜºÍ
-ÊäÈë²ÎÊı : ÎŞ
-·µ»Ø²ÎÊı : ÏÂ·¢ÃüÁî×ÜºÍ
-Ê¹ÓÃËµÃ÷ : ¸Ãº¯ÊıÓÃ»§²»ÄÜĞŞ¸Ä
+å‡½æ•°åç§° : get_download_cmd_total
+åŠŸèƒ½æè¿° : è·å–æ‰€æœ‰dpå‘½ä»¤æ€»å’Œ
+è¾“å…¥å‚æ•° : æ— 
+è¿”å›å‚æ•° : ä¸‹å‘å‘½ä»¤æ€»å’Œ
+ä½¿ç”¨è¯´æ˜ : è¯¥å‡½æ•°ç”¨æˆ·ä¸èƒ½ä¿®æ”¹
 *****************************************************************************/
 unsigned char get_download_cmd_total(void)
 {
