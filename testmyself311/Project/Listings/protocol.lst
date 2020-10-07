@@ -1,876 +1,530 @@
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 1   
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 1   
 
 
-C51 COMPILER V9.52.0.0, COMPILATION OF MODULE PROTOCOL
+C51 COMPILER V8.02, COMPILATION OF MODULE PROTOCOL
 OBJECT MODULE PLACED IN .\Objects\protocol.obj
-COMPILER INVOKED BY: C:\Keil4\C51\BIN\C51.EXE ..\User\protocol.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\protocol.lst
-                    -) TABS(2) OBJECT(.\Objects\protocol.obj)
+COMPILER INVOKED BY: d:\cccc2020\TOOL\Keil\C51\BIN\C51.EXE ..\User\protocol.c COMPACT BROWSE DEBUG OBJECTEXTEND PRINT(.\
+                    -Listings\protocol.lst) TABS(2) OBJECT(.\Objects\protocol.obj)
 
 line level    source
 
    1          /****************************************Copyright (c)*************************
-   2          **                               °æÈ¨ËùÓÐ (C), 2015-2017, Í¿Ñ»¿Æ¼¼
+   2          **                               ç‰ˆæƒæ‰€æœ‰ (C), 2015-2017, æ¶‚é¸¦ç§‘æŠ€
    3          **
    4          **                                 http://www.tuya.com
    5          **
-   6          **--------------ÎÄ¼þÐÅÏ¢-------------------------------------------------------
-   7          **ÎÄ   ¼þ   Ãû: protocol.c
-   8          **Ãè        Êö: ÏÂ·¢/ÉÏ±¨Êý¾Ý´¦Àíº¯Êý
-   9          **Ê¹ ÓÃ Ëµ Ã÷ :
+   6          **--------------æ–‡ä»¶ä¿¡æ¯-------------------------------------------------------
+   7          **æ–‡   ä»¶   å: protocol.c
+   8          **æ        è¿°: ä¸‹å‘/ä¸ŠæŠ¥æ•°æ®å¤„ç†å‡½æ•°
+   9          **ä½¿ ç”¨ è¯´ æ˜Ž :
   10          
-  11                            *******·Ç³£ÖØÒª£¬Ò»¶¨Òª¿´Å¶£¡£¡£¡********
+  11                            *******éžå¸¸é‡è¦ï¼Œä¸€å®šè¦çœ‹å“¦ï¼ï¼ï¼********
   12          
-  13          ** 1¡¢ÓÃ»§ÔÚ´ËÎÄ¼þÖÐÊµÏÖÊý¾ÝÏÂ·¢/ÉÏ±¨¹¦ÄÜ
-  14          ** 2¡¢DPµÄID/TYPE¼°Êý¾Ý´¦Àíº¯Êý¶¼ÐèÒªÓÃ»§°´ÕÕÊµ¼Ê¶¨ÒåÊµÏÖ
-  15          ** 3¡¢µ±¿ªÊ¼Ä³Ð©ºê¶¨ÒåºóÐèÒªÓÃ»§ÊµÏÖ´úÂëµÄº¯ÊýÄÚ²¿ÓÐ#errÌáÊ¾,Íê³Éº¯ÊýºóÇëÉ¾³ý¸Ã#err
+  13          ** 1ã€ç”¨æˆ·åœ¨æ­¤æ–‡ä»¶ä¸­å®žçŽ°æ•°æ®ä¸‹å‘/ä¸ŠæŠ¥åŠŸèƒ½
+  14          ** 2ã€DPçš„ID/TYPEåŠæ•°æ®å¤„ç†å‡½æ•°éƒ½éœ€è¦ç”¨æˆ·æŒ‰ç…§å®žé™…å®šä¹‰å®žçŽ°
+  15          ** 3ã€å½“å¼€å§‹æŸäº›å®å®šä¹‰åŽéœ€è¦ç”¨æˆ·å®žçŽ°ä»£ç çš„å‡½æ•°å†…éƒ¨æœ‰#erræç¤º,å®Œæˆå‡½æ•°åŽè¯·å
+             -ˆ é™¤è¯¥#err
   16          **
-  17          **--------------µ±Ç°°æ±¾ÐÞ¶©---------------------------------------------------
-  18          ** °æ  ±¾: v1.0
-  19          ** ÈÕ¡¡ÆÚ: 2017Äê5ÔÂ3ÈÕ
-  20          ** Ãè¡¡Êö: 1:´´½¨Í¿Ñ»bluetooth¶Ô½ÓMCU_SDK
+  17          **--------------å½“å‰ç‰ˆæœ¬ä¿®è®¢---------------------------------------------------
+  18          ** ç‰ˆ  æœ¬: v1.0
+  19          ** æ—¥ã€€æœŸ: 2017å¹´5æœˆ3æ—¥
+  20          ** æã€€è¿°: 1:åˆ›å»ºæ¶‚é¸¦bluetoothå¯¹æŽ¥MCU_SDK
   21          **
   22          **-----------------------------------------------------------------------------
   23          ******************************************************************************/
-  24          //#include "include.h"
-  25          
+  24          #include "HC89S003F4.h"
+  25          #include "HC-MCU-XBR.h"
   26          #include "bluetooth.h"
   27          
-  28          #define RADIUS_1M 5000000
-  29          #define RADIUS_2M 3200000
-  30          #define RADIUS_3M 2000000
-  31          #define RADIUS_4M 1000000
-  32          #define RADIUS_5M 400000
-  33          
-  34            
-  35          //extern TYPE_BUFFER_S FlashBuffer;
-  36          
-  37          /******************************************************************************
-  38                                          ÒÆÖ²ÐëÖª:
-  39          1:MCU±ØÐëÔÚwhileÖÐÖ±½Óµ÷ÓÃmcu_api.cÄÚµÄbt_uart_service()º¯Êý
-  40          2:³ÌÐòÕý³£³õÊ¼»¯Íê³Éºó,½¨Òé²»½øÐÐ¹Ø´®¿ÚÖÐ¶Ï,Èç±ØÐë¹ØÖÐ¶Ï,¹ØÖÐ¶ÏÊ±¼ä±ØÐë¶Ì,¹ØÖÐ¶Ï»áÒýÆð´®¿ÚÊý¾Ý°ü¶ªÊ§
-  41          3:ÇëÎðÔÚÖÐ¶Ï/¶¨Ê±Æ÷ÖÐ¶ÏÄÚµ÷ÓÃÉÏ±¨º¯Êý
-  42          ******************************************************************************/
-  43          
-  44                   
+  28          /******************************************************************************
+  29                                          ç§»æ¤é¡»çŸ¥:
+  30          1:MCUå¿…é¡»åœ¨whileä¸­ç›´æŽ¥è°ƒç”¨mcu_api.cå†…çš„bt_uart_service()å‡½æ•°
+  31          2:ç¨‹åºæ­£å¸¸åˆå§‹åŒ–å®ŒæˆåŽ,å»ºè®®ä¸è¿›è¡Œå…³ä¸²å£ä¸­æ–­,å¦‚å¿…é¡»å…³ä¸­æ–­,å…³ä¸­æ–­æ—¶é—´å¿…é¡»çŸ
+             -­,å…³ä¸­æ–­ä¼šå¼•èµ·ä¸²å£æ•°æ®åŒ…ä¸¢å¤±
+  32          3:è¯·å‹¿åœ¨ä¸­æ–­/å®šæ—¶å™¨ä¸­æ–­å†…è°ƒç”¨ä¸ŠæŠ¥å‡½æ•°
+  33          ******************************************************************************/
+  34          
+  35                   
+  36          /******************************************************************************
+  37                                        ç¬¬ä¸€æ­¥:åˆå§‹åŒ–
+  38          1:åœ¨éœ€è¦ä½¿ç”¨åˆ°btç›¸å…³æ–‡ä»¶çš„æ–‡ä»¶ä¸­include "bt.h"
+  39          2:åœ¨MCUåˆå§‹åŒ–ä¸­è°ƒç”¨mcu_api.cæ–‡ä»¶ä¸­çš„bt_protocol_init()å‡½æ•°
+  40          3:å°†MCUä¸²å£å•å­—èŠ‚å‘é€å‡½æ•°å¡«å…¥protocol.cæ–‡ä»¶ä¸­uart_transmit_outputå‡½æ•°å†…,å¹¶åˆ é™¤#error
+  41          4:åœ¨MCUä¸²å£æŽ¥æ”¶å‡½æ•°ä¸­è°ƒç”¨mcu_api.cæ–‡ä»¶å†…çš„uart_receive_inputå‡½æ•°,å¹¶å°†æŽ¥æ”¶åˆ°çš„å­—èŠ‚ä
+             -½œä¸ºå‚æ•°ä¼ å…¥
+  42          5:å•ç‰‡æœºè¿›å…¥whileå¾ªçŽ¯åŽè°ƒç”¨mcu_api.cæ–‡ä»¶å†…çš„bt_uart_service()å‡½æ•°
+  43          ******************************************************************************/
+  44          
   45          /******************************************************************************
-  46                                        µÚÒ»²½:³õÊ¼»¯
-  47          1:ÔÚÐèÒªÊ¹ÓÃµ½btÏà¹ØÎÄ¼þµÄÎÄ¼þÖÐinclude "bt.h"
-  48          2:ÔÚMCU³õÊ¼»¯ÖÐµ÷ÓÃmcu_api.cÎÄ¼þÖÐµÄbt_protocol_init()º¯Êý
-  49          3:½«MCU´®¿Úµ¥×Ö½Ú·¢ËÍº¯ÊýÌîÈëprotocol.cÎÄ¼þÖÐuart_transmit_outputº¯ÊýÄÚ,²¢É¾³ý#error
-  50          4:ÔÚMCU´®¿Ú½ÓÊÕº¯ÊýÖÐµ÷ÓÃmcu_api.cÎÄ¼þÄÚµÄuart_receive_inputº¯Êý,²¢½«½ÓÊÕµ½µÄ×Ö½Ú×÷Îª²ÎÊý´«Èë
-  51          5:µ¥Æ¬»ú½øÈëwhileÑ­»·ºóµ÷ÓÃmcu_api.cÎÄ¼þÄÚµÄbt_uart_service()º¯Êý
-  52          ******************************************************************************/
-  53          
-  54          extern u8 xdata LIGHT_TH,light_ad;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 2   
+  46                                  1:dpæ•°æ®ç‚¹åºåˆ—ç±»åž‹å¯¹ç…§è¡¨
+  47                    **æ­¤ä¸ºè‡ªåŠ¨ç”Ÿæˆä»£ç ,å¦‚åœ¨å¼€å‘å¹³å°æœ‰ç›¸å…³ä¿®æ”¹è¯·é‡æ–°ä¸‹è½½MCU_SDK**         
+  48          ******************************************************************************/
+  49          const DOWNLOAD_CMD_S download_cmd[] =
+  50          {
+  51            {DPID_SWITCH_LED, DP_TYPE_BOOL},
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 2   
 
-  55          extern u16 xdata DELAY_NUM;
-  56          extern u8 xdata SWITCHflag ;
-  57          extern u8 xdata lightvalue ;
-  58          extern ulong xdata TH ;
-  59          extern  u8 xdata switchcnt ;
-  60          void Flash_EraseBlock(unsigned int fui_Address);//ÉÈÇø²Á³ý
-  61          void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address);
-  62          void Delay_us_1(uint q1);
-  63          void send_data(u8 d);
-  64          void savevar(void);
-  65          //u8 test_LIGHT_TH;
-  66          //u8 test_DELAY_NUM;
-  67          //u8 test_lightvalue;
-  68          //u8 test_TH;
-  69          
-  70          /******************************************************************************
-  71                                  1:dpÊý¾ÝµãÐòÁÐÀàÐÍ¶ÔÕÕ±í
-  72                    **´ËÎª×Ô¶¯Éú³É´úÂë,ÈçÔÚ¿ª·¢Æ½Ì¨ÓÐÏà¹ØÐÞ¸ÄÇëÖØÐÂÏÂÔØMCU_SDK**         
-  73          ******************************************************************************/
-  74          const DOWNLOAD_CMD_S  xdata download_cmd[] =
-  75          {
-  76            {DPID_SWITCH_LED, DP_TYPE_BOOL},
-  77            //{DPID_WORK_MODE, DP_TYPE_ENUM},
-  78            {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
-  79            //{DPID_DEVICE_MODE, DP_TYPE_ENUM},
-  80            //{DPID_PIR_STATE, DP_TYPE_ENUM},
-  81            {DPID_CDS, DP_TYPE_ENUM},
-  82            //{DPID_PIR_SENSITIVITY, DP_TYPE_ENUM},
-  83            {DPID_PIR_DELAY, DP_TYPE_VALUE},
-  84            //{DPID_SWITCH_PIR, DP_TYPE_BOOL},
-  85            //{DPID_PIR_RESUME_COUNTDOWN, DP_TYPE_VALUE},
-  86            //{DPID_STANDBY_TIME, DP_TYPE_VALUE},
-  87            {DPID_SENSING_RADIUS, DP_TYPE_VALUE},
-  88            //{DPID_HANG_HIGH, DP_TYPE_VALUE},
-  89          //  {DPID_SWITCH_LED, DP_TYPE_BOOL},
-  90          //  {DPID_WORK_MODE, DP_TYPE_ENUM},
-  91          //  {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
-  92          //  {DPID_DEVICE_MODE, DP_TYPE_ENUM},
-  93          //  {DPID_PIR_STATE, DP_TYPE_ENUM},
-  94          //  {DPID_CDS, DP_TYPE_ENUM},
-  95          //  {DPID_PIR_SENSITIVITY, DP_TYPE_ENUM},
-  96          //  {DPID_PIR_DELAY, DP_TYPE_VALUE},
-  97          //  {DPID_SWITCH_PIR, DP_TYPE_BOOL},
-  98          //  {DPID_PIR_RESUME_COUNTDOWN, DP_TYPE_VALUE},
-  99          //  {DPID_STANDBY_TIME, DP_TYPE_VALUE},
- 100          //  {DPID_SENSING_RADIUS, DP_TYPE_VALUE},
- 101          //  {DPID_HANG_HIGH, DP_TYPE_VALUE},
- 102          };
+  52            {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
+  53            {DPID_LIGHT_PARAMETER, DP_TYPE_VALUE},
+  54            {DPID_SENSE_DELAY, DP_TYPE_VALUE},
+  55            {DPID_SENSE_SWITCH, DP_TYPE_BOOL},
+  56            {DPID_STAYON_DELAY, DP_TYPE_VALUE},
+  57            {DPID_SENSE_STRESS, DP_TYPE_VALUE},
+  58            {DPID_SENSE_CIRCLE_R, DP_TYPE_VALUE},
+  59          };
+  60          
+  61          
+  62          
+  63          
+  64          /******************************************************************************
+  65                                     2:ä¸²å£å•å­—èŠ‚å‘é€å‡½æ•°
+  66          è¯·å°†MCUä¸²å£å‘é€å‡½æ•°å¡«å…¥è¯¥å‡½æ•°å†…,å¹¶å°†æŽ¥æ”¶åˆ°çš„æ•°æ®ä½œä¸ºå‚æ•°ä¼ å…¥ä¸²å£å‘é€å‡½æ•°
+  67          ******************************************************************************/
+  68          
+  69          /*****************************************************************************
+  70          å‡½æ•°åç§° : uart_transmit_output
+  71          åŠŸèƒ½æè¿° : å‘æ•°æ®å¤„ç†
+  72          è¾“å…¥å‚æ•° : value:ä¸²å£æ”¶åˆ°å­—èŠ‚æ•°æ®
+  73          è¿”å›žå‚æ•° : æ— 
+  74          ä½¿ç”¨è¯´æ˜Ž : è¯·å°†MCUä¸²å£å‘é€å‡½æ•°å¡«å…¥è¯¥å‡½æ•°å†…,å¹¶å°†æŽ¥æ”¶åˆ°çš„æ•°æ®ä½œä¸ºå‚æ•°ä¼ å…¥ä¸²
+             -å£å‘é€å‡½æ•°
+  75          *****************************************************************************/
+  76          void uart_transmit_output(unsigned char value)
+  77          {
+  78   1       //#error "è¯·å°†MCUä¸²å£å‘é€å‡½æ•°å¡«å…¥è¯¥å‡½æ•°,å¹¶åˆ é™¤è¯¥è¡Œ"
+  79   1          send_data(value);
+  80   1      /*
+  81   1        //ç¤ºä¾‹:
+  82   1        extern void Uart_PutChar(unsigned char value);
+  83   1        Uart_PutChar(value);                                  //ä¸²å£å‘é€å‡½æ•°
+  84   1      */  
+  85   1      }
+  86          /******************************************************************************
+  87                                     ç¬¬äºŒæ­¥:å®žçŽ°å…·ä½“ç”¨æˆ·å‡½æ•°
+  88          1:APPä¸‹å‘æ•°æ®å¤„ç†
+  89          2:æ•°æ®ä¸ŠæŠ¥å¤„ç†
+  90          ******************************************************************************/
+  91          
+  92          /******************************************************************************
+  93                                      1:æ‰€æœ‰æ•°æ®ä¸ŠæŠ¥å¤„ç†
+  94          å½“å‰å‡½æ•°å¤„ç†å…¨éƒ¨æ•°æ®ä¸ŠæŠ¥(åŒ…æ‹¬å¯ä¸‹å‘/å¯ä¸ŠæŠ¥å’Œåªä¸ŠæŠ¥)
+  95            éœ€è¦ç”¨æˆ·æŒ‰ç…§å®žé™…æƒ…å†µå®žçŽ°:
+  96            1:éœ€è¦å®žçŽ°å¯ä¸‹å‘/å¯ä¸ŠæŠ¥æ•°æ®ç‚¹ä¸ŠæŠ¥
+  97            2:éœ€è¦å®žçŽ°åªä¸ŠæŠ¥æ•°æ®ç‚¹ä¸ŠæŠ¥
+  98          æ­¤å‡½æ•°ä¸ºMCUå†…éƒ¨å¿…é¡»è°ƒç”¨
+  99          ç”¨æˆ·ä¹Ÿå¯è°ƒç”¨æ­¤å‡½æ•°å®žçŽ°å…¨éƒ¨æ•°æ®ä¸ŠæŠ¥
+ 100          ******************************************************************************/
+ 101          
+ 102          //è‡ªåŠ¨åŒ–ç”Ÿæˆæ•°æ®ä¸ŠæŠ¥å‡½æ•°
  103          
- 104          
- 105          
- 106          
- 107          /******************************************************************************
- 108                                     2:´®¿Úµ¥×Ö½Ú·¢ËÍº¯Êý
- 109          Çë½«MCU´®¿Ú·¢ËÍº¯ÊýÌîÈë¸Ãº¯ÊýÄÚ,²¢½«½ÓÊÕµ½µÄÊý¾Ý×÷Îª²ÎÊý´«Èë´®¿Ú·¢ËÍº¯Êý
- 110          ******************************************************************************/
- 111          
- 112          /*****************************************************************************
- 113          º¯ÊýÃû³Æ : uart_transmit_output
- 114          ¹¦ÄÜÃèÊö : ·¢Êý¾Ý´¦Àí
- 115          ÊäÈë²ÎÊý : value:´®¿ÚÊÕµ½×Ö½ÚÊý¾Ý
- 116          ·µ»Ø²ÎÊý : ÎÞ
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 3   
+ 104          /*****************************************************************************
+ 105          å‡½æ•°åç§° : all_data_update
+ 106          åŠŸèƒ½æè¿° : ç³»ç»Ÿæ‰€æœ‰dpç‚¹ä¿¡æ¯ä¸Šä¼ ,å®žçŽ°APPå’Œmucæ•°æ®åŒæ­¥
+ 107          è¾“å…¥å‚æ•° : æ— 
+ 108          è¿”å›žå‚æ•° : æ— 
+ 109          ä½¿ç”¨è¯´æ˜Ž : æ­¤å‡½æ•°SDKå†…éƒ¨éœ€è°ƒç”¨;
+ 110                     MCUå¿…é¡»å®žçŽ°è¯¥å‡½æ•°å†…æ•°æ®ä¸ŠæŠ¥åŠŸèƒ½;åŒ…æ‹¬åªä¸ŠæŠ¥å’Œå¯ä¸ŠæŠ¥å¯ä¸‹å‘åž‹æ•°æ®
+ 111          *****************************************************************************/
+ 112          void all_data_update(void)
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 3   
 
- 117          Ê¹ÓÃËµÃ÷ : Çë½«MCU´®¿Ú·¢ËÍº¯ÊýÌîÈë¸Ãº¯ÊýÄÚ,²¢½«½ÓÊÕµ½µÄÊý¾Ý×÷Îª²ÎÊý´«Èë´®¿Ú·¢ËÍº¯Êý
- 118          *****************************************************************************/
- 119          void uart_transmit_output(unsigned char value)
- 120          {
- 121   1      // #error "Çë½«MCU´®¿Ú·¢ËÍº¯ÊýÌîÈë¸Ãº¯Êý,²¢É¾³ý¸ÃÐÐ"
- 122   1        
- 123   1        
- 124   1            SBUF = value;
- 125   1          while(!(SCON & 0x02));
- 126   1          SCON &=~ 0x02;
- 127   1        
- 128   1      /*
- 129   1        //Ê¾Àý:
- 130   1        extern void Uart_PutChar(unsigned char value);
- 131   1        Uart_PutChar(value);                                  //´®¿Ú·¢ËÍº¯Êý
- 132   1      */  
- 133   1      }
- 134          /******************************************************************************
- 135                                     µÚ¶þ²½:ÊµÏÖ¾ßÌåÓÃ»§º¯Êý
- 136          1:APPÏÂ·¢Êý¾Ý´¦Àí
- 137          2:Êý¾ÝÉÏ±¨´¦Àí
- 138          ******************************************************************************/
- 139          
- 140          /******************************************************************************
- 141                                      1:ËùÓÐÊý¾ÝÉÏ±¨´¦Àí
- 142          µ±Ç°º¯Êý´¦ÀíÈ«²¿Êý¾ÝÉÏ±¨(°üÀ¨¿ÉÏÂ·¢/¿ÉÉÏ±¨ºÍÖ»ÉÏ±¨)
- 143            ÐèÒªÓÃ»§°´ÕÕÊµ¼ÊÇé¿öÊµÏÖ:
- 144            1:ÐèÒªÊµÏÖ¿ÉÏÂ·¢/¿ÉÉÏ±¨Êý¾ÝµãÉÏ±¨
- 145            2:ÐèÒªÊµÏÖÖ»ÉÏ±¨Êý¾ÝµãÉÏ±¨
- 146          ´Ëº¯ÊýÎªMCUÄÚ²¿±ØÐëµ÷ÓÃ
- 147          ÓÃ»§Ò²¿Éµ÷ÓÃ´Ëº¯ÊýÊµÏÖÈ«²¿Êý¾ÝÉÏ±¨
- 148          ******************************************************************************/
- 149          
- 150          //×Ô¶¯»¯Éú³ÉÊý¾ÝÉÏ±¨º¯Êý
- 151          
- 152          /*****************************************************************************
- 153          º¯ÊýÃû³Æ : all_data_update
- 154          ¹¦ÄÜÃèÊö : ÏµÍ³ËùÓÐdpµãÐÅÏ¢ÉÏ´«,ÊµÏÖAPPºÍmucÊý¾ÝÍ¬²½
- 155          ÊäÈë²ÎÊý : ÎÞ
- 156          ·µ»Ø²ÎÊý : ÎÞ
- 157          Ê¹ÓÃËµÃ÷ : ´Ëº¯ÊýSDKÄÚ²¿Ðèµ÷ÓÃ;
- 158                     MCU±ØÐëÊµÏÖ¸Ãº¯ÊýÄÚÊý¾ÝÉÏ±¨¹¦ÄÜ;°üÀ¨Ö»ÉÏ±¨ºÍ¿ÉÉÏ±¨¿ÉÏÂ·¢ÐÍÊý¾Ý
- 159          *****************************************************************************/
- 160          void all_data_update(void)
- 161          {
- 162   1        u8 radius,light;
- 163   1        //#error "ÇëÔÚ´Ë´¦Àí¿ÉÏÂ·¢¿ÉÉÏ±¨Êý¾Ý¼°Ö»ÉÏ±¨Êý¾ÝÊ¾Àý,´¦ÀíÍê³ÉºóÉ¾³ý¸ÃÐÐ"
- 164   1        //´Ë´úÂëÎªÆ½Ì¨×Ô¶¯Éú³É£¬Çë°´ÕÕÊµ¼ÊÊý¾ÝÐÞ¸ÄÃ¿¸ö¿ÉÏÂ·¢¿ÉÉÏ±¨º¯ÊýºÍÖ»ÉÏ±¨º¯Êý
- 165   1          
- 166   1          mcu_dp_bool_update(DPID_SWITCH_LED,SWITCHflag); //BOOLÐÍÊý¾ÝÉÏ±¨;
- 167   1          //mcu_dp_enum_update(DPID_WORK_MODE,SWITCHflag); //Ã¶¾ÙÐÍÊý¾ÝÉÏ±¨;
- 168   1          mcu_dp_value_update(DPID_BRIGHT_VALUE,lightvalue); //VALUEÐÍÊý¾ÝÉÏ±¨;
- 169   1          //mcu_dp_enum_update(DPID_DEVICE_MODE,SWITCHflag); //Ã¶¾ÙÐÍÊý¾ÝÉÏ±¨;
- 170   1          //mcu_dp_enum_update(DPID_PIR_STATE,SWITCHflag); //Ã¶¾ÙÐÍÊý¾ÝÉÏ±¨;
- 171   1        
- 172   1         // mcu_dp_enum_update(DPID_CDS,LIGHT_TH/4); //Ã¶¾ÙÐÍÊý¾ÝÉÏ±¨;
- 173   1        
- 174   1          if(LIGHT_TH==255)
- 175   1            light=0;
- 176   1          else if(LIGHT_TH==200)
- 177   1            light=2;
- 178   1          else if(LIGHT_TH==40)
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 4   
+ 113          {
+ 114   1        //#error "è¯·åœ¨æ­¤å¤„ç†å¯ä¸‹å‘å¯ä¸ŠæŠ¥æ•°æ®åŠåªä¸ŠæŠ¥æ•°æ®ç¤ºä¾‹,å¤„ç†å®ŒæˆåŽåˆ é™¤è¯¥è¡Œ"
+ 115   1        //æ­¤ä»£ç ä¸ºå¹³å°è‡ªåŠ¨ç”Ÿæˆï¼Œè¯·æŒ‰ç…§å®žé™…æ•°æ®ä¿®æ”¹æ¯ä¸ªå¯ä¸‹å‘å¯ä¸ŠæŠ¥å‡½æ•°å’Œåªä¸ŠæŠ¥
+             -å‡½æ•°
+ 116   1      
+ 117   1          /*
+ 118   1          mcu_dp_bool_update(DPID_SWITCH_LED,å½“å‰å¼€å…³); //BOOLåž‹æ•°æ®ä¸ŠæŠ¥;
+ 119   1          mcu_dp_value_update(DPID_BRIGHT_VALUE,å½“å‰äº®åº¦å€¼); //VALUEåž‹æ•°æ®ä¸ŠæŠ¥;
+ 120   1          mcu_dp_value_update(DPID_LIGHT_PARAMETER,å½“å‰å…‰æ•å‚æ•°); //VALUEåž‹æ•°æ®ä¸ŠæŠ¥;
+ 121   1          mcu_dp_value_update(DPID_SENSE_DELAY,å½“å‰æ„Ÿåº”å»¶æ—¶); //VALUEåž‹æ•°æ®ä¸ŠæŠ¥;
+ 122   1          mcu_dp_bool_update(DPID_SENSE_SWITCH,å½“å‰æ„Ÿåº”å¼€å…³); //BOOLåž‹æ•°æ®ä¸ŠæŠ¥;
+ 123   1          mcu_dp_value_update(DPID_STAYON_DELAY,å½“å‰ä¼´äº®å»¶æ—¶); //VALUEåž‹æ•°æ®ä¸ŠæŠ¥;
+ 124   1          mcu_dp_value_update(DPID_SENSE_STRESS,å½“å‰æ„Ÿåº”å¼ºåº¦); //VALUEåž‹æ•°æ®ä¸ŠæŠ¥;
+ 125   1          mcu_dp_value_update(DPID_SENSE_CIRCLE_R,å½“å‰æ„Ÿåº”åŠå¾„); //VALUEåž‹æ•°æ®ä¸ŠæŠ¥;
+ 126   1          */
+ 127   1      
+ 128   1      
+ 129   1      }
+ 130          
+ 131          
+ 132          /******************************************************************************
+ 133                                          WARNING!!!    
+ 134                                      2:æ‰€æœ‰æ•°æ®ä¸ŠæŠ¥å¤„ç†
+ 135          è‡ªåŠ¨åŒ–ä»£ç æ¨¡æ¿å‡½æ•°,å…·ä½“è¯·ç”¨æˆ·è‡ªè¡Œå®žçŽ°æ•°æ®å¤„ç†
+ 136          ******************************************************************************/
+ 137          
+ 138          /*****************************************************************************
+ 139          å‡½æ•°åç§° : dp_download_switch_led_handle
+ 140          åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SWITCH_LEDçš„å¤„ç†å‡½æ•°
+ 141          è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+ 142                  : length:æ•°æ®é•¿åº¦
+ 143          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERROR
+ 144          ä½¿ç”¨è¯´æ˜Ž : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»åž‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åŽä¸ŠæŠ¥å¤„ç†ç»“æžœè‡³app
+ 145          *****************************************************************************/
+ 146          static unsigned char dp_download_switch_led_handle(const unsigned char value[], unsigned short length)
+ 147          {
+ 148   1          //ç¤ºä¾‹:å½“å‰DPç±»åž‹ä¸ºBOOL
+ 149   1          unsigned char ret;
+ 150   1          //0:å…³/1:å¼€
+ 151   1          unsigned char switch_led;
+ 152   1          
+ 153   1          switch_led = mcu_get_dp_download_bool(value,length);
+ 154   1          if(switch_led == 0) {
+ 155   2              //å¼€å…³å…³
+ 156   2          }else {
+ 157   2              //å¼€å…³å¼€
+ 158   2          }
+ 159   1        
+ 160   1          //å¤„ç†å®ŒDPæ•°æ®åŽåº”æœ‰åé¦ˆ
+ 161   1          ret = mcu_dp_bool_update(DPID_SWITCH_LED,switch_led);
+ 162   1          if(ret == SUCCESS)
+ 163   1              return SUCCESS;
+ 164   1          else
+ 165   1              return ERROR;
+ 166   1      }
+ 167          /*****************************************************************************
+ 168          å‡½æ•°åç§° : dp_download_bright_value_handle
+ 169          åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_BRIGHT_VALUEçš„å¤„ç†å‡½æ•°
+ 170          è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+ 171                  : length:æ•°æ®é•¿åº¦
+ 172          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERROR
+ 173          ä½¿ç”¨è¯´æ˜Ž : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»åž‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åŽä¸ŠæŠ¥å¤„ç†ç»“æžœè‡³app
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 4   
 
- 179   1            light=3;    
- 180   1          else if(LIGHT_TH==20)
- 181   1            light=4;
- 182   1          else //if(LIGHT_TH==200)
- 183   1            light=5;
- 184   1          mcu_dp_enum_update(DPID_CDS,light); //Ã¶¾ÙÐÍÊý¾ÝÉÏ±¨;
- 185   1        
- 186   1          //mcu_dp_enum_update(DPID_PIR_SENSITIVITY,SWITCHflag); //Ã¶¾ÙÐÍÊý¾ÝÉÏ±¨;
- 187   1          mcu_dp_value_update(DPID_PIR_DELAY,DELAY_NUM/4); //VALUEÐÍÊý¾ÝÉÏ±¨;
- 188   1      //    mcu_dp_bool_update(DPID_SWITCH_PIR,SWITCHflag); //BOOLÐÍÊý¾ÝÉÏ±¨;
- 189   1      //    mcu_dp_value_update(DPID_PIR_RESUME_COUNTDOWN,DELAY_NUM); //VALUEÐÍÊý¾ÝÉÏ±¨;
- 190   1      //    mcu_dp_value_update(DPID_STANDBY_TIME,DELAY_NUM); //VALUEÐÍÊý¾ÝÉÏ±¨;
- 191   1        
- 192   1        
- 193   1          if(TH==RADIUS_1M)
- 194   1            radius=1;
- 195   1          else if(TH==RADIUS_2M)
- 196   1            radius=2;
- 197   1          else if(TH==RADIUS_3M)
- 198   1            radius=3; 
- 199   1          else if(TH==RADIUS_4M)
- 200   1            radius=4;
- 201   1          else
- 202   1            radius=5;
- 203   1          
- 204   1          //savevar();
- 205   1        
- 206   1          mcu_dp_value_update(DPID_SENSING_RADIUS,radius);
+ 174          *****************************************************************************/
+ 175          static unsigned char dp_download_bright_value_handle(const unsigned char value[], unsigned short length)
+ 176          {
+ 177   1          //ç¤ºä¾‹:å½“å‰DPç±»åž‹ä¸ºVALUE
+ 178   1          unsigned char ret;
+ 179   1          unsigned long bright_value;
+ 180   1          
+ 181   1          bright_value = mcu_get_dp_download_value(value,length);
+ 182   1          /*
+ 183   1          //VALUEç±»åž‹æ•°æ®å¤„ç†
+ 184   1          
+ 185   1          */
+ 186   1          
+ 187   1          //å¤„ç†å®ŒDPæ•°æ®åŽåº”æœ‰åé¦ˆ
+ 188   1          ret = mcu_dp_value_update(DPID_BRIGHT_VALUE,bright_value);
+ 189   1          if(ret == SUCCESS)
+ 190   1              return SUCCESS;
+ 191   1          else
+ 192   1              return ERROR;
+ 193   1      }
+ 194          /*****************************************************************************
+ 195          å‡½æ•°åç§° : dp_download_light_parameter_handle
+ 196          åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_LIGHT_PARAMETERçš„å¤„ç†å‡½æ•°
+ 197          è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+ 198                  : length:æ•°æ®é•¿åº¦
+ 199          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERROR
+ 200          ä½¿ç”¨è¯´æ˜Ž : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»åž‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åŽä¸ŠæŠ¥å¤„ç†ç»“æžœè‡³app
+ 201          *****************************************************************************/
+ 202          static unsigned char dp_download_light_parameter_handle(const unsigned char value[], unsigned short length
+             -)
+ 203          {
+ 204   1          //ç¤ºä¾‹:å½“å‰DPç±»åž‹ä¸ºVALUE
+ 205   1          unsigned char ret;
+ 206   1          unsigned long light_parameter;
  207   1          
- 208   1       //   mcu_dp_value_update(DPID_SENSING_RADIUS,TH/1000); //VALUEÐÍÊý¾ÝÉÏ±¨;
- 209   1      //    mcu_dp_value_update(DPID_HANG_HIGH,SWITCHflag); //VALUEÐÍÊý¾ÝÉÏ±¨;
- 210   1      
- 211   1      
- 212   1      
- 213   1      }
- 214          
- 215          
- 216          /******************************************************************************
- 217                                          WARNING!!!    
- 218                                      2:ËùÓÐÊý¾ÝÉÏ±¨´¦Àí
- 219          ×Ô¶¯»¯´úÂëÄ£°åº¯Êý,¾ßÌåÇëÓÃ»§×ÔÐÐÊµÏÖÊý¾Ý´¦Àí
- 220          ******************************************************************************/
- 221          
- 222          /*****************************************************************************
- 223          º¯ÊýÃû³Æ : dp_download_switch_led_handle
- 224          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_SWITCH_LEDµÄ´¦Àíº¯Êý
- 225          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 226                  : length:Êý¾Ý³¤¶È
- 227          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 228          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 229          *****************************************************************************/
- 230          static unsigned char dp_download_switch_led_handle(const unsigned char value[], unsigned short length)
- 231          {
- 232   1          //Ê¾Àý:µ±Ç°DPÀàÐÍÎªBOOL
- 233   1          unsigned char ret;
- 234   1          //0:¹Ø/1:¿ª
- 235   1          unsigned char switch_led;
- 236   1          
- 237   1          switch_led = mcu_get_dp_download_bool(value,length);
- 238   1          if(switch_led == 0) {
- 239   2              //¿ª¹Ø¹Ø
- 240   2              //LIGHT_OFF;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 5   
+ 208   1          light_parameter = mcu_get_dp_download_value(value,length);
+ 209   1          /*
+ 210   1          //VALUEç±»åž‹æ•°æ®å¤„ç†
+ 211   1          
+ 212   1          */
+ 213   1          
+ 214   1          //å¤„ç†å®ŒDPæ•°æ®åŽåº”æœ‰åé¦ˆ
+ 215   1          ret = mcu_dp_value_update(DPID_LIGHT_PARAMETER,light_parameter);
+ 216   1          if(ret == SUCCESS)
+ 217   1              return SUCCESS;
+ 218   1          else
+ 219   1              return ERROR;
+ 220   1      }
+ 221          /*****************************************************************************
+ 222          å‡½æ•°åç§° : dp_download_sense_delay_handle
+ 223          åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SENSE_DELAYçš„å¤„ç†å‡½æ•°
+ 224          è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+ 225                  : length:æ•°æ®é•¿åº¦
+ 226          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERROR
+ 227          ä½¿ç”¨è¯´æ˜Ž : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»åž‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åŽä¸ŠæŠ¥å¤„ç†ç»“æžœè‡³app
+ 228          *****************************************************************************/
+ 229          static unsigned char dp_download_sense_delay_handle(const unsigned char value[], unsigned short length)
+ 230          {
+ 231   1          //ç¤ºä¾‹:å½“å‰DPç±»åž‹ä¸ºVALUE
+ 232   1          unsigned char ret;
+ 233   1          unsigned long sense_delay;
+ 234   1          
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 5   
 
- 241   2          }else {
- 242   2              //¿ª¹Ø¿ª
- 243   2              //LIGHT_ON;
- 244   2          }
- 245   1        
- 246   1          //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 247   1          ret = mcu_dp_bool_update(DPID_SWITCH_LED,switch_led);
- 248   1          if(ret == SUCCESS)
- 249   1              return SUCCESS;
- 250   1          else
- 251   1              return ERROR;
- 252   1      }
- 253          /*****************************************************************************
- 254          º¯ÊýÃû³Æ : dp_download_work_mode_handle
- 255          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_WORK_MODEµÄ´¦Àíº¯Êý
- 256          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 257                  : length:Êý¾Ý³¤¶È
- 258          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 259          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 260          *****************************************************************************/
- 261          //static unsigned char dp_download_work_mode_handle(const unsigned char value[], unsigned short length)
- 262          //{
- 263          //    //Ê¾Àý:µ±Ç°DPÀàÐÍÎªENUM
- 264          //    unsigned char ret;
- 265          //    unsigned char work_mode;
- 266          //    
- 267          //    work_mode = mcu_get_dp_download_enum(value,length);
- 268          //    switch(work_mode) {
- 269          //        case 0:
- 270          //        break;
- 271          //        
- 272          //        case 1:
- 273          //        break;
- 274          //        
- 275          //        default:
- 276          //    
- 277          //        break;
- 278          //    }
- 279          //    
- 280          //    //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 281          //    ret = mcu_dp_enum_update(DPID_WORK_MODE, work_mode);
- 282          //    if(ret == SUCCESS)
- 283          //        return SUCCESS;
- 284          //    else
- 285          //        return ERROR;
- 286          //}
- 287          /*****************************************************************************
- 288          º¯ÊýÃû³Æ : dp_download_bright_value_handle
- 289          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_BRIGHT_VALUEµÄ´¦Àíº¯Êý
- 290          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 291                  : length:Êý¾Ý³¤¶È
- 292          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 293          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 294          *****************************************************************************/
- 295          static unsigned char dp_download_bright_value_handle(const unsigned char value[], unsigned short length)
- 296          {
- 297   1          //Ê¾Àý:µ±Ç°DPÀàÐÍÎªVALUE
- 298   1          unsigned char ret;
- 299   1          unsigned long bright_value;
- 300   1          
- 301   1          bright_value = mcu_get_dp_download_value(value,length);
- 302   1          /*
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 6   
+ 235   1          sense_delay = mcu_get_dp_download_value(value,length);
+ 236   1          /*
+ 237   1          //VALUEç±»åž‹æ•°æ®å¤„ç†
+ 238   1          
+ 239   1          */
+ 240   1          
+ 241   1          //å¤„ç†å®ŒDPæ•°æ®åŽåº”æœ‰åé¦ˆ
+ 242   1          ret = mcu_dp_value_update(DPID_SENSE_DELAY,sense_delay);
+ 243   1          if(ret == SUCCESS)
+ 244   1              return SUCCESS;
+ 245   1          else
+ 246   1              return ERROR;
+ 247   1      }
+ 248          /*****************************************************************************
+ 249          å‡½æ•°åç§° : dp_download_sense_switch_handle
+ 250          åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SENSE_SWITCHçš„å¤„ç†å‡½æ•°
+ 251          è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+ 252                  : length:æ•°æ®é•¿åº¦
+ 253          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERROR
+ 254          ä½¿ç”¨è¯´æ˜Ž : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»åž‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åŽä¸ŠæŠ¥å¤„ç†ç»“æžœè‡³app
+ 255          *****************************************************************************/
+ 256          static unsigned char dp_download_sense_switch_handle(const unsigned char value[], unsigned short length)
+ 257          {
+ 258   1          //ç¤ºä¾‹:å½“å‰DPç±»åž‹ä¸ºBOOL
+ 259   1          unsigned char ret;
+ 260   1          //0:å…³/1:å¼€
+ 261   1          unsigned char sense_switch;
+ 262   1          
+ 263   1          sense_switch = mcu_get_dp_download_bool(value,length);
+ 264   1          if(sense_switch == 0) {
+ 265   2              //å¼€å…³å…³
+ 266   2          }else {
+ 267   2              //å¼€å…³å¼€
+ 268   2          }
+ 269   1        
+ 270   1          //å¤„ç†å®ŒDPæ•°æ®åŽåº”æœ‰åé¦ˆ
+ 271   1          ret = mcu_dp_bool_update(DPID_SENSE_SWITCH,sense_switch);
+ 272   1          if(ret == SUCCESS)
+ 273   1              return SUCCESS;
+ 274   1          else
+ 275   1              return ERROR;
+ 276   1      }
+ 277          /*****************************************************************************
+ 278          å‡½æ•°åç§° : dp_download_stayon_delay_handle
+ 279          åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_STAYON_DELAYçš„å¤„ç†å‡½æ•°
+ 280          è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+ 281                  : length:æ•°æ®é•¿åº¦
+ 282          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERROR
+ 283          ä½¿ç”¨è¯´æ˜Ž : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»åž‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åŽä¸ŠæŠ¥å¤„ç†ç»“æžœè‡³app
+ 284          *****************************************************************************/
+ 285          static unsigned char dp_download_stayon_delay_handle(const unsigned char value[], unsigned short length)
+ 286          {
+ 287   1          //ç¤ºä¾‹:å½“å‰DPç±»åž‹ä¸ºVALUE
+ 288   1          unsigned char ret;
+ 289   1          unsigned long stayon_delay;
+ 290   1          
+ 291   1          stayon_delay = mcu_get_dp_download_value(value,length);
+ 292   1          /*
+ 293   1          //VALUEç±»åž‹æ•°æ®å¤„ç†
+ 294   1          
+ 295   1          */
+ 296   1          
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 6   
 
- 303   1          //VALUEÀàÐÍÊý¾Ý´¦Àí
- 304   1          
- 305   1          
- 306   1          */
- 307   1          lightvalue = bright_value;
- 308   1          savevar();
- 309   1        
- 310   1          //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 311   1          ret = mcu_dp_value_update(DPID_BRIGHT_VALUE,bright_value);
- 312   1          if(ret == SUCCESS)
- 313   1              return SUCCESS;
- 314   1          else
- 315   1              return ERROR;
- 316   1      }
- 317          /*****************************************************************************
- 318          º¯ÊýÃû³Æ : dp_download_device_mode_handle
- 319          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_DEVICE_MODEµÄ´¦Àíº¯Êý
- 320          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 321                  : length:Êý¾Ý³¤¶È
- 322          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 323          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 324          *****************************************************************************/
- 325          //static unsigned char dp_download_device_mode_handle(const unsigned char value[], unsigned short length)
- 326          //{
- 327          //    //Ê¾Àý:µ±Ç°DPÀàÐÍÎªENUM
- 328          //    unsigned char ret;
- 329          //    unsigned char device_mode;
- 330          //    
- 331          //    device_mode = mcu_get_dp_download_enum(value,length);
- 332          //    switch(device_mode) {
- 333          //        case 0:
- 334          //        break;
- 335          //        
- 336          //        case 1:
- 337          //        break;
- 338          //        
- 339          //        default:
- 340          //    
- 341          //        break;
- 342          //    }
- 343          //    
- 344          //    //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 345          //    ret = mcu_dp_enum_update(DPID_DEVICE_MODE, device_mode);
- 346          //    if(ret == SUCCESS)
- 347          //        return SUCCESS;
- 348          //    else
- 349          //        return ERROR;
- 350          //}
- 351          /*****************************************************************************
- 352          º¯ÊýÃû³Æ : dp_download_cds_handle
- 353          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_CDSµÄ´¦Àíº¯Êý
- 354          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 355                  : length:Êý¾Ý³¤¶È
- 356          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 357          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 358          *****************************************************************************/
- 359          static unsigned char dp_download_cds_handle(const unsigned char value[], unsigned short length)
- 360          {
- 361   1          //Ê¾Àý:µ±Ç°DPÀàÐÍÎªENUM
- 362   1          unsigned char ret;
- 363   1          unsigned char cds;
- 364   1          
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 7   
+ 297   1          //å¤„ç†å®ŒDPæ•°æ®åŽåº”æœ‰åé¦ˆ
+ 298   1          ret = mcu_dp_value_update(DPID_STAYON_DELAY,stayon_delay);
+ 299   1          if(ret == SUCCESS)
+ 300   1              return SUCCESS;
+ 301   1          else
+ 302   1              return ERROR;
+ 303   1      }
+ 304          /*****************************************************************************
+ 305          å‡½æ•°åç§° : dp_download_sense_stress_handle
+ 306          åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SENSE_STRESSçš„å¤„ç†å‡½æ•°
+ 307          è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+ 308                  : length:æ•°æ®é•¿åº¦
+ 309          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERROR
+ 310          ä½¿ç”¨è¯´æ˜Ž : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»åž‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åŽä¸ŠæŠ¥å¤„ç†ç»“æžœè‡³app
+ 311          *****************************************************************************/
+ 312          static unsigned char dp_download_sense_stress_handle(const unsigned char value[], unsigned short length)
+ 313          {
+ 314   1          //ç¤ºä¾‹:å½“å‰DPç±»åž‹ä¸ºVALUE
+ 315   1          unsigned char ret;
+ 316   1          unsigned long sense_stress;
+ 317   1          
+ 318   1          sense_stress = mcu_get_dp_download_value(value,length);
+ 319   1          /*
+ 320   1          //VALUEç±»åž‹æ•°æ®å¤„ç†
+ 321   1          
+ 322   1          */
+ 323   1          
+ 324   1          //å¤„ç†å®ŒDPæ•°æ®åŽåº”æœ‰åé¦ˆ
+ 325   1          ret = mcu_dp_value_update(DPID_SENSE_STRESS,sense_stress);
+ 326   1          if(ret == SUCCESS)
+ 327   1              return SUCCESS;
+ 328   1          else
+ 329   1              return ERROR;
+ 330   1      }
+ 331          /*****************************************************************************
+ 332          å‡½æ•°åç§° : dp_download_sense_circle_r_handle
+ 333          åŠŸèƒ½æè¿° : é’ˆå¯¹DPID_SENSE_CIRCLE_Rçš„å¤„ç†å‡½æ•°
+ 334          è¾“å…¥å‚æ•° : value:æ•°æ®æºæ•°æ®
+ 335                  : length:æ•°æ®é•¿åº¦
+ 336          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERROR
+ 337          ä½¿ç”¨è¯´æ˜Ž : å¯ä¸‹å‘å¯ä¸ŠæŠ¥ç±»åž‹,éœ€è¦åœ¨å¤„ç†å®Œæ•°æ®åŽä¸ŠæŠ¥å¤„ç†ç»“æžœè‡³app
+ 338          *****************************************************************************/
+ 339          static unsigned char dp_download_sense_circle_r_handle(const unsigned char value[], unsigned short length)
+ 340          {
+ 341   1          //ç¤ºä¾‹:å½“å‰DPç±»åž‹ä¸ºVALUE
+ 342   1          unsigned char ret;
+ 343   1          unsigned long sense_circle_r;
+ 344   1          
+ 345   1          sense_circle_r = mcu_get_dp_download_value(value,length);
+ 346   1          /*
+ 347   1          //VALUEç±»åž‹æ•°æ®å¤„ç†
+ 348   1          
+ 349   1          */
+ 350   1          
+ 351   1          //å¤„ç†å®ŒDPæ•°æ®åŽåº”æœ‰åé¦ˆ
+ 352   1          ret = mcu_dp_value_update(DPID_SENSE_CIRCLE_R,sense_circle_r);
+ 353   1          if(ret == SUCCESS)
+ 354   1              return SUCCESS;
+ 355   1          else
+ 356   1              return ERROR;
+ 357   1      }
+ 358          
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 7   
 
- 365   1          cds = mcu_get_dp_download_enum(value,length);
- 366   1          switch(cds) {
- 367   2      //         case 5:
- 368   2      //      LIGHT_TH=cds*4;
- 369   2      //         break;
- 370   2      //         
- 371   2      //         case 10:
- 372   2      //      LIGHT_TH=cds*4;
- 373   2      //         break;
- 374   2      //         
- 375   2      //         case 50:
- 376   2      //      LIGHT_TH=cds*4;
- 377   2      //         break;
- 378   2      //         
- 379   2      //         case 300:
- 380   2      //         break;
- 381   2      //         
- 382   2      //         case 2000:
- 383   2      //         break;
- 384   2              
- 385   2              case 0:   //2000LUS
- 386   2            LIGHT_TH=255;//cds*4;
- 387   2              break;
- 388   2              
- 389   2              case 1:   //300LUX
- 390   2            LIGHT_TH=255;//cds*4;
- 391   2              break;
- 392   2              
- 393   2              case 2:   //50LUX
- 394   2            LIGHT_TH=200;
- 395   2              break;
- 396   2              
- 397   2              case 3: //10LUX
- 398   2                LIGHT_TH=40;
- 399   2            
- 400   2              break;
- 401   2              
- 402   2              case 4: //5LUX
- 403   2                LIGHT_TH=20;
- 404   2              break;
- 405   2              
- 406   2              case 5:
- 407   2                LIGHT_TH=light_ad;
- 408   2                break;
- 409   2              
- 410   2              default:
- 411   2          
- 412   2              break;
- 413   2          }
- 414   1        
- 415   1         
- 416   1          savevar();
- 417   1        
- 418   1          //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 419   1          ret = mcu_dp_enum_update(DPID_CDS, cds);
- 420   1          if(ret == SUCCESS)
- 421   1              return SUCCESS;
- 422   1          else
- 423   1              return ERROR;
- 424   1      }
- 425          /*****************************************************************************
- 426          º¯ÊýÃû³Æ : dp_download_pir_sensitivity_handle
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 8   
+ 359          
+ 360          /******************************************************************************
+ 361                                          WARNING!!!                     
+ 362          æ­¤ä»£ç ä¸ºSDKå†…éƒ¨è°ƒç”¨,è¯·æŒ‰ç…§å®žé™…dpæ•°æ®å®žçŽ°å‡½æ•°å†…éƒ¨æ•°æ®
+ 363          ******************************************************************************/
+ 364          #ifdef SUPPORT_MCU_FIRM_UPDATE
+              /*****************************************************************************
+              å‡½æ•°åç§° : mcu_firm_update_handle
+              åŠŸèƒ½æè¿° : MCUè¿›å…¥å›ºä»¶å‡çº§æ¨¡å¼
+              è¾“å…¥å‚æ•° : value:å›ºä»¶ç¼“å†²åŒº
+                         position:å½“å‰æ•°æ®åŒ…åœ¨äºŽå›ºä»¶ä½ç½®
+                         length:å½“å‰å›ºä»¶åŒ…é•¿åº¦(å›ºä»¶åŒ…é•¿åº¦ä¸º0æ—¶,è¡¨ç¤ºå›ºä»¶åŒ…å‘é€å®Œæˆ)
+              è¿”å›žå‚æ•° : æ— 
+              ä½¿ç”¨è¯´æ˜Ž : MCUéœ€è¦è‡ªè¡Œå®žçŽ°è¯¥åŠŸèƒ½
+              *****************************************************************************/
+              unsigned char mcu_firm_update_handle(const unsigned char value[],unsigned long position,unsigned short len
+             -gth)
+              {
+                #error "è¯·è‡ªè¡Œå®ŒæˆMCUå›ºä»¶å‡çº§ä»£ç ,å®ŒæˆåŽè¯·åˆ é™¤è¯¥è¡Œ"
+                unsigned long addr;
+               
+                if(length == 0)
+                {
+              #ifdef ENABLE_BOOT
+                  //å›ºä»¶æ•°æ®å‘é€å®Œæˆ
+                  FlashBuffer.magic_code = FIREWARE_UPDATE_FLAG;
+                  
+                  if(Earse_Flash(PARA_ADDR) == ERROR)
+                    return ERROR;
+                  
+                  //å†™å…¥å‡çº§æ ‡å¿—
+                  if(Write_Flash(PARA_ADDR,(unsigned char *)&FlashBuffer,sizeof(FlashBuffer)) == ERROR)
+                    return ERROR;
+                  
+                  Reset();
+              #endif
+                }
+                else
+                {
+                  //å›ºä»¶æ•°æ®å¤„ç†
+                  addr = FIREWARE_ADDR_H;
+                   
+                  if(position % 1024 == 0)
+                  {
+                    if(Earse_Flash(addr + position) == ERROR)
+                      return ERROR;
+                  }
+                  
+                  if(Write_Flash(addr + position,(unsigned char *)value,length) == ERROR)
+                    return ERROR;
+                }
+              
+                return SUCCESS;
+              }
+              #endif
+ 413          /******************************************************************************
+ 414                                          WARNING!!!                     
+ 415          ä»¥ä¸‹å‡½æ•°ç”¨æˆ·è¯·å‹¿ä¿®æ”¹!!
+ 416          ******************************************************************************/
+ 417          
+ 418          /*****************************************************************************
+ 419          å‡½æ•°åç§° : dp_download_handle
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 8   
 
- 427          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_PIR_SENSITIVITYµÄ´¦Àíº¯Êý
- 428          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 429                  : length:Êý¾Ý³¤¶È
- 430          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 431          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 432          *****************************************************************************/
- 433          //static unsigned char dp_download_pir_sensitivity_handle(const unsigned char value[], unsigned short leng
-             -th)
- 434          //{
- 435          //    //Ê¾Àý:µ±Ç°DPÀàÐÍÎªENUM
- 436          //    unsigned char ret;
- 437          //    unsigned char pir_sensitivity;
- 438          //    
- 439          //    pir_sensitivity = mcu_get_dp_download_enum(value,length);
- 440          //    switch(pir_sensitivity) {
- 441          //        case 0:
- 442          //        break;
- 443          //        
- 444          //        case 1:
- 445          //        break;
- 446          //        
- 447          //        case 2:
- 448          //        break;
- 449          //        
- 450          //        default:
- 451          //    
- 452          //        break;
- 453          //    }
- 454          //    
- 455          //    //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 456          //    ret = mcu_dp_enum_update(DPID_PIR_SENSITIVITY, pir_sensitivity);
- 457          //    if(ret == SUCCESS)
- 458          //        return SUCCESS;
- 459          //    else
- 460          //        return ERROR;
- 461          //}
- 462          /*****************************************************************************
- 463          º¯ÊýÃû³Æ : dp_download_pir_delay_handle
- 464          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_PIR_DELAYµÄ´¦Àíº¯Êý
- 465          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 466                  : length:Êý¾Ý³¤¶È
- 467          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 468          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 469          *****************************************************************************/
- 470          static unsigned char dp_download_pir_delay_handle(const unsigned char value[], unsigned short length)
- 471          {
- 472   1          //Ê¾Àý:µ±Ç°DPÀàÐÍÎªVALUE
- 473   1          unsigned char ret;
- 474   1          unsigned long pir_delay;
- 475   1          
- 476   1          pir_delay = mcu_get_dp_download_value(value,length);
- 477   1          /*
- 478   1          //VALUEÀàÐÍÊý¾Ý´¦Àí
- 479   1          
- 480   1          */
- 481   1          DELAY_NUM = pir_delay*4;
- 482   1          savevar();
- 483   1        
- 484   1          //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 485   1          ret = mcu_dp_value_update(DPID_PIR_DELAY,pir_delay);
- 486   1          if(ret == SUCCESS)
- 487   1              return SUCCESS;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 9   
+ 420          åŠŸèƒ½æè¿° : dpä¸‹å‘å¤„ç†å‡½æ•°
+ 421          è¾“å…¥å‚æ•° : dpid:DPåºå·
+ 422                     value:dpæ•°æ®ç¼“å†²åŒºåœ°å€
+ 423                     length:dpæ•°æ®é•¿åº¦
+ 424          è¿”å›žå‚æ•° : æˆåŠŸè¿”å›ž:SUCCESS/å¤±è´¥è¿”å›ž:ERRO
+ 425          ä½¿ç”¨è¯´æ˜Ž : è¯¥å‡½æ•°ç”¨æˆ·ä¸èƒ½ä¿®æ”¹
+ 426          *****************************************************************************/
+ 427          unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[], unsigned short length)
+ 428          {
+ 429   1        /*********************************
+ 430   1        å½“å‰å‡½æ•°å¤„ç†å¯ä¸‹å‘/å¯ä¸ŠæŠ¥æ•°æ®è°ƒç”¨                    
+ 431   1        å…·ä½“å‡½æ•°å†…éœ€è¦å®žçŽ°ä¸‹å‘æ•°æ®å¤„ç†
+ 432   1        å®Œæˆç”¨éœ€è¦å°†å¤„ç†ç»“æžœåé¦ˆè‡³APPç«¯,å¦åˆ™APPä¼šè®¤ä¸ºä¸‹å‘å¤±è´¥
+ 433   1        ***********************************/
+ 434   1        unsigned char ret;
+ 435   1        switch(dpid)
+ 436   1        {
+ 437   2              case DPID_SWITCH_LED:
+ 438   2                  //å¼€å…³å¤„ç†å‡½æ•°
+ 439   2                  ret = dp_download_switch_led_handle(value,length);
+ 440   2              break;
+ 441   2              case DPID_BRIGHT_VALUE:
+ 442   2                  //äº®åº¦å€¼å¤„ç†å‡½æ•°
+ 443   2                  ret = dp_download_bright_value_handle(value,length);
+ 444   2              break;
+ 445   2              case DPID_LIGHT_PARAMETER:
+ 446   2                  //å…‰æ•å‚æ•°å¤„ç†å‡½æ•°
+ 447   2                  ret = dp_download_light_parameter_handle(value,length);
+ 448   2              break;
+ 449   2              case DPID_SENSE_DELAY:
+ 450   2                  //æ„Ÿåº”å»¶æ—¶å¤„ç†å‡½æ•°
+ 451   2                  ret = dp_download_sense_delay_handle(value,length);
+ 452   2              break;
+ 453   2              case DPID_SENSE_SWITCH:
+ 454   2                  //æ„Ÿåº”å¼€å…³å¤„ç†å‡½æ•°
+ 455   2                  ret = dp_download_sense_switch_handle(value,length);
+ 456   2              break;
+ 457   2              case DPID_STAYON_DELAY:
+ 458   2                  //ä¼´äº®å»¶æ—¶å¤„ç†å‡½æ•°
+ 459   2                  ret = dp_download_stayon_delay_handle(value,length);
+ 460   2              break;
+ 461   2              case DPID_SENSE_STRESS:
+ 462   2                  //æ„Ÿåº”å¼ºåº¦å¤„ç†å‡½æ•°
+ 463   2                  ret = dp_download_sense_stress_handle(value,length);
+ 464   2              break;
+ 465   2              case DPID_SENSE_CIRCLE_R:
+ 466   2                  //æ„Ÿåº”åŠå¾„å¤„ç†å‡½æ•°
+ 467   2                  ret = dp_download_sense_circle_r_handle(value,length);
+ 468   2              break;
+ 469   2      
+ 470   2      
+ 471   2        default:
+ 472   2          break;
+ 473   2        }
+ 474   1        return ret;
+ 475   1      }
+ 476          /*****************************************************************************
+ 477          å‡½æ•°åç§° : get_download_cmd_total
+ 478          åŠŸèƒ½æè¿° : èŽ·å–æ‰€æœ‰dpå‘½ä»¤æ€»å’Œ
+ 479          è¾“å…¥å‚æ•° : æ— 
+ 480          è¿”å›žå‚æ•° : ä¸‹å‘å‘½ä»¤æ€»å’Œ
+ 481          ä½¿ç”¨è¯´æ˜Ž : è¯¥å‡½æ•°ç”¨æˆ·ä¸èƒ½ä¿®æ”¹
+C51 COMPILER V8.02   PROTOCOL                                                              10/06/2020 17:42:47 PAGE 9   
 
- 488   1          else
- 489   1              return ERROR;
- 490   1      }
- 491          /*****************************************************************************
- 492          º¯ÊýÃû³Æ : dp_download_switch_pir_handle
- 493          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_SWITCH_PIRµÄ´¦Àíº¯Êý
- 494          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 495                  : length:Êý¾Ý³¤¶È
- 496          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 497          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 498          *****************************************************************************/
- 499          //static unsigned char dp_download_switch_pir_handle(const unsigned char value[], unsigned short length)
- 500          //{
- 501          //    //Ê¾Àý:µ±Ç°DPÀàÐÍÎªBOOL
- 502          //    unsigned char ret;
- 503          //    //0:¹Ø/1:¿ª
- 504          //    unsigned char switch_pir;
- 505          //    
- 506          //    switch_pir = mcu_get_dp_download_bool(value,length);
- 507          //    if(switch_pir == 0) {
- 508          //        //¿ª¹Ø¹Ø
- 509          //    }else {
- 510          //        //¿ª¹Ø¿ª
- 511          //    }
- 512          //  
- 513          //    //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 514          //    ret = mcu_dp_bool_update(DPID_SWITCH_PIR,switch_pir);
- 515          //    if(ret == SUCCESS)
- 516          //        return SUCCESS;
- 517          //    else
- 518          //        return ERROR;
- 519          //}
- 520          /*****************************************************************************
- 521          º¯ÊýÃû³Æ : dp_download_standby_time_handle
- 522          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_STANDBY_TIMEµÄ´¦Àíº¯Êý
- 523          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 524                  : length:Êý¾Ý³¤¶È
- 525          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 526          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 527          *****************************************************************************/
- 528          //static unsigned char dp_download_standby_time_handle(const unsigned char value[], unsigned short length)
- 529          //{
- 530          //    //Ê¾Àý:µ±Ç°DPÀàÐÍÎªVALUE
- 531          //    unsigned char ret;
- 532          //    unsigned long standby_time;
- 533          //    
- 534          //    standby_time = mcu_get_dp_download_value(value,length);
- 535          //    /*
- 536          //    //VALUEÀàÐÍÊý¾Ý´¦Àí
- 537          //    
- 538          //    */
- 539          //    
- 540          //    //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 541          //    ret = mcu_dp_value_update(DPID_STANDBY_TIME,standby_time);
- 542          //    if(ret == SUCCESS)
- 543          //        return SUCCESS;
- 544          //    else
- 545          //        return ERROR;
- 546          //}
- 547          /*****************************************************************************
- 548          º¯ÊýÃû³Æ : dp_download_sensing_radius_handle
- 549          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_SENSING_RADIUSµÄ´¦Àíº¯Êý
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 10  
-
- 550          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 551                  : length:Êý¾Ý³¤¶È
- 552          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 553          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 554          *****************************************************************************/
- 555          static unsigned char dp_download_sensing_radius_handle(const unsigned char value[], unsigned short length)
- 556          {
- 557   1          //Ê¾Àý:µ±Ç°DPÀàÐÍÎªVALUE
- 558   1          unsigned char ret;//,radius;
- 559   1          unsigned long sensing_radius;
- 560   1          
- 561   1          sensing_radius = mcu_get_dp_download_value(value,length);
- 562   1          /*
- 563   1          //VALUEÀàÐÍÊý¾Ý´¦Àí
- 564   1          
- 565   1          */
- 566   1         // TH=sensing_radius*1000;
- 567   1        
- 568   1          if(sensing_radius>5)sensing_radius=5;
- 569   1          else if(sensing_radius==0)sensing_radius=1;
- 570   1          //radius=sensing_radius;
- 571   1        
- 572   1          if(sensing_radius==1)
- 573   1            TH=RADIUS_1M;
- 574   1          else if(sensing_radius==2)
- 575   1            TH=RADIUS_2M;
- 576   1          else if(sensing_radius==3)
- 577   1            TH=RADIUS_3M;
- 578   1          else if(sensing_radius==4)
- 579   1            TH=RADIUS_4M;
- 580   1          else 
- 581   1            TH=RADIUS_5M;
- 582   1          
- 583   1        //  sensing_radius*=4;
- 584   1          
- 585   1        //  sensing_radius=24-sensing_radius;
- 586   1          
- 587   1          
- 588   1          //TH=sensing_radius*10000;  //5m-60000,4m-110000,3m-160000 ....1m-260000---³õ²½¹ÀËãÖµ -20200927
- 589   1        
- 590   1          savevar();
- 591   1          
- 592   1          //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 593   1          //ret = mcu_dp_value_update(DPID_SENSING_RADIUS,sensing_radius);
- 594   1          ret = mcu_dp_value_update(DPID_SENSING_RADIUS,sensing_radius);  //-20200927
- 595   1          
- 596   1          if(ret == SUCCESS)
- 597   1              return SUCCESS;
- 598   1          else
- 599   1              return ERROR;
- 600   1      }
- 601          /*****************************************************************************
- 602          º¯ÊýÃû³Æ : dp_download_hang_high_handle
- 603          ¹¦ÄÜÃèÊö : Õë¶ÔDPID_HANG_HIGHµÄ´¦Àíº¯Êý
- 604          ÊäÈë²ÎÊý : value:Êý¾ÝÔ´Êý¾Ý
- 605                  : length:Êý¾Ý³¤¶È
- 606          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERROR
- 607          Ê¹ÓÃËµÃ÷ : ¿ÉÏÂ·¢¿ÉÉÏ±¨ÀàÐÍ,ÐèÒªÔÚ´¦ÀíÍêÊý¾ÝºóÉÏ±¨´¦Àí½á¹ûÖÁapp
- 608          *****************************************************************************/
- 609          //static unsigned char dp_download_hang_high_handle(const unsigned char value[], unsigned short length)
- 610          //{
- 611          //    //Ê¾Àý:µ±Ç°DPÀàÐÍÎªVALUE
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 11  
-
- 612          //    unsigned char ret;
- 613          //    unsigned long hang_high;
- 614          //    
- 615          //    hang_high = mcu_get_dp_download_value(value,length);
- 616          //    /*
- 617          //    //VALUEÀàÐÍÊý¾Ý´¦Àí
- 618          //    
- 619          //    */
- 620          //    
- 621          //    //´¦ÀíÍêDPÊý¾ÝºóÓ¦ÓÐ·´À¡
- 622          //    ret = mcu_dp_value_update(DPID_HANG_HIGH,hang_high);
- 623          //    if(ret == SUCCESS)
- 624          //        return SUCCESS;
- 625          //    else
- 626          //        return ERROR;
- 627          //}
- 628          
- 629          
- 630          ///******************************************************************************
- 631          //                                WARNING!!!                     
- 632          //´Ë´úÂëÎªSDKÄÚ²¿µ÷ÓÃ,Çë°´ÕÕÊµ¼ÊdpÊý¾ÝÊµÏÖº¯ÊýÄÚ²¿Êý¾Ý
- 633          //******************************************************************************/
- 634          //#ifdef SUPPORT_MCU_FIRM_UPDATE
- 635          ///*****************************************************************************
- 636          //º¯ÊýÃû³Æ : mcu_firm_update_handle
- 637          //¹¦ÄÜÃèÊö : MCU½øÈë¹Ì¼þÉý¼¶Ä£Ê½
- 638          //ÊäÈë²ÎÊý : value:¹Ì¼þ»º³åÇø
- 639          //           position:µ±Ç°Êý¾Ý°üÔÚÓÚ¹Ì¼þÎ»ÖÃ
- 640          //           length:µ±Ç°¹Ì¼þ°ü³¤¶È(¹Ì¼þ°ü³¤¶ÈÎª0Ê±,±íÊ¾¹Ì¼þ°ü·¢ËÍÍê³É)
- 641          //·µ»Ø²ÎÊý : ÎÞ
- 642          //Ê¹ÓÃËµÃ÷ : MCUÐèÒª×ÔÐÐÊµÏÖ¸Ã¹¦ÄÜ
- 643          //*****************************************************************************/
- 644          //unsigned char mcu_firm_update_handle(const unsigned char value[],unsigned long position,unsigned short l
-             -ength)
- 645          //{
- 646          //  #error "Çë×ÔÐÐÍê³ÉMCU¹Ì¼þÉý¼¶´úÂë,Íê³ÉºóÇëÉ¾³ý¸ÃÐÐ"
- 647          //  unsigned long addr;
- 648          // 
- 649          //  if(length == 0)
- 650          //  {
- 651          //#ifdef ENABLE_BOOT
- 652          //    //¹Ì¼þÊý¾Ý·¢ËÍÍê³É
- 653          //    FlashBuffer.magic_code = FIREWARE_UPDATE_FLAG;
- 654          //    
- 655          //    if(Earse_Flash(PARA_ADDR) == ERROR)
- 656          //      return ERROR;
- 657          //    
- 658          //    //Ð´ÈëÉý¼¶±êÖ¾
- 659          //    if(Write_Flash(PARA_ADDR,(unsigned char *)&FlashBuffer,sizeof(FlashBuffer)) == ERROR)
- 660          //      return ERROR;
- 661          //    
- 662          //    Reset();
- 663          //#endif
- 664          //  }
- 665          //  else
- 666          //  {
- 667          //    //¹Ì¼þÊý¾Ý´¦Àí
- 668          //    addr = FIREWARE_ADDR_H;
- 669          //     
- 670          //    if(position % 1024 == 0)
- 671          //    {
- 672          //      if(Earse_Flash(addr + position) == ERROR)
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 12  
-
- 673          //        return ERROR;
- 674          //    }
- 675          //    
- 676          //    if(Write_Flash(addr + position,(unsigned char *)value,length) == ERROR)
- 677          //      return ERROR;
- 678          //  }
- 679          
- 680          //  return SUCCESS;
- 681          //}
- 682          //#endif
- 683          /******************************************************************************
- 684                                          WARNING!!!                     
- 685          ÒÔÏÂº¯ÊýÓÃ»§ÇëÎðÐÞ¸Ä!!
- 686          ******************************************************************************/
- 687          
- 688          void savevar(void)
- 689          {
- 690   1        unsigned char i;
- 691   1        Flash_EraseBlock(0X2F00);
- 692   1        Delay_us_1(10000);
- 693   1        i=(TH/1000)>>8;
- 694   1        FLASH_WriteData(i,0X2F00+0);
- 695   1        Delay_us_1(100);
- 696   1        i=(TH/1000)&0xff;
- 697   1        FLASH_WriteData(i,0X2F00+1);
- 698   1        Delay_us_1(100);
- 699   1        i=LIGHT_TH;
- 700   1        FLASH_WriteData(i,0X2F00+2);
- 701   1        Delay_us_1(100);
- 702   1        
- 703   1        i=DELAY_NUM>>10;
- 704   1        FLASH_WriteData(i,0X2F00+3);
- 705   1        Delay_us_1(100);
- 706   1        i=DELAY_NUM>>2;//&0xff;
- 707   1        FLASH_WriteData(i,0X2F00+4);
- 708   1        Delay_us_1(100);
- 709   1        
- 710   1        i=lightvalue;
- 711   1        FLASH_WriteData(i,0X2F00+5);
- 712   1        Delay_us_1(100);
- 713   1        
- 714   1        EA=1;       //-20200927
- 715   1      
- 716   1      }
- 717          
- 718          
- 719          
- 720          
- 721          /*****************************************************************************
- 722          º¯ÊýÃû³Æ : dp_download_handle
- 723          ¹¦ÄÜÃèÊö : dpÏÂ·¢´¦Àíº¯Êý
- 724          ÊäÈë²ÎÊý : dpid:DPÐòºÅ
- 725                     value:dpÊý¾Ý»º³åÇøµØÖ·
- 726                     length:dpÊý¾Ý³¤¶È
- 727          ·µ»Ø²ÎÊý : ³É¹¦·µ»Ø:SUCCESS/Ê§°Ü·µ»Ø:ERRO
- 728          Ê¹ÓÃËµÃ÷ : ¸Ãº¯ÊýÓÃ»§²»ÄÜÐÞ¸Ä
- 729          *****************************************************************************/
- 730          unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[], unsigned short length)
- 731          {
- 732   1        /*********************************
- 733   1        µ±Ç°º¯Êý´¦Àí¿ÉÏÂ·¢/¿ÉÉÏ±¨Êý¾Ýµ÷ÓÃ                    
- 734   1        ¾ßÌåº¯ÊýÄÚÐèÒªÊµÏÖÏÂ·¢Êý¾Ý´¦Àí
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 13  
-
- 735   1        Íê³ÉÓÃÐèÒª½«´¦Àí½á¹û·´À¡ÖÁAPP¶Ë,·ñÔòAPP»áÈÏÎªÏÂ·¢Ê§°Ü
- 736   1        ***********************************/
- 737   1        unsigned char ret;
- 738   1        switch(dpid)
- 739   1        {
- 740   2              case DPID_SWITCH_LED:
- 741   2                  //¿ª¹Ø´¦Àíº¯Êý
- 742   2                  ret = dp_download_switch_led_handle(value,length);
- 743   2                  if(ret==1)
- 744   2                  {
- 745   3                      switchcnt ++;
- 746   3                      if(switchcnt>=5)
- 747   3                      {
- 748   4                          switchcnt = 0;
- 749   4                          send_data(0x55);
- 750   4                          send_data(0xAA);
- 751   4                          send_data(0X00);
- 752   4                          send_data(0X04);
- 753   4                          send_data(0X00);
- 754   4                          send_data(0X00);
- 755   4                          send_data(0X03);
- 756   4                      }
- 757   3                  
- 758   3                  }
- 759   2                  
- 760   2              break;
- 761   2      //        case DPID_WORK_MODE:
- 762   2      //            //Ä£Ê½´¦Àíº¯Êý
- 763   2      //            ret = dp_download_work_mode_handle(value,length);
- 764   2      //        break;
- 765   2              case DPID_BRIGHT_VALUE:
- 766   2                  //ÁÁ¶ÈÖµ´¦Àíº¯Êý
- 767   2                  ret = dp_download_bright_value_handle(value,length);
- 768   2                  switchcnt=0;
- 769   2              break;
- 770   2      //        case DPID_DEVICE_MODE:
- 771   2      //            //Éè±¸Ä£Ê½´¦Àíº¯Êý
- 772   2      //            ret = dp_download_device_mode_handle(value,length);
- 773   2      //        break;
- 774   2              case DPID_CDS:
- 775   2                  //¹âÃô²ÎÊý´¦Àíº¯Êý
- 776   2                  ret = dp_download_cds_handle(value,length);
- 777   2                  switchcnt=0;
- 778   2              break;
- 779   2      //        case DPID_PIR_SENSITIVITY:
- 780   2      //            //ÁéÃô¶È´¦Àíº¯Êý
- 781   2      //            ret = dp_download_pir_sensitivity_handle(value,length);
- 782   2      //        break;
- 783   2              case DPID_PIR_DELAY:
- 784   2                  //¸ÐÓ¦ÑÓÊ±´¦Àíº¯Êý
- 785   2                  ret = dp_download_pir_delay_handle(value,length);
- 786   2                  switchcnt=0;
- 787   2              break;
- 788   2      //        case DPID_SWITCH_PIR:
- 789   2      //            //¸ÐÓ¦¿ª¹Ø´¦Àíº¯Êý
- 790   2      //            ret = dp_download_switch_pir_handle(value,length);
- 791   2      //        break;
- 792   2      //        case DPID_STANDBY_TIME:
- 793   2      //            //°éÁÁÑÓÊ±´¦Àíº¯Êý
- 794   2      //            ret = dp_download_standby_time_handle(value,length);
- 795   2      //        break;
- 796   2              case DPID_SENSING_RADIUS:
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          09/28/2020 17:37:45 PAGE 14  
-
- 797   2                  //¸ÐÓ¦°ë¾¶´¦Àíº¯Êý
- 798   2                  ret = dp_download_sensing_radius_handle(value,length);
- 799   2                  switchcnt=0;
- 800   2              break;
- 801   2      //        case DPID_HANG_HIGH:
- 802   2      //            //¹Ò¸ß´¦Àíº¯Êý
- 803   2      //            ret = dp_download_hang_high_handle(value,length);
- 804   2      //        break;
- 805   2      
- 806   2      
- 807   2        default:
- 808   2          break;
- 809   2        }
- 810   1      
- 811   1        
- 812   1      
- 813   1      
- 814   1        
- 815   1        return ret;
- 816   1      }
- 817          /*****************************************************************************
- 818          º¯ÊýÃû³Æ : get_download_cmd_total
- 819          ¹¦ÄÜÃèÊö : »ñÈ¡ËùÓÐdpÃüÁî×ÜºÍ
- 820          ÊäÈë²ÎÊý : ÎÞ
- 821          ·µ»Ø²ÎÊý : ÏÂ·¢ÃüÁî×ÜºÍ
- 822          Ê¹ÓÃËµÃ÷ : ¸Ãº¯ÊýÓÃ»§²»ÄÜÐÞ¸Ä
- 823          *****************************************************************************/
- 824          unsigned char get_download_cmd_total(void)
- 825          {
- 826   1        return(sizeof(download_cmd) / sizeof(download_cmd[0]));
- 827   1      }
+ 482          *****************************************************************************/
+ 483          unsigned char get_download_cmd_total(void)
+ 484          {
+ 485   1        return(sizeof(download_cmd) / sizeof(download_cmd[0]));
+ 486   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1078    ----
+   CODE SIZE        =    529    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =     10    ----
-   PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----      22
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =     16      31
+   DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

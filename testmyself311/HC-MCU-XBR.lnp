@@ -1,0 +1,9 @@
+"..\STARTUP.obj",
+"..\HC-MCU-XBR.obj",
+"..\mcu_api.obj",
+"..\protocol.obj",
+"..\system.obj" 
+TO "..\HC-MCU-XBR" 
+PRINT(".\Listings\HC-MCU-XBR.m51") RAMSIZE(256) 
+CODE( 0X0000-0X3FFF )
+XDATA( 0X0000-0X07FF )
