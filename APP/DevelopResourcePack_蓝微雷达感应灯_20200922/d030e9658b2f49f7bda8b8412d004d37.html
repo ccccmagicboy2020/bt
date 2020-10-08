@@ -1,0 +1,348 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body><h1>MCU 快速上手</h1>
+<h2>引言</h2>
+<p>在完成涂鸦三明治开发板开发环境搭建之后，本文将介绍如何使用涂鸦三明治开发板创建产品工程，以及如何在开发完成后验证、运行和维护。</p>
+<h2>物料清单</h2>
+<h3>硬件</h3>
+<p>1、涂鸦三明治 Wi-Fi 通信板（E3S）</p>
+<p><img src="/goat/20200410/e49e68bce13b4f60b52fb30a81deeb51.jpg" alt="15865055051.jpg"></p>
+<p>2、ST Nucleo 开发板</p>
+<p><img src="/goat/20200410/9daa4a5b436c41aa8ee353fecc0b1dd6.jpg" alt="15865054871.jpg"></p>
+<p>3、支持数据传输的 Micro-USB线。</p>
+<h3>软件</h3>
+<p>Arduino IDE</p>
+<h2>工程创建</h2>
+<p>作为开发者，我们需要创建工程来实现产品的两个功能：</p>
+<ul>
+<li>涂鸦三明治主控板与涂鸦三明治 Wi-Fi 通信板（E3S）之间基础的通信功能；</li>
+<li>根据自身需求编写实际产品具体 DP 点对应的功能逻辑。</li>
+</ul>
+<h3>获取 MCU SDK</h3>
+<p>为了实现涂鸦三明治套件中的主控板与涂鸦三明治 Wi-Fi 通信板（E3S）之间的通信，我们首先需要通过涂鸦 IoT 工作台根据产品生成 MCU SDK 开发包。</p>
+<p>下面以实现产品插座为例，获取插座产品 MCU SDK 开发包步骤如下：</p>
+<h4>创建产品</h4>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/3db349892a2c41368056a27d61c4e995.png" alt="微信截图_20200212204628.png"></p>
+<p>选择需要实现的产品，这里以自定义开发的 Wi-Fi 协议插座为例。</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/fe-static/tuya-docs/1961434b-775a-44b4-b90b-adfec9283092.png" alt="1576496045748"></p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200215/2caec36fca4a490f91ecc6c5578ef388.png" alt="image.png"></p>
+<p>根据功能需求选取对应的 DP 点。</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/7f6c4b626f8a47e98478c49f4b68f4ba.png" alt="f9fd01d58decf6f1d08c6d9c9fbb584.png"></p>
+<h4>下载 MCU SDK</h4>
+<p>在下述红框位置点击下载 MCU SDK 开发包。</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/fe-static/tuya-docs/a493f71e-9468-46ab-9fa8-b86cf3c30f8f.png" alt="1576496364539"></p>
+<p>平台下载的开发包压缩文件的目录如下：</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200215/b2a475d0df4145949c91552f36e0e2a8.png" alt="image.png"></p>
+<p>其中包含有说明文档、MCU SDK 文件夹、涂鸦云串口调试助手和助手所需的调试文件。</p>
+<p>在当前阶段，我们仅需要使用其中的 MCU SDK 文件夹中的内容：</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200215/39e62bce277c4d438d970a7a2f60270b.png" alt="image.png"></p>
+<p>文件夹内文件对应说明如下：</p>
+<table>
+<thead>
+<tr>
+<th>执行文件</th>
+<th>头文件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mcu_api.c</td>
+<td>mcu_api.h</td>
+<td>内含WiFi相关函数，客户可按需调用</td>
+</tr>
+<tr>
+<td>protocol.c</td>
+<td>protocol.h</td>
+<td>协议文件，用户根据项目需求，需修改这个2个文件，内含数据处理函数</td>
+</tr>
+<tr>
+<td>system.c</td>
+<td>system.h</td>
+<td>串口通讯协议的具体实现，可以不做了解</td>
+</tr>
+<tr>
+<td></td>
+<td>wifi.h</td>
+<td>WiFi相关宏定义</td>
+</tr>
+</tbody>
+</table>
+<p>接下来我们需要将SDK开发包移植到我们的工程中。</p>
+<h3>MCU SDK 包移植</h3>
+<h4>新建 Arduino IDE 工程</h4>
+<p>点击菜单栏-文件-新建，新建一个工程项目。<br>
+<img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/30251c029f634c1b9931da2d9dab23e9.png" alt="8a95108c545812f0edf0a726e7c9614.png"></p>
+<p>此时我们工程中有两个函数：<code>setup（）</code>一般用于初始化只执行一次，<code>loop（）</code>函数会循环执行。</p>
+<p>找到 MCU 开发包中以下所有**.C** 与**.H** 文件，将这些文件复制到刚刚新建的工程路径下的<strong>同一级目录</strong>，并将  <strong>.c</strong>  件后缀改为  <strong>.cpp</strong>。</p>
+<p>这样即可将 MCU SDK 包中的文件添加进当前 Arduino 的项目之中。</p>
+<p>完成后如下图所示：</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/2e651695ce8948fb8c77eab5d44460a0.png" alt="cf39370893ce6ae3dcaf6fb6a8d8439.png"></p>
+<p>重新打开 .<strong>ino</strong> 文件，即可在 IDE 中发现添加的 MCU SDK 文件：</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/03cfa2859bd74b7f98561d6ece96c455.png" alt="微信截图_20200212205613.png"></p>
+<p>完成上述所有步骤后，点击左上角对勾，进行代码编译验证。</p>
+<h4>移植操作</h4>
+<p>MCU SDK 刚导入工程，未进行任何移植操作前，编译会有报错的情况出现，这是正常现象，不要担心。接下来我们将依次对代码进行移植修改，直到编译后没有错误。</p>
+<p>移植流程中可能出现的错误如下：</p>
+<p><strong>报错一：</strong></p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/8ae7a6fc05a544b885560adf6e02c23a.png" alt="1c7b954de11204905acbae4488a3587.png"></p>
+<p><strong>原因：</strong> 在 SDK 中，每个 <code>#error</code> 出现的位置都是 SDK 移植时，用户必须要改动代码的位置，<code>#error</code> 可以提醒用户遗漏程序编写的关键部分。</p>
+<p><strong>修正方法：</strong> 这里为了方便验证通过，我们<strong>暂时</strong>在 <code>#error</code> 前添加 <code>//</code> ，使其处于注释状态，跳过提醒。<strong>注意：</strong> 在我们后续完成代码开发时，需要回到出现 <code>#error</code> 提示的位置，并按照 <code>#error</code> 的指引填写相应功能实现需要的内容。</p>
+<p><strong>报错二：</strong><br>
+<img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/2e0592444dff4aa7b13c846064514fba.png" alt="c48357a778fbf01b4060346aaecc6a5.png"></p>
+<p><strong>原因：</strong> 编译环境存在不同导致编译不通过。</p>
+<p><strong>修正方法：</strong> 我们可以在<code>system.cpp</code>文件中，找到位置并添加强制类型转换，替换后的<strong>函数</strong>参考如下所示：</p>
+<pre><code class="language-">static void product_info_update(void)
+{
+  unsigned char length = 0;
+  length = set_wifi_uart_buffer(length,(unsigned char *)"{\"p\":\"", my_strlen((unsigned char *)"{\"p\":\""));
+  length = set_wifi_uart_buffer(length,(unsigned char *)PRODUCT_KEY,my_strlen((unsigned char *)PRODUCT_KEY));
+  length = set_wifi_uart_buffer(length,(unsigned char *) "\",\"v\":\"", my_strlen((unsigned char *)"\",\"v\":\""));
+  length = set_wifi_uart_buffer(length,(unsigned char *)MCU_VER,my_strlen((unsigned char *)MCU_VER));
+  length = set_wifi_uart_buffer(length,(unsigned char *)"\",\"m\":", my_strlen((unsigned char *)"\",\"m\":"));
+  length = set_wifi_uart_buffer(length,(unsigned char *)CONFIG_MODE, my_strlen((unsigned char *)CONFIG_MODE));
+  length = set_wifi_uart_buffer(length,(unsigned char *) "}", my_strlen((unsigned char *)"}"));
+  
+  wifi_uart_write_frame(PRODUCT_INFO_CMD, length);
+}
+</code></pre>
+<p><strong>报错三：</strong></p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/9139f22b447f490c8832afbb08226247.png" alt="50791e979a7b09ee2df63b6aa67ea07.png"></p>
+<p><strong>原因：</strong> 程序常量问题。</p>
+<p><strong>修改方法：</strong> 去掉 <code>protocol.cpp</code> 和  <code>system.cpp</code> 文件中截图处的 <code>const</code>。</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/346c5971cd1042f485d4837ef5d6036e.png" alt="9c7c49f01b7ca502d883cbb2a907507.png"><br>
+<img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/d5e44dc0df424ac886d3d4bbd55cf411.png" alt="d9d28d95db871d3b34617bff6362673.png"></p>
+<p><strong>报错四：</strong><br>
+<img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/9500733364724888a46e49300148ee70.png" alt="16f6e2fba5dd3a1ec8aad623d004968.png"></p>
+<p><strong>原因：</strong> 与官方库存在重复定义。</p>
+<p><strong>修正方法：</strong> 删除 <code>wifi.h</code> 中重复定义的部分，删除内容见上图红框所示。</p>
+<p>报错解决后编译通过。我们需要实现三明治开发板与Wi-Fi模块通信之间的串口收发函数，其他移植细节请参考 STM32 的<a href="https://developer.tuya.com/cn/docs/iot/device-development/access-mode-mcu/mcu-sdk-application-wifi/sdk-transplant" target="_blank">MCU SDK 移植</a>教程。</p>
+<h4>示例代码</h4>
+<p>本 demo 可以作为开发者实现基本串口和按键功能的参考，demo 中的串口收发功能实现是调用了官方 Arduino 串口的 API，关于 Arduino API 使用说明，开发者可在 Arduino 官网查询。</p>
+<p>主程序代码示例：</p>
+<pre><code class="language-">#include "wifi.h"
+#include &lt;SoftwareSerial.h&gt;
+
+SoftwareSerial mySerial(0, 1); // RX, TX
+#define _SS_MAX_RX_BUFF 300
+#define relay 10
+int time_cnt = 0, cnt = 0, init_flag = 0;
+
+
+
+void setup() {
+
+  pinMode(relay, OUTPUT);   //继电器IO初始化
+  digitalWrite(relay, LOW);
+
+  pinMode(PC13, INPUT);     //重置wifi按键初始化
+  pinMode(8, OUTPUT);       //WiFi状态指示灯初始化
+
+  mySerial.begin(9600);     //软件串口初始化
+  mySerial.println("myserial init successful!");
+  Serial.begin(115200);     //PA3 RX   PA2 TX
+  Serial.println("serial init successful!");
+
+  wifi_protocol_init();
+}
+
+void loop() {
+  if (init_flag == 0) {
+    time_cnt++;
+    if (time_cnt % 6000 == 0) {
+      time_cnt = 0;
+      cnt ++;
+    }
+    wifi_stat_led(&amp;cnt);   //WIFI状态处理
+  }
+  wifi_uart_service();
+  myserialEvent();      //串口接收处理
+  key_scan();           //重置配网按键检测
+
+
+}
+
+
+void myserialEvent() {
+  if (mySerial.available()) {
+    unsigned char ch = (unsigned char)mySerial.read();
+    uart_receive_input(ch);
+  }
+}
+
+void key_scan(void)
+{
+  static char ap_ez_change = 0;
+  unsigned char buttonState  = HIGH;
+  buttonState = digitalRead(PC13);
+  if (buttonState == LOW) {
+    delay(3000);
+    buttonState = digitalRead(PC13);
+      printf("------%d",buttonState);
+    if (buttonState == LOW) {
+      printf("123\r\n");
+      init_flag = 0;
+      switch (ap_ez_change) {
+        case 0 :
+          mcu_set_wifi_mode(SMART_CONFIG);
+          break;
+        case 1 :
+          mcu_set_wifi_mode(AP_CONFIG);
+          break;
+        default:
+          break;
+      }
+      ap_ez_change = !ap_ez_change;
+    }
+
+  }
+}
+
+void wifi_stat_led(int *cnt)
+{
+#define wifi_stat_led 8
+  switch (mcu_get_wifi_work_state())
+  {
+    case SMART_CONFIG_STATE:  //0x00
+      init_flag = 0;
+      if (*cnt == 2) {
+        *cnt = 0;
+      }
+      if (*cnt % 2 == 0)  //LED快闪
+      {
+        digitalWrite(wifi_stat_led, LOW);
+      }
+      else
+      {
+        digitalWrite(wifi_stat_led, HIGH);
+      }
+      break;
+    case AP_STATE:  //0x01
+      init_flag = 0;
+      if (*cnt &gt;= 30) {
+        *cnt = 0;
+      }
+      if (*cnt  == 0)      //LED慢闪
+      {
+        digitalWrite(wifi_stat_led, LOW);
+      }
+      else if (*cnt == 15)
+      {
+        digitalWrite(wifi_stat_led, HIGH);
+      }
+      break;
+
+    case WIFI_NOT_CONNECTED:  //0x02
+      digitalWrite(wifi_stat_led, HIGH); //LED熄灭
+      break;
+    case WIFI_CONNECTED:  //0x03
+      break;
+    case WIFI_CONN_CLOUD:  //0x04
+      if ( 0 == init_flag )
+      {
+        digitalWrite(wifi_stat_led, LOW);//LED常亮
+        init_flag = 1;                  //wifi连接上后该灯可控
+        *cnt = 0;
+      }
+
+      break;
+
+    default:
+      digitalWrite(wifi_stat_led, HIGH);
+      break;
+  }
+}
+</code></pre>
+<p>串口发送函数实现:</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/af4e50bcb9a547aa8c06fa963c56174b.png" alt="4e96af7663d557ce6d66f042be52cda.png"></p>
+<p>改为：</p>
+<pre><code class="language-">void uart_transmit_output(unsigned char value)
+{
+//  #error "请将MCU串口发送函数填入该函数,并删除该行"
+extern SoftwareSerial mySerial;
+   mySerial.write(value);                                
+}
+</code></pre>
+<p>导入 Arduino 相应库函数头文件：</p>
+<ul>
+<li>将 <code>protocol.cpp</code> 文件里的截图红框部分</li>
+</ul>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/6871dcb909f14c54b5ac5df3b8a322d3.png" alt="0a7164018e59c7809b312469b43a5a3.png"></p>
+<p>替换为：</p>
+<pre><code class="language-">#include "wifi.h"
+#include &lt;SoftwareSerial.h&gt;
+#include "Arduino.h"
+#ifdef WEATHER_ENABLE
+</code></pre>
+<ul>
+<li>在 wifi.h 文件里的截图红框部分中</li>
+</ul>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/99b8a7f1de99499e929dcd7c26e5cf1c.png" alt="26afe0dbef4994a6a23bae096a51828.png"></p>
+<p>替换为：</p>
+<pre><code class="language-">#include "protocol.h"
+#include "system.h"
+#include "mcu_api.h"
+#include "Arduino.h"
+</code></pre>
+<h3>产品功能实现</h3>
+<p>实现基本的串口收发功能以后，就需要开发者根据需求，实现产品的具体功能。</p>
+<p>在上述示例中，我们在涂鸦 IoT 平台创建产品时，功能实现选项中选择了开关功能，选择的功能在下载的 SDK 包中生成了对应 DP 功能函数，具体的实现函数在 <code>protocol.cpp</code> 如下位置：</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200212/93a13d203b5b4f63b47c8d84e2e789c1.png" alt="Operation2.png"><br>
+关于串口通信相关移植请参考<a href="https://developer.tuya.com/cn/docs/iot/device-development/access-mode-mcu/mcu-sdk-application-wifi/sdk-transplant" target="_blank">MCU SDK 移植</a></p>
+<p>具体通信协议实现细节可参考<a href="https://developer.tuya.com/cn/docs/iot/device-development/access-mode-mcu/protocol-reference-wifi/tuya-cloud-universal-serial-port-access-protocol" target="_blank">涂鸦云通用串口接入协议</a>。</p>
+<h2>下载与调试</h2>
+<h3>下载</h3>
+<p>当开发者编写好产品的应用程序后，可通过以下步骤将代码下载到涂鸦三明治开发板中。</p>
+<p>1、将三明治开发板与电脑相连，选择对应的端口</p>
+<p>2、点击上传</p>
+<h2>结果展示</h2>
+<p>通过以上步骤将程序下载到我们的开发板中，下载成功出现以下页面：</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/fe-static/tuya-docs/45a6f8c7-b16f-4c78-b1f3-44e6c963fa2b.png" alt=""></p>
+<h3>调试</h3>
+<p>涂鸦三明治开发板调试可以通过<code>printf()</code>函数格式化输出我们需要调试的信息</p>
+<p>1、初始化硬件串口语句： <code>Serial.begin(115200);</code> ；</p>
+<p>2、涂鸦三明治开发板库中已将 <code>printf()</code> 函数重定向到了串口，因此开发者可以直接使用 <code>printf() </code> 函数完成数据收发。</p>
+<h2>配网App</h2>
+<p>将程序下载到后开发板重新上电，此时  Wi-Fi  模块默认处于  EZ  配网模式，使用涂鸦智能  App  进行配网。</p>
+<p>我们可以根据模块上配网指示灯的不同状态，判断当前模块的配网状态：</p>
+<table>
+<thead>
+<tr>
+<th>配网指示灯</th>
+<th>配网状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>快闪</td>
+<td>EZ 配网状态，等待配网</td>
+</tr>
+<tr>
+<td>慢闪</td>
+<td>AP 配网状态，等待配网</td>
+</tr>
+<tr>
+<td>熄灭</td>
+<td>Wi-Fi已配置且连上路由器</td>
+</tr>
+<tr>
+<td>常亮</td>
+<td>已连上路由器且连接到云端</td>
+</tr>
+</tbody>
+</table>
+<p>配网步骤：</p>
+<p>step1：打开涂鸦智能 APP，点击图示添加设备按钮</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20191212/71fd75877263460a96072e4b73d072ea.png" alt="image.png"></p>
+<p>step2：选择对应品类，添加设备</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20191212/858b18b66b2649a49af7dca38df271cd.png" alt="image.png"></p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20191212/89325db7e17d4439a46950e9b201b62b.png" alt="image.png"></p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20191212/cf244e25748c4a4090622c853a8cc038.png" alt="image.png"></p>
+<p>step3：配网中，等待配网完成</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20191212/efd5afb44ee64e1fad7044af7f94f699.png" alt="image.png"></p>
+<p><img src="https://airtApp-public-data.oss-cn-hangzhou.aliyuncs.com/fe-static/tuya-docs/ebd45db3-037e-439c-b96e-13ade2315929.jpg" alt=""></p>
+<p>step4：设备配网成功，我们可通过APP进行相应控制</p>
+<p><img src="https://airtake-public-data.oss-cn-hangzhou.aliyuncs.com/goat/20200215/230ae477a1a74e67b9882994abba1fbc.png" alt="image.png"></p>
+<h2>附录</h2>
+<p>文字出现的专业名称请见<a href="https://developer.tuya.com/cn/docs/iot/introduction-of-tuya/terms" target="_blank">专业名词解释</a>。</p>
+<p>涂鸦云模组串口协议请见<a href="https://developer.tuya.com/cn/docs/iot/device-development/access-mode-mcu/protocol-reference-wifi/tuya-cloud-universal-serial-port-access-protocol" target="_blank">涂鸦云通用串口接入协议</a>。</p>
+<p>使用 STM32 进行 MCU SDK 移植参考教程请见<a href="https://developer.tuya.com/cn/docs/iot/device-development/access-mode-mcu/software-reference-wifi/overview-of-migrating-tuyas-mcu-sdk" target="_blank">MCU SDK 移植</a>。</p>
+</body></html>

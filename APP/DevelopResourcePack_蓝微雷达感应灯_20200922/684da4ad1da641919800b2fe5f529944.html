@@ -1,0 +1,259 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body><h1>固件升级</h1>
+<p>如果采用 MCU 通用固件对接或 IPC SDK 对接，当需要对已出货的设备进行固件升级时，可以通过 IoT 工作台进行远程在线升级，无需烧录。此功能需控制板支持固件升级。本文介绍 MCU 通用固件对接和 IPC SDK 对接的升级流程。</p>
+<h2>前提条件</h2>
+<p>您已经创建了至少一个产品。详情请参考 <a href="https://developer.tuya.com/cn/docs/iot/configure-in-platform/create-product/create-product?id=K914jp1ijtsfe" target="_blank">选品类创建产品</a>。</p>
+<h2>方式一：升级为已发布的涂鸦固件</h2>
+<ol>
+<li>
+<p>登录 <a href="https://iot.tuya.com/pmg/list" target="_blank">IoT 工作台产品列表</a>。</p>
+</li>
+<li>
+<p>鼠标悬浮至一款 <strong>开发中</strong> 的产品，单击 <strong>进入开发</strong>。</p>
+</li>
+<li>
+<p>单击 <strong>云端配置</strong>。</p>
+<p><img src="/goat/20200724/d559534b55cd4be1bd24b02621e557cf.png" alt="云端配置"></p>
+</li>
+<li>
+<p>找到 <strong>固件升级</strong> 栏，单击 <strong>设置</strong>。</p>
+</li>
+<li>
+<p>选择需要升级的固件版本，单击 <strong>编辑</strong>。</p>
+<p><img src="/goat/20200903/67e041328572467eb43e8f864950b9b3.png" alt="image.png"></p>
+</li>
+<li>
+<p>填写相关内容，单击 <strong>确定</strong>。</p>
+<p><img src="/goat/20200820/df448f36625a401386de96ef78137360.png" alt="填写固件信息.png"></p>
+<ul>
+<li>选择升级方式：</li>
+<li>App 提醒升级：用户在 App 端收到升级提醒，可选择升级或不升级。</li>
+<li>App 静默升级：设备静默升级，App 用户（设备的消费者）无感知。</li>
+<li>App 强制升级：App 用户必须升级后才能继续使用。</li>
+<li>App 检测升级：App 用户主动单击对应设备的面板，然后单击右上角，主动更新。</li>
+<li>添加升级文案：需填写中、英文升级文案。</li>
+</ul>
+</li>
+<li>
+<p>单击 <strong>常用白名单管理</strong>，设置 App 用户账号进行测试。</p>
+<p><img src="/goat/20200903/8f7ba4ec3e004deb8540cfadc5b76e99.png" alt="image.png"></p>
+<ul>
+<li>支持根据您的 App 账号批量选择设备 ID，请先设置测试白名单。</li>
+<li>支持选择设备所在区域，即中国区、美国区、欧洲区、微软区、印度区和西欧区。</li>
+<li>新增白名单支持通过用户的 App 账号进行添加。输入 App 账号并且验证通过后，此账号下该 PID （产品 ID）的所有设备会添加至白名单。</li>
+</ul>
+<p><img src="/goat/20200820/4b50ecf2ae0f417fbdc5023533638905.png" alt="白名单.png"></p>
+<blockquote>
+<p><strong>说明</strong>：安全起见，需要对 App 用户账号进行验证。</p>
+</blockquote>
+</li>
+<li>
+<p>固件推送并验证。</p>
+<ul>
+<li>
+<p>单击固件升级栏的 <strong>验证</strong>，进入如下页面，支持在六区（中国区、美国区、欧洲区、微软区、印度区和西欧区）进行设备验证。</p>
+<p><img src="/goat/20200831/d09d2cb99931496ea9f7e5b13f6bf740.png" alt="固件升级验证.png"></p>
+</li>
+<li>
+<p>添加测试设备时，支持添加设备 ID直接添加，也可直接从白名单管理中选择设备 ID，选中设备 ID 后，即推送固件到这几个设备上。</p>
+<p><img src="/goat/20200820/b287fd036615409893f133dc72654661.png" alt="添加测试设备.png"></p>
+<p><img src="/goat/20200820/e42b9f0c643f489799785b5c0ed38508.png" alt="从白名单添加测试设备.png"></p>
+</li>
+<li>
+<p>单击 <strong>验证是否完成升级</strong> 进行测试设备验证。</p>
+<p><img src="/goat/20200901/57f376c9a4b348e5ae075420fa865be3.png" alt="验证是否完成升级.png"></p>
+</li>
+</ul>
+</li>
+<li>
+<p>OTA 固件升级发布申请。</p>
+<p>测试设备验证成功后，可单击 <strong>发布</strong> 按钮，进入发布界面。</p>
+<p><img src="/goat/20200901/832ec7ef579846939a0cfbd56428394f.png" alt="固件发布.png"></p>
+<p>新版固件升级发布流程如下：</p>
+<ul>
+<li>单击 <strong>发布</strong> 按钮，进入发布界面。</li>
+<li>单击 <strong>灰度发布</strong> 功能，可以按照不同数据区（非设备所在的地理位置）和不同的比例进行发布。</li>
+<li>或单击 <strong>切换到旧版</strong> ，使用旧版固件发布功能，后期旧版固件发布功能将停用，停用前会提前进行通知。<br>
+<img src="/goat/20200831/973c5dd959f0484083cfcd07f4a9d82a.png" alt="切换到旧版.png"></li>
+<li>不同数据区的设备相互隔离，可通过切换不同的数据区选择对应的设备，分别发布。</li>
+<li><strong>灰度升级比例设置</strong>：通过调整灰度比例后提交，可以发布不同比例的设备数，建议前几次发布，设置较小的比例，如 5% 。</li>
+<li><strong>暂停发布</strong>：如在发布过过程中，有用户反馈固件有问题，可以直接暂停发布降低影响，排查完问题后也可恢复发布。</li>
+<li><strong>灰度升级核心数据</strong>：主要展示如下数据：
+<ul>
+<li>目标设备总数</li>
+<li>灰度设备数</li>
+<li>升级触发设备数</li>
+<li>升级成功设备数<br>
+<img src="/goat/20200901/2b87d04133914ae18fc652b2aa72268b.png" alt="灰度升级核心数据.png"></li>
+</ul>
+</li>
+<li><strong>数据可视化</strong>：展示发布过程的中数据情况，用户可以通过观察数据，决定每次发布的比例，直至发布到100%。
+<ul>
+<li><strong>数据分析</strong>：提供升级状态分布和升级次数分布图。<br>
+<img src="/goat/20200901/452cc94fc0084fb3bebe466db9fb60b5.png" alt="数据分析.png"></li>
+</ul>
+</li>
+<li><strong>数据趋势</strong>：查看升级触发设备数和升级成功设备数随时间变化趋势图。<br>
+<img src="/goat/20200901/418346e0824a427e8c8feeeb84e4fc2b.png" alt="数据趋势.png"></li>
+<li><strong>升级设备明细</strong>：提供根据设备ID维度的设备升级明细，供用户查询。<br>
+<img src="/goat/20200901/c0b1680ee52343168e7c788168672bb2.png" alt="升级设备明细.png"></li>
+</ul>
+<p>旧版固件升级发布流程如下：</p>
+<ul>
+<li>
+<p>单击 <strong>发布</strong> 按钮，进入发布界面。</p>
+</li>
+<li>
+<p>单击 <strong>全量发布</strong> 或 <strong>灰度发布</strong> 后，系统将自动提交一个发布申请，涂鸦会审核发布和固件的安全性，审核通过后会向您选择的发布范围进行消费者推送。</p>
+<p><img src="/goat/20200820/eb9d26e3c458463c83fb8b3a5d9818f2.png" alt="发布固件版本.png"></p>
+</li>
+<li>
+<p>测试设备验证通过后，可进行 OTA 固件发布。</p>
+</li>
+<li>
+<p>支持多区发布。</p>
+</li>
+<li>
+<p>支持灰度发布和全量发布，可设置发布时间。灰度发布时，可选择地域（多选）、数量和版本号（多选）。</p>
+</li>
+<li>
+<p>确认发布后，对于未审核过的固件我们需要预留 24 小时去审核。已审核过的无需预留审核时间。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2>方式二：自行上传或升级固件</h2>
+<p>普通设备的自定义开发方案支持客户添加自定义固件，包括 MCU SDK 、模组 SDK 对接、SDK 对接均可支持您的自定义固件。具体操作步骤如下：</p>
+<ol>
+<li>
+<p>登录 <a href="https://iot.tuya.com/pmg/list" target="_blank">IoT 工作台产品列表</a>。</p>
+</li>
+<li>
+<p>鼠标悬浮至一款 <strong>开发中</strong> 的产品，单击 <strong>进入开发</strong>。</p>
+</li>
+<li>
+<p>进入第三步  <strong>硬件开发</strong>。</p>
+</li>
+<li>
+<p>选择涂鸦固件后，单击 <strong>新增自定义固件</strong>。</p>
+<p><img src="/goat/20200903/5f0940e7899f4f39a448ecc2d6d9d954.png" alt="image.png"></p>
+<p>填写如下信息：</p>
+<p><img src="/goat/20200820/c0eaa8e15e3f4c6e8159f97a7b9eac6d.png" alt="填写固件信息.png"></p>
+<ul>
+<li><strong>固件标识名</strong>：固件管理主键，可以根据自己管理规范输入。</li>
+<li><strong>固件名称</strong>：包含中英文，仅用于管理固件，不对外显示。</li>
+<li><strong>固件类型</strong>：选请结合您的开发方式选择对应固件类型：
+<ul>
+<li>若为 MCU SDK 开发方式，上传 MCU 固件时，建议选择 MCU 固件。</li>
+<li>其他开发方式，主通讯固件请选择 <strong>模组固件</strong>。</li>
+<li>如果模组固件被暂用，可以根据自己模组通讯类型选择。</li>
+</ul>
+</li>
+<li><strong>通道号</strong>：如果固件类型为模组固件、蓝牙固件、Zigbee 固件、MCU 固件，会有预设好的通道号，用户无需再次选择通道号。关于 <strong>通道号</strong> 介绍，具体请参考 <a href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A" target="_blank">名词解释</a>。</li>
+<li><strong>芯片平台</strong>：根据固件开发的芯片平台来选择，若没有芯片平台，可选择 <strong>其他</strong>。选择 <strong>其他</strong> 时，该芯片暂时不支持使用涂鸦烧录工具，不可上传生产固件包，仅支持 OTA 升级。</li>
+</ul>
+</li>
+<li>
+<p>固件新增成功后，您可以在线编辑固件、设置 OTA 升级、清除和上传生产固件。</p>
+<ul>
+<li>
+<p><strong>编辑固件</strong>：如果有固件包信息，您可以修改固件中英文名称、固件升级超时时间。</p>
+</li>
+<li>
+<p><strong>上传生产固件包</strong>：仅芯片平台为涂鸦烧录工具支持的芯片时，可以上传生产固件包，支持使用涂鸦烧录工具烧录。</p>
+</li>
+<li>
+<p><strong>OTA 固件</strong>：所有固件可以使用涂鸦固件升级功能进行 OTA 升级。</p>
+</li>
+<li>
+<p><strong>清除</strong>：当固件未上传过固件包时，可删除固件。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h3>如何上传生产固件包</h3>
+<p>新增自定义固件时，如果选择的芯片是 <strong>涂鸦标准芯片</strong>，在固件列表可以看到 <strong>上传生产固件</strong> 的入口。关于 <strong>涂鸦标准芯片</strong> 介绍，具体请参考 <a href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A" target="_blank">名词解释</a>。</p>
+<ol>
+<li>
+<p>单击 <strong>上传生产固件</strong>，输入以下固件包对应信息，即可使用涂鸦上位机烧录固件。</p>
+<p><img src="/goat/20200820/75825d744bd64230a169e1ce97e7066e.png" alt="上传生产固件包.png"></p>
+<ul>
+<li>
+<p>固件版本：必填。</p>
+</li>
+<li>
+<p>生产固件、用户区固件：必填，可上传相同固件包。</p>
+</li>
+<li>
+<p>允许模式：根据 Flash 的烧录方式进行选择，8285 的芯片会选择 DOUT ，其他的所有芯片都是选 QIO ，另外两种基本不使用。还可根据编译后 SDK 名称查看应该要选择的模式。</p>
+<p><img src="/goat/20200820/68a667787f9644428e36217cbb96e228.png" alt="允许模式.png"></p>
+</li>
+<li>
+<p>固件使用的 SDK 版本：选择开发固件使用的 SDK 版本。</p>
+</li>
+</ul>
+<p><img src="/goat/20200820/21d337d6e3f04ee88eb5fb8c0a294fa3.png" alt="固件SDK版本.png"></p>
+</li>
+<li>
+<p>单击 <strong>确定</strong> 完成设置。</p>
+</li>
+</ol>
+<h3>如何 OTA 升级固件</h3>
+<p>若芯片为非涂鸦标准芯片/其他时，不支持上传生产固件包，但可以设置 OTA 升级。</p>
+<ol>
+<li>
+<p>在涂鸦 IoT 开发平台上，OTA 固件的功能主要有如下几个入口。</p>
+<ul>
+<li>
+<p>选择一款 <strong>开发中</strong> 产品，进入开发后，单击进入第四步 <strong>云端配置</strong> &gt; <strong>固件升级</strong> 入口。</p>
+<p><img src="/goat/20200724/d559534b55cd4be1bd24b02621e557cf.png" alt="云端配置"></p>
+</li>
+<li>
+<p>选择一款 <strong>开发中</strong> 产品，<strong>开发中</strong> 产品，单击进入第三步 <strong>硬件开发</strong> &gt; <strong>已选固件</strong>，单击<strong>更多</strong>选择<strong>OTA 升级</strong>进入固件升级页面。</p>
+<p><img src="/goat/20200820/5c5419bdbb274cafa96ad8720acc8931.png" alt="固件升级入口.png"></p>
+</li>
+<li>
+<p>在 <strong>产品概况</strong> 页面，单击右侧 <strong>云端配置</strong> 进入 <strong>固件升级</strong> 页面。</p>
+<p><img src="/goat/20200820/46959464ae504057bdad24d33e5cd0be.png" alt="产品概况入口.png"></p>
+</li>
+</ul>
+</li>
+<li>
+<p>进入固件升级页面后，可支持新增编辑固件版本、验证固件可用性等。</p>
+<ul>
+<li>
+<p>新增固件版本：仅用户自己上传的固件支持新增版本。</p>
+<p><img src="/goat/20200910/48f160a509ee4709b836e5ef8ca1a100.png" alt="新增固件版本.png"></p>
+<p><img src="/goat/20200820/002f6d0f991042299cd9f037ec9d2bbf.png" alt="编辑固件信息.png"></p>
+</li>
+</ul>
+<p>新增完成后，固件版本不可修改。</p>
+<p>涂鸦固件仅支持添加测试设备验证、升级。</p>
+<p><img src="/goat/20200820/f65eed4465e545e487919e76ee32a6f3.png" alt="添加测试设备.png"></p>
+</li>
+</ol>
+<h2>名词解释</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>涂鸦标准芯片</td>
+<td>是芯片的标签，涂鸦自己已经使用过的芯片，可以复用涂鸦自己的上位机程序，用涂鸦的上位机进行烧录。</td>
+</tr>
+<tr>
+<td>通道号</td>
+<td>仅用于固件升级。当一个产品存在多个固件需要升级时，涂鸦云和涂鸦设备会通过升级通道号，区分不同的升级固件，然后进行不同的升级操作。</td>
+</tr>
+<tr>
+<td>固件灰度发布</td>
+<td>灰度发布（Gray Release ）是为了能够让设备固件版本逐步过渡到新版固件的一种发布方式。一般是新固件开发完成即将发布升级时，可进行 A/B 测试，即让一部分用户继续使用老版本 A ，一部分用户开始用新版本 B ，如果用户对版本 B 无反对意见，且版本 B 没有漏洞，则可逐步扩大范围，将所有固件都迁移到版本 B。</td>
+</tr>
+</tbody>
+</table>
+<h2>相关视频</h2>
+<p>观看以下视频了解如何进行固件升级。</p>
+<iframe src="//player.bilibili.com/player.html?aid=56974864&amp;bvid=BV1Nx411d7f2&amp;cid=99507771&amp;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></body></html>
