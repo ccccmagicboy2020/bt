@@ -93,23 +93,32 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //备注:灯的亮度值
 #define DPID_BRIGHT_VALUE 3
 //光敏参数(可下发可上报)
-//备注:光的敏感度
-#define DPID_LIGHT_PARAMETER 101
+//备注:红外对光的敏感度
+#define DPID_CDS 101
 //感应延时(可下发可上报)
-//备注:
-#define DPID_SENSE_DELAY 102
+//备注:如果雷达感应到人体，灯点亮延长时间
+#define DPID_PIR_DELAY 102
 //感应开关(可下发可上报)
-//备注:
-#define DPID_SENSE_SWITCH 103
+//备注:雷达感应开关
+#define DPID_SWITCH_XBR 103
 //伴亮延时(可下发可上报)
-//备注:
-#define DPID_STAYON_DELAY 104
+//备注:到完全关闭的时间
+#define DPID_STANDBY_TIME 104
 //感应强度(可下发可上报)
-//备注:
+//备注:雷达模组感应强度值
 #define DPID_SENSE_STRESS 105
-//感应半径(可下发可上报)
-//备注:
-#define DPID_SENSE_CIRCLE_R 106
+//设备地址(可下发可上报)
+//备注:mesh设备地址
+#define DPID_ADDR 106
+//设备地址结束值(可下发可上报)
+//备注:设备地址结束值
+#define DPID_ADDREND 107
+//设备群组(可下发可上报)
+//备注:mesh群组
+#define DPID_GROUP 108
+//调试字串(只上报)
+//备注:调试用字串
+#define DPID_DEBUG 109
 
 
 

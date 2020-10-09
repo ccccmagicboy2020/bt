@@ -53,12 +53,15 @@ const DOWNLOAD_CMD_S download_cmd[] =
 {
   {DPID_SWITCH_LED, DP_TYPE_BOOL},
   {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
-  {DPID_LIGHT_PARAMETER, DP_TYPE_VALUE},
-  {DPID_SENSE_DELAY, DP_TYPE_VALUE},
-  {DPID_SENSE_SWITCH, DP_TYPE_BOOL},
-  {DPID_STAYON_DELAY, DP_TYPE_VALUE},
+  {DPID_CDS, DP_TYPE_ENUM},
+  {DPID_PIR_DELAY, DP_TYPE_VALUE},
+  {DPID_SWITCH_XBR, DP_TYPE_BOOL},
+  {DPID_STANDBY_TIME, DP_TYPE_VALUE},
   {DPID_SENSE_STRESS, DP_TYPE_VALUE},
-  {DPID_SENSE_CIRCLE_R, DP_TYPE_VALUE},
+  {DPID_ADDR, DP_TYPE_VALUE},
+  {DPID_ADDREND, DP_TYPE_VALUE},
+  {DPID_GROUP, DP_TYPE_VALUE},
+  {DPID_DEBUG, DP_TYPE_STRING},
 };
 
 
@@ -117,12 +120,15 @@ void all_data_update(void)
   //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报函数
     mcu_dp_bool_update(DPID_SWITCH_LED,当前开关); //BOOL型数据上报;
     mcu_dp_value_update(DPID_BRIGHT_VALUE,当前亮度值); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_LIGHT_PARAMETER,当前光敏参数); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_SENSE_DELAY,当前感应延时); //VALUE型数据上报;
-    mcu_dp_bool_update(DPID_SENSE_SWITCH,当前感应开关); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_STAYON_DELAY,当前伴亮延时); //VALUE型数据上报;
+    mcu_dp_enum_update(DPID_CDS,当前光敏参数); //枚举型数据上报;
+    mcu_dp_value_update(DPID_PIR_DELAY,当前感应延时); //VALUE型数据上报;
+    mcu_dp_bool_update(DPID_SWITCH_XBR,当前感应开关); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_STANDBY_TIME,当前伴亮延时); //VALUE型数据上报;
     mcu_dp_value_update(DPID_SENSE_STRESS,当前感应强度); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_SENSE_CIRCLE_R,当前感应半径); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR,当前设备地址); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDREND,当前设备地址结束值); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_GROUP,当前设备群组); //VALUE型数据上报;
+    mcu_dp_string_update(DPID_DEBUG,当前调试字串指针,当前调试字串数据长度); //STRING型数据上报;
 
 
 
@@ -192,110 +198,129 @@ static unsigned char dp_download_bright_value_handle(const unsigned char value[]
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_light_parameter_handle
-功能描述 : 针对DPID_LIGHT_PARAMETER的处理函数
+函数名称 : dp_download_cds_handle
+功能描述 : 针对DPID_CDS的处理函数
 输入参数 : value:数据源数据
         : length:数据长度
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_light_parameter_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_cds_handle(const unsigned char value[], unsigned short length)
 {
-    //示例:当前DP类型为VALUE
+    //示例:当前DP类型为ENUM
     unsigned char ret;
-    unsigned long light_parameter;
+    unsigned char cds;
     
-    light_parameter = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
+    cds = mcu_get_dp_download_enum(value,length);
+    switch(cds) {
+        case 0:
+        break;
+        
+        case 1:
+        break;
+        
+        case 2:
+        break;
+        
+        case 3:
+        break;
+        
+        case 4:
+        break;
+        
+        case 5:
+        break;
+        
+        default:
     
-    */
+        break;
+    }
     
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_LIGHT_PARAMETER,light_parameter);
+    ret = mcu_dp_enum_update(DPID_CDS, cds);
     if(ret == SUCCESS)
         return SUCCESS;
     else
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_sense_delay_handle
-功能描述 : 针对DPID_SENSE_DELAY的处理函数
+函数名称 : dp_download_pir_delay_handle
+功能描述 : 针对DPID_PIR_DELAY的处理函数
 输入参数 : value:数据源数据
         : length:数据长度
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_sense_delay_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_pir_delay_handle(const unsigned char value[], unsigned short length)
 {
     //示例:当前DP类型为VALUE
     unsigned char ret;
-    unsigned long sense_delay;
+    unsigned long pir_delay;
     
-    sense_delay = mcu_get_dp_download_value(value,length);
+    pir_delay = mcu_get_dp_download_value(value,length);
     /*
     //VALUE类型数据处理
     
     */
     
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_SENSE_DELAY,sense_delay);
+    ret = mcu_dp_value_update(DPID_PIR_DELAY,pir_delay);
     if(ret == SUCCESS)
         return SUCCESS;
     else
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_sense_switch_handle
-功能描述 : 针对DPID_SENSE_SWITCH的处理函数
+函数名称 : dp_download_switch_xbr_handle
+功能描述 : 针对DPID_SWITCH_XBR的处理函数
 输入参数 : value:数据源数据
         : length:数据长度
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_sense_switch_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], unsigned short length)
 {
     //示例:当前DP类型为BOOL
     unsigned char ret;
     //0:关/1:开
-    unsigned char sense_switch;
+    unsigned char switch_xbr;
     
-    sense_switch = mcu_get_dp_download_bool(value,length);
-    if(sense_switch == 0) {
+    switch_xbr = mcu_get_dp_download_bool(value,length);
+    if(switch_xbr == 0) {
         //开关关
     }else {
         //开关开
     }
   
     //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_SENSE_SWITCH,sense_switch);
+    ret = mcu_dp_bool_update(DPID_SWITCH_XBR,switch_xbr);
     if(ret == SUCCESS)
         return SUCCESS;
     else
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_stayon_delay_handle
-功能描述 : 针对DPID_STAYON_DELAY的处理函数
+函数名称 : dp_download_standby_time_handle
+功能描述 : 针对DPID_STANDBY_TIME的处理函数
 输入参数 : value:数据源数据
         : length:数据长度
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_stayon_delay_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_standby_time_handle(const unsigned char value[], unsigned short length)
 {
     //示例:当前DP类型为VALUE
     unsigned char ret;
-    unsigned long stayon_delay;
+    unsigned long standby_time;
     
-    stayon_delay = mcu_get_dp_download_value(value,length);
+    standby_time = mcu_get_dp_download_value(value,length);
     /*
     //VALUE类型数据处理
     
     */
     
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_STAYON_DELAY,stayon_delay);
+    ret = mcu_dp_value_update(DPID_STANDBY_TIME,standby_time);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -329,27 +354,81 @@ static unsigned char dp_download_sense_stress_handle(const unsigned char value[]
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_sense_circle_r_handle
-功能描述 : 针对DPID_SENSE_CIRCLE_R的处理函数
+函数名称 : dp_download_addr_handle
+功能描述 : 针对DPID_ADDR的处理函数
 输入参数 : value:数据源数据
         : length:数据长度
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_sense_circle_r_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_addr_handle(const unsigned char value[], unsigned short length)
 {
     //示例:当前DP类型为VALUE
     unsigned char ret;
-    unsigned long sense_circle_r;
+    unsigned long addr;
     
-    sense_circle_r = mcu_get_dp_download_value(value,length);
+    addr = mcu_get_dp_download_value(value,length);
     /*
     //VALUE类型数据处理
     
     */
     
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_SENSE_CIRCLE_R,sense_circle_r);
+    ret = mcu_dp_value_update(DPID_ADDR,addr);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+/*****************************************************************************
+函数名称 : dp_download_addrend_handle
+功能描述 : 针对DPID_ADDREND的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_addrend_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为VALUE
+    unsigned char ret;
+    unsigned long addrend;
+    
+    addrend = mcu_get_dp_download_value(value,length);
+    /*
+    //VALUE类型数据处理
+    
+    */
+    
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_value_update(DPID_ADDREND,addrend);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+/*****************************************************************************
+函数名称 : dp_download_group_handle
+功能描述 : 针对DPID_GROUP的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_group_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为VALUE
+    unsigned char ret;
+    unsigned long group;
+    
+    group = mcu_get_dp_download_value(value,length);
+    /*
+    //VALUE类型数据处理
+    
+    */
+    
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_value_update(DPID_GROUP,group);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -442,29 +521,37 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
             //亮度值处理函数
             ret = dp_download_bright_value_handle(value,length);
         break;
-        case DPID_LIGHT_PARAMETER:
+        case DPID_CDS:
             //光敏参数处理函数
-            ret = dp_download_light_parameter_handle(value,length);
+            ret = dp_download_cds_handle(value,length);
         break;
-        case DPID_SENSE_DELAY:
+        case DPID_PIR_DELAY:
             //感应延时处理函数
-            ret = dp_download_sense_delay_handle(value,length);
+            ret = dp_download_pir_delay_handle(value,length);
         break;
-        case DPID_SENSE_SWITCH:
+        case DPID_SWITCH_XBR:
             //感应开关处理函数
-            ret = dp_download_sense_switch_handle(value,length);
+            ret = dp_download_switch_xbr_handle(value,length);
         break;
-        case DPID_STAYON_DELAY:
+        case DPID_STANDBY_TIME:
             //伴亮延时处理函数
-            ret = dp_download_stayon_delay_handle(value,length);
+            ret = dp_download_standby_time_handle(value,length);
         break;
         case DPID_SENSE_STRESS:
             //感应强度处理函数
             ret = dp_download_sense_stress_handle(value,length);
         break;
-        case DPID_SENSE_CIRCLE_R:
-            //感应半径处理函数
-            ret = dp_download_sense_circle_r_handle(value,length);
+        case DPID_ADDR:
+            //设备地址处理函数
+            ret = dp_download_addr_handle(value,length);
+        break;
+        case DPID_ADDREND:
+            //设备地址结束值处理函数
+            ret = dp_download_addrend_handle(value,length);
+        break;
+        case DPID_GROUP:
+            //设备群组处理函数
+            ret = dp_download_group_handle(value,length);
         break;
 
 
