@@ -553,7 +553,7 @@ uchar read_ad(uchar ch)
 	}
 	
 	//ADC_P14_AN5;
-	ADCC1 =1;
+	ADCC1 =1;		//切换到an1
 	i=ad_sum>>8;
 	
 	Delay_us(100);
@@ -697,7 +697,7 @@ void XBRHandle(void)
 					if(LIGHT==0)	
 					{
 						//light_ad=READ_LIGHT();
-						light_ad=read_ad(10);
+						light_ad=read_ad(10);		//切换到an10
 
 						if((light_ad<=(light_ad0+2))&&(light_ad0<=(light_ad+2)))
 							light_ad=light_ad0;
@@ -1201,7 +1201,7 @@ unsigned char PWM3init(unsigned char ab)
 void main()
 {
 	u8 i,j;
-	bt_protocol_init();
+	bt_protocol_init();		//mcu_sdk
 	InitSYS();
 	GPIO_Init();
 	LIGHT_ON;
@@ -1229,7 +1229,7 @@ void main()
 	light_ad0=light_ad;
 	
 	EA=0;
-	set_var();
+	set_var();	//从flash读取出变量
 	
 	//for(i=0;i<5;i++)send_data(guc_Read_a[i]);
 	
@@ -1247,14 +1247,13 @@ void main()
 // 	for(i=0;i<7;i++)send_data(TXdata[i]);	
 	resetbtcnt++;
 	
-	Flash_EraseBlock(0X2F80);
+	Flash_EraseBlock(0x2F80);
 	Delay_us_1(10000);
-	FLASH_WriteData(resetbtcnt,0X2F80);
+	FLASH_WriteData(resetbtcnt, 0x2F80);
 	Delay_us_1(100);
 	
 	EA=1;
 	
-
 	wait1();
 
 	slowchcnt = lightvalue;
@@ -1272,7 +1271,7 @@ void main()
 		if(resetbtcnt>=3)
 		{
 			resetbtcnt = 0;
-			send_data(0x55);
+			send_data(0x55);//p15，重置模块
 			send_data(0xAA);
 			send_data(0X00);
 			send_data(0X04);
@@ -1281,10 +1280,11 @@ void main()
 			send_data(0X03);
 			
 		}
+
 		WDTC |= 0x10;		//清看门狗
 		bt_uart_service();
 		
-		if(SWITCHfXBR==1)//雷达开
+		if(SWITCHfXBR==1)//雷达开, app控制
 		{
 			if(while_2flag==0)
 			{
