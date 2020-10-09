@@ -7,7 +7,7 @@
 
 
 
-#define  VERSION  0X21
+//#define  VERSION  0X21
 
 #define  TH_LOW		30000
 #define  TH_HIGH	4000000
@@ -923,7 +923,7 @@ void XBRHandle(void)
 									LIGHT=1;
 							
 									//PC3=0;
-									LIGHT_ON;
+									//LIGHT_ON;
 									//slowchcnt = slowchcnt+20;//
 									//if(slowchcnt>100)
 									//{
@@ -1001,7 +1001,7 @@ void XBRHandle(void)
 //					send_data(0x55);
 				//}
 				//PC3=1;
-				LIGHT_OFF;
+				//LIGHT_OFF;
 				//slowchcnt = lightvalue;
 				//PWM3init(lightvalue);
 				lowlight1mincount = 0;
@@ -1204,7 +1204,7 @@ void main()
 	bt_protocol_init();		//mcu_sdk
 	InitSYS();
 	GPIO_Init();
-	LIGHT_ON;
+	//LIGHT_ON;
 	//P0_6=0;
 	PWM3init(100);
 	Timer_Init();
@@ -1222,7 +1222,7 @@ void main()
 	
 	Delay_ms(200);
 	
-	LIGHT_ON;
+	//LIGHT_ON;
 	PWM3init(100);
 	SWITCHflag = 1;
 	light_ad=read_ad(10);
@@ -1259,7 +1259,7 @@ void main()
 	slowchcnt = lightvalue;
 	//Delay_ms(200);
 	PWM3init(lightvalue);
-	LIGHT_OFF;
+	//LIGHT_OFF;
 	//P0_6=1;
 	Delay_ms(300);
 	
