@@ -62,6 +62,9 @@ const DOWNLOAD_CMD_S download_cmd[] =
   {DPID_ADDREND, DP_TYPE_VALUE},
   {DPID_GROUP, DP_TYPE_VALUE},
   {DPID_DEBUG, DP_TYPE_STRING},
+  {DPID_TEST_BN0, DP_TYPE_BOOL},
+  {DPID_TEST_BN1, DP_TYPE_BOOL},
+  {DPID_TEST_BN2, DP_TYPE_BOOL},
 };
 
 
@@ -129,6 +132,9 @@ void all_data_update(void)
     mcu_dp_value_update(DPID_ADDREND,当前设备地址结束值); //VALUE型数据上报;
     mcu_dp_value_update(DPID_GROUP,当前设备群组); //VALUE型数据上报;
     mcu_dp_string_update(DPID_DEBUG,当前调试字串指针,当前调试字串数据长度); //STRING型数据上报;
+    mcu_dp_bool_update(DPID_TEST_BN0,当前测试开关0); //BOOL型数据上报;
+    mcu_dp_bool_update(DPID_TEST_BN1,当前测试开关1); //BOOL型数据上报;
+    mcu_dp_bool_update(DPID_TEST_BN2,当前测试开关2); //BOOL型数据上报;
 
 
 
@@ -434,6 +440,93 @@ static unsigned char dp_download_group_handle(const unsigned char value[], unsig
     else
         return ERROR;
 }
+/*****************************************************************************
+函数名称 : dp_download_test_bn0_handle
+功能描述 : 针对DPID_TEST_BN0的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_test_bn0_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char test_bn0;
+    
+    test_bn0 = mcu_get_dp_download_bool(value,length);
+    if(test_bn0 == 0) {
+        //开关关
+    }else {
+        //开关开
+    }
+  
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_TEST_BN0,test_bn0);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+/*****************************************************************************
+函数名称 : dp_download_test_bn1_handle
+功能描述 : 针对DPID_TEST_BN1的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_test_bn1_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char test_bn1;
+    
+    test_bn1 = mcu_get_dp_download_bool(value,length);
+    if(test_bn1 == 0) {
+        //开关关
+    }else {
+        //开关开
+    }
+  
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_TEST_BN1,test_bn1);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+/*****************************************************************************
+函数名称 : dp_download_test_bn2_handle
+功能描述 : 针对DPID_TEST_BN2的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_test_bn2_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char test_bn2;
+    
+    test_bn2 = mcu_get_dp_download_bool(value,length);
+    if(test_bn2 == 0) {
+        //开关关
+    }else {
+        //开关开
+    }
+  
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_TEST_BN2,test_bn2);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
 
 
 /******************************************************************************
@@ -552,6 +645,18 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
         case DPID_GROUP:
             //设备群组处理函数
             ret = dp_download_group_handle(value,length);
+        break;
+        case DPID_TEST_BN0:
+            //测试开关0处理函数
+            ret = dp_download_test_bn0_handle(value,length);
+        break;
+        case DPID_TEST_BN1:
+            //测试开关1处理函数
+            ret = dp_download_test_bn1_handle(value,length);
+        break;
+        case DPID_TEST_BN2:
+            //测试开关2处理函数
+            ret = dp_download_test_bn2_handle(value,length);
         break;
 
 

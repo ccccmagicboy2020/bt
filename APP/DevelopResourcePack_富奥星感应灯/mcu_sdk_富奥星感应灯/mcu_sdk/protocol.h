@@ -119,6 +119,15 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //调试字串(只上报)
 //备注:调试用字串
 #define DPID_DEBUG 109
+//测试开关0(可下发可上报)
+//备注:
+#define DPID_TEST_BN0 110
+//测试开关1(可下发可上报)
+//备注:
+#define DPID_TEST_BN1 111
+//测试开关2(可下发可上报)
+//备注:
+#define DPID_TEST_BN2 112
 
 
 
