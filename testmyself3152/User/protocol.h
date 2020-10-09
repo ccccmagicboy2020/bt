@@ -128,6 +128,9 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //测试开关2(可下发可上报)
 //备注:
 #define DPID_TEST_BN2 112
+//灯开关(可下发可上报)
+//备注:灯开关，默认的为模块复位触发开关
+#define DPID_SWITCH_LED2 113
 
 
 

@@ -49,7 +49,7 @@
                         1:dp数据点序列类型对照表
           **此为自动生成代码,如在开发平台有相关修改请重新下载MCU_SDK**         
 ******************************************************************************/
-const DOWNLOAD_CMD_S  xdata download_cmd[] =
+const DOWNLOAD_CMD_S download_cmd[] =
 {
   {DPID_SWITCH_LED, DP_TYPE_BOOL},
   {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
@@ -65,6 +65,7 @@ const DOWNLOAD_CMD_S  xdata download_cmd[] =
   {DPID_TEST_BN0, DP_TYPE_BOOL},
   {DPID_TEST_BN1, DP_TYPE_BOOL},
   {DPID_TEST_BN2, DP_TYPE_BOOL},
+  {DPID_SWITCH_LED2, DP_TYPE_BOOL},
 };
 
 
@@ -534,6 +535,35 @@ static unsigned char dp_download_test_bn2_handle(const unsigned char value[], un
     else
         return ERROR;
 }
+/*****************************************************************************
+函数名称 : dp_download_switch_led2_handle
+功能描述 : 针对DPID_SWITCH_LED2的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_switch_led2_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char switch_led2;
+    
+    switch_led2 = mcu_get_dp_download_bool(value,length);
+    if(switch_led2 == 0) {
+        //开关关
+    }else {
+        //开关开
+    }
+  
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_SWITCH_LED2,switch_led2);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
 
 
 /******************************************************************************
@@ -664,6 +694,10 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
         case DPID_TEST_BN2:
             //测试开关2处理函数
             ret = dp_download_test_bn2_handle(value,length);
+        break;
+        case DPID_SWITCH_LED2:
+            //灯开关处理函数
+            ret = dp_download_switch_led2_handle(value,length);
         break;
 
 
