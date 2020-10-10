@@ -25,21 +25,35 @@
 
 #include "bluetooth.h"
 #include "string.h"
+#include <stdio.h>
   
 
-extern u8 xdata switchcnt;
-const char xdata test_str[]={"fw: v1.01"};
+extern u8 xdata switchcnt;      //复位模块点击次数计数
+extern u8 xdata SWITCHflag2;   //开关灯的变量
+extern u8 xdata SWITCHfXBR;    //开关雷达的变量
+extern u8 xdata lightvalue;    //灯亮值
+extern u8 xdata XRBoffbrightvalue;  //关雷达后的灯亮值
+extern ulong xdata TH;          //雷达感应阈值
+extern u8 xdata LIGHT_TH;       //感光阈值
+extern u16 xdata DELAY_NUM;     //感应延时，单位为秒
+extern u8 xdata lowlightDELAY_NUM;      //关灯延时，单位为分钟
+extern u8 xdata light_ad;               //采到的光感的瞬时值
+
 const char xdata led_bn_on[]={"led on"};
 const char xdata led_bn_off[]={"led off"};
-extern u8 xdata SWITCHflag2 ;
-extern u8 xdata SWITCHfXBR ;
+const char xdata radar_bn_on[]={"radar on"};
+const char xdata radar_bn_off[]={"radar off"};
 
 //extern TYPE_BUFFER_S FlashBuffer;
 void send_data(u8 d);
-void reset_bt_module();
+void reset_bt_module(void);
 unsigned char PWM3init(unsigned char ab);
+void savevar(void);
+void Flash_EraseBlock(unsigned int fui_Address);//flash扇区擦除
+void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address);//flash写入
+void Delay_us_1(uint q1);
 
-void reset_bt_module()
+void reset_bt_module(void)
 {
 	send_data(0x55);
 	send_data(0xAA);
@@ -144,23 +158,42 @@ void uart_transmit_output(unsigned char value)
 *****************************************************************************/
 void all_data_update(void)
 {
+    u8 light;
+    u8 radius;
   //#error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
   //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报函数
 	
     mcu_dp_bool_update(DPID_SWITCH_LED, 1); //复位模块
     mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2); //灯的开关
-    //mcu_dp_value_update(DPID_BRIGHT_VALUE,当前亮度值); //VALUE型数据上报;
-    //mcu_dp_enum_update(DPID_CDS,当前光敏参数); //枚举型数据上报;
-    //mcu_dp_value_update(DPID_PIR_DELAY,当前感应延时); //VALUE型数据上报;
-    //mcu_dp_bool_update(DPID_SWITCH_XBR,当前感应开关); //BOOL型数据上报;
-    //mcu_dp_value_update(DPID_STANDBY_TIME,当前伴亮延时); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_SENSE_STRESS,当前感应强度); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_ADDR,当前设备地址); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_ADDREND,当前设备地址结束值); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_GROUP,当前设备群组); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_BRIGHT_VALUE, lightvalue); //VALUE型数据上报;
+
+	if(LIGHT_TH==255)
+		light=0;
+	else if(LIGHT_TH==200)
+		light=2;
+	else if(LIGHT_TH==40)
+		light=3;		
+	else if(LIGHT_TH==20)
+		light=4;
+	else //if(LIGHT_TH==200)
+		light=5;
+
+    mcu_dp_enum_update(DPID_CDS, light); //枚举型数据上报;
+    mcu_dp_value_update(DPID_PIR_DELAY, DELAY_NUM); //VALUE型数据上报;
+    mcu_dp_bool_update(DPID_SWITCH_XBR, SWITCHfXBR); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_STANDBY_TIME, lowlightDELAY_NUM); //VALUE型数据上报;
+
+	radius=TH/10000;
+	radius=50-radius;
+
+    mcu_dp_value_update(DPID_SENSE_STRESS, radius); //VALUE型数据上报;
+
+    mcu_dp_value_update(DPID_ADDR, 10); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDREND, 11); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_GROUP, 12); //VALUE型数据上报;
 
 
-    mcu_dp_string_update(DPID_DEBUG, test_str, strlen(test_str)); //STRING型数据上报;
+    mcu_dp_string_update(DPID_DEBUG, "111", 3); //STRING型数据上报;
 
 
     //mcu_dp_bool_update(DPID_TEST_BN0,当前测试开关0); //BOOL型数据上报;
@@ -224,13 +257,18 @@ static unsigned char dp_download_bright_value_handle(const unsigned char value[]
     unsigned long bright_value;
     
     bright_value = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    
-    */
-    
+    lightvalue = bright_value;
+
+	if(SWITCHfXBR==0)
+	{
+		XRBoffbrightvalue = bright_value;
+	}
+	
+	savevar();
+		
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_BRIGHT_VALUE,bright_value);
+    ret = mcu_dp_value_update(DPID_BRIGHT_VALUE, lightvalue);
+
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -252,29 +290,38 @@ static unsigned char dp_download_cds_handle(const unsigned char value[], unsigne
     
     cds = mcu_get_dp_download_enum(value,length);
     switch(cds) {
-        case 0:
+        case 0:		//2000LUS
+			LIGHT_TH=255;//cds*4;
         break;
         
-        case 1:
+        case 1:		//300LUX
+			LIGHT_TH=255;//cds*4;
         break;
         
-        case 2:
+        case 2:		//50LUX
+			LIGHT_TH=200;
         break;
         
-        case 3:
+        case 3:	//10LUX
+			LIGHT_TH=40;
         break;
         
-        case 4:
+        case 4:	//5LUX
+			LIGHT_TH=20;
         break;
         
-        case 5:
-        break;
-        
+		case 5:
+			LIGHT_TH = light_ad;
+		break;
+				
         default:
     
         break;
     }
-    
+
+    savevar();
+    //sprintf(temp_str, "%3d", LIGHT_TH);
+    //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));
     //处理完DP数据后应有反馈
     ret = mcu_dp_enum_update(DPID_CDS, cds);
     if(ret == SUCCESS)
@@ -299,11 +346,12 @@ static unsigned char dp_download_pir_delay_handle(const unsigned char value[], u
     pir_delay = mcu_get_dp_download_value(value,length);
     /*
     //VALUE类型数据处理
-    
     */
+    DELAY_NUM = pir_delay;
+	savevar();
     
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_PIR_DELAY,pir_delay);
+    ret = mcu_dp_value_update(DPID_PIR_DELAY, DELAY_NUM);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -327,12 +375,17 @@ static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], 
     switch_xbr = mcu_get_dp_download_bool(value,length);
     if(switch_xbr == 0) {
         //开关关
+        SWITCHfXBR = 0;
+        mcu_dp_string_update(DPID_DEBUG, radar_bn_off, strlen(radar_bn_off));
     }else {
         //开关开
+        SWITCHfXBR = 1;
+        mcu_dp_string_update(DPID_DEBUG, radar_bn_on, strlen(radar_bn_on));
     }
   
+    savevar();
     //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_SWITCH_XBR,switch_xbr);
+    ret = mcu_dp_bool_update(DPID_SWITCH_XBR,SWITCHfXBR);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -357,9 +410,11 @@ static unsigned char dp_download_standby_time_handle(const unsigned char value[]
     //VALUE类型数据处理
     
     */
+    lowlightDELAY_NUM=standby_time;
     
+    savevar();
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_STANDBY_TIME,standby_time);
+    ret = mcu_dp_value_update(DPID_STANDBY_TIME, lowlightDELAY_NUM);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -378,15 +433,22 @@ static unsigned char dp_download_sense_stress_handle(const unsigned char value[]
     //示例:当前DP类型为VALUE
     unsigned char ret;
     unsigned long sense_stress;
+    unsigned long sense_cccc;
     
     sense_stress = mcu_get_dp_download_value(value,length);
     /*
     //VALUE类型数据处理
     
     */
+ 	sense_cccc=50-sense_stress;
+	TH=sense_cccc*10000;
+		
+	savevar();
     
+    //sprintf(temp_str, "%6d", TH);
+    //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));    
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_SENSE_STRESS,sense_stress);
+    ret = mcu_dp_value_update(DPID_SENSE_STRESS, sense_stress);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -595,7 +657,7 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
     }
   
     //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_SWITCH_LED2,SWITCHflag2);
+    ret = mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -691,7 +753,6 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
 					switchcnt = 0;
                     reset_bt_module();
 				}
-			
 			}
         break;
         case DPID_BRIGHT_VALUE:
@@ -778,3 +839,62 @@ unsigned char get_download_cmd_total(void)
 {
   return(sizeof(download_cmd) / sizeof(download_cmd[0]));
 }
+
+void savevar(void)
+{
+	unsigned char i;
+	Flash_EraseBlock(0x2F00);
+	Delay_us_1(10000);
+
+	i=(TH/1000)>>8;
+	FLASH_WriteData(i,0x2F00+0);
+	Delay_us_1(100);
+	
+    i=(TH/1000)&0xff;
+	FLASH_WriteData(i,0x2F00+1);
+	Delay_us_1(100);
+	
+    i=LIGHT_TH;
+	FLASH_WriteData(i,0x2F00+2);
+	Delay_us_1(100);
+	
+	i=DELAY_NUM>>8;
+	FLASH_WriteData(i,0x2F00+3);
+	Delay_us_1(100);
+	i=DELAY_NUM&0xff;//&0xff;
+	FLASH_WriteData(i,0x2F00+4);
+	Delay_us_1(100);
+	
+	i=lightvalue;
+	FLASH_WriteData(i,0x2F00+5);
+	Delay_us_1(100);
+	
+	i=lowlightDELAY_NUM;
+	FLASH_WriteData(i,0x2F00+6);
+	Delay_us_1(100);
+	
+	i=SWITCHfXBR;//&0xff;
+	FLASH_WriteData(i,0x2F00+7);
+	Delay_us_1(100);
+	
+//	i=addr;//&0xff;
+//	FLASH_WriteData(i,0X2F00+7);
+//	Delay_us_1(100);
+//	
+//	i=devgroup;//&0xff;
+//	FLASH_WriteData(i,0X2F00+8);
+//	Delay_us_1(100);
+
+//	i=addrend;
+//	FLASH_WriteData(i,0X2F00+9);
+//	Delay_us_1(100);
+	
+	Flash_EraseBlock(0x2F80);
+	Delay_us_1(10000);
+	FLASH_WriteData(0,0x2F80+0);
+	
+	EA=1;				//-20200927
+
+}
+
+
