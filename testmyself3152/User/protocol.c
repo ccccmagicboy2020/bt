@@ -24,9 +24,31 @@
 //#include "include.h"
 
 #include "bluetooth.h"
+#include "string.h"
   
-  
+
+extern u8 xdata switchcnt;
+const char xdata test_str[]={"fw: v1.01"};
+const char xdata led_bn_on[]={"led on"};
+const char xdata led_bn_off[]={"led off"};
+extern u8 xdata SWITCHflag2 ;
+extern u8 xdata SWITCHfXBR ;
+
 //extern TYPE_BUFFER_S FlashBuffer;
+void send_data(u8 d);
+void reset_bt_module();
+unsigned char PWM3init(unsigned char ab);
+
+void reset_bt_module()
+{
+	send_data(0x55);
+	send_data(0xAA);
+	send_data(0X00);
+	send_data(0X04);
+	send_data(0X00);
+	send_data(0X00);
+	send_data(0X03);
+}
 
 /******************************************************************************
                                 移植须知:
@@ -86,11 +108,7 @@ const DOWNLOAD_CMD_S download_cmd[] =
 void uart_transmit_output(unsigned char value)
 {
 // #error "请将MCU串口发送函数填入该函数,并删除该行"
-	
-	
-			SBUF = value;
-		while(!(SCON & 0x02));
-		SCON &=~ 0x02;
+    send_data(value);
 	
 /*
   //示例:
@@ -129,7 +147,8 @@ void all_data_update(void)
   //#error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
   //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报函数
 	
-    //mcu_dp_bool_update(DPID_SWITCH_LED,当前开关); //BOOL型数据上报;
+    mcu_dp_bool_update(DPID_SWITCH_LED, 1); //复位模块
+    mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2); //灯的开关
     //mcu_dp_value_update(DPID_BRIGHT_VALUE,当前亮度值); //VALUE型数据上报;
     //mcu_dp_enum_update(DPID_CDS,当前光敏参数); //枚举型数据上报;
     //mcu_dp_value_update(DPID_PIR_DELAY,当前感应延时); //VALUE型数据上报;
@@ -139,7 +158,11 @@ void all_data_update(void)
     //mcu_dp_value_update(DPID_ADDR,当前设备地址); //VALUE型数据上报;
     //mcu_dp_value_update(DPID_ADDREND,当前设备地址结束值); //VALUE型数据上报;
     //mcu_dp_value_update(DPID_GROUP,当前设备群组); //VALUE型数据上报;
-    //mcu_dp_string_update(DPID_DEBUG,当前调试字串指针,当前调试字串数据长度); //STRING型数据上报;
+
+
+    mcu_dp_string_update(DPID_DEBUG, test_str, strlen(test_str)); //STRING型数据上报;
+
+
     //mcu_dp_bool_update(DPID_TEST_BN0,当前测试开关0); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_TEST_BN1,当前测试开关1); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_TEST_BN2,当前测试开关2); //BOOL型数据上报;
@@ -173,12 +196,14 @@ static unsigned char dp_download_switch_led_handle(const unsigned char value[], 
     switch_led = mcu_get_dp_download_bool(value,length);
     if(switch_led == 0) {
         //开关关
+        //PWM3init(0);
     }else {
         //开关开
+        //PWM3init(100);
     }
   
     //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_SWITCH_LED,switch_led);
+    ret = mcu_dp_bool_update(DPID_SWITCH_LED, 1);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -552,13 +577,25 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
     
     switch_led2 = mcu_get_dp_download_bool(value,length);
     if(switch_led2 == 0) {
-        //开关关
+        //灯开关关
+        mcu_dp_string_update(DPID_DEBUG, led_bn_off, strlen(led_bn_off));
+		if(SWITCHfXBR==1)
+		{
+			PWM3init(0);
+		}
+        SWITCHflag2=0;
     }else {
-        //开关开
+        //灯开关开
+        mcu_dp_string_update(DPID_DEBUG, led_bn_on, strlen(led_bn_on));
+        if(SWITCHfXBR==1)
+		{
+			PWM3init(100);
+		}
+        SWITCHflag2=1;
     }
   
     //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_SWITCH_LED2,switch_led2);
+    ret = mcu_dp_bool_update(DPID_SWITCH_LED2,SWITCHflag2);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -646,62 +683,86 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
         case DPID_SWITCH_LED:
             //开关处理函数
             ret = dp_download_switch_led_handle(value,length);
+			if(ret==1)
+			{
+				switchcnt ++;
+				if(switchcnt>=5)
+				{
+					switchcnt = 0;
+                    reset_bt_module();
+				}
+			
+			}
         break;
         case DPID_BRIGHT_VALUE:
             //亮度值处理函数
             ret = dp_download_bright_value_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_CDS:
             //光敏参数处理函数
             ret = dp_download_cds_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_PIR_DELAY:
             //感应延时处理函数
             ret = dp_download_pir_delay_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_SWITCH_XBR:
             //感应开关处理函数
             ret = dp_download_switch_xbr_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_STANDBY_TIME:
             //伴亮延时处理函数
             ret = dp_download_standby_time_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_SENSE_STRESS:
             //感应强度处理函数
             ret = dp_download_sense_stress_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_ADDR:
             //设备地址处理函数
             ret = dp_download_addr_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_ADDREND:
             //设备地址结束值处理函数
             ret = dp_download_addrend_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_GROUP:
             //设备群组处理函数
             ret = dp_download_group_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_TEST_BN0:
             //测试开关0处理函数
             ret = dp_download_test_bn0_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_TEST_BN1:
             //测试开关1处理函数
             ret = dp_download_test_bn1_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_TEST_BN2:
             //测试开关2处理函数
             ret = dp_download_test_bn2_handle(value,length);
+            switchcnt = 0;
         break;
         case DPID_SWITCH_LED2:
             //灯开关处理函数
             ret = dp_download_switch_led2_handle(value,length);
+            switchcnt = 0;
         break;
 
 
   default:
+        switchcnt = 0;
     break;
   }
   return ret;
