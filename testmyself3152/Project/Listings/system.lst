@@ -1,28 +1,28 @@
-C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 1   
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/12/2020 09:44:13 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE SYSTEM
 OBJECT MODULE PLACED IN .\Objects\system.obj
-COMPILER INVOKED BY: C:\Keil4\C51\BIN\C51.EXE ..\User\system.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\system.lst) TA
-                    -BS(2) OBJECT(.\Objects\system.obj)
+COMPILER INVOKED BY: d:\cccc2020\TOOL\Keil\C51\BIN\C51.EXE ..\User\system.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\s
+                    -ystem.lst) TABS(2) OBJECT(.\Objects\system.obj)
 
 line level    source
 
    1          /****************************************Copyright (c)*************************
-   2          **                               °æÈ¨ËùÓĞ (C), 2015-2017, Í¿Ñ»¿Æ¼¼
+   2          **                               ç‰ˆæƒæ‰€æœ‰ (C), 2015-2017, æ¶‚é¸¦ç§‘æŠ€
    3          **
    4          **                                 http://www.tuya.com
    5          **
-   6          **--------------ÎÄ¼şĞÅÏ¢-------------------------------------------------------
-   7          **ÎÄ   ¼ş   Ãû: system.c
-   8          **Ãè        Êö: bluetoothÊı¾İ´¦Àíº¯Êı
-   9          **Ê¹ ÓÃ Ëµ Ã÷ : ÓÃ»§ÎŞĞè¹ØĞÄ¸ÃÎÄ¼şÊµÏÖÄÚÈİ
+   6          **--------------æ–‡ä»¶ä¿¡æ¯-------------------------------------------------------
+   7          **æ–‡   ä»¶   å: system.c
+   8          **æ        è¿°: bluetoothæ•°æ®å¤„ç†å‡½æ•°
+   9          **ä½¿ ç”¨ è¯´ æ˜ : ç”¨æˆ·æ— éœ€å…³å¿ƒè¯¥æ–‡ä»¶å®ç°å†…å®¹
   10          **
   11          **
-  12          **--------------µ±Ç°°æ±¾ĞŞ¶©---------------------------------------------------
-  13          ** °æ  ±¾: v1.0
-  14          ** ÈÕ¡¡ÆÚ: 2017Äê5ÔÂ3ÈÕ
-  15          ** Ãè¡¡Êö: 1:´´½¨Í¿Ñ»bluetooth¶Ô½ÓMCU_SDK
+  12          **--------------å½“å‰ç‰ˆæœ¬ä¿®è®¢---------------------------------------------------
+  13          ** ç‰ˆ  æœ¬: v1.0
+  14          ** æ—¥ã€€æœŸ: 2017å¹´5æœˆ3æ—¥
+  15          ** æã€€è¿°: 1:åˆ›å»ºæ¶‚é¸¦bluetoothå¯¹æ¥MCU_SDK
   16          **
   17          **-----------------------------------------------------------------------------
   18          ******************************************************************************/
@@ -35,11 +35,11 @@ line level    source
   25          extern const DOWNLOAD_CMD_S xdata download_cmd[];
   26          
   27          /*****************************************************************************
-  28          º¯ÊıÃû³Æ : set_bt_uart_byte
-  29          ¹¦ÄÜÃèÊö : Ğ´bt_uart×Ö½Ú
-  30          ÊäÈë²ÎÊı : dest:»º´æÇøÆäÊµµØÖ·;
-  31                     byte:Ğ´Èë×Ö½ÚÖµ
-  32          ·µ»Ø²ÎÊı : Ğ´ÈëÍê³ÉºóµÄ×Ü³¤¶È
+  28          å‡½æ•°åç§° : set_bt_uart_byte
+  29          åŠŸèƒ½æè¿° : å†™bt_uartå­—èŠ‚
+  30          è¾“å…¥å‚æ•° : dest:ç¼“å­˜åŒºå…¶å®åœ°å€;
+  31                     byte:å†™å…¥å­—èŠ‚å€¼
+  32          è¿”å›å‚æ•° : å†™å…¥å®Œæˆåçš„æ€»é•¿åº¦
   33          *****************************************************************************/
   34          unsigned short set_bt_uart_byte(unsigned short dest, unsigned char byte)
   35          {
@@ -51,18 +51,18 @@ line level    source
   41   1        return dest;
   42   1      }
   43          /*****************************************************************************
-  44          º¯ÊıÃû³Æ : set_bt_uart_buffer
-  45          ¹¦ÄÜÃèÊö : Ğ´bt_uart_buffer
-  46          ÊäÈë²ÎÊı : dest:Ä¿±êµØÖ·
-  47                     src:Ô´µØÖ·
-  48                     len:Êı¾İ³¤¶È
-  49          ·µ»Ø²ÎÊı : ÎŞ
+  44          å‡½æ•°åç§° : set_bt_uart_buffer
+  45          åŠŸèƒ½æè¿° : å†™bt_uart_buffer
+  46          è¾“å…¥å‚æ•° : dest:ç›®æ ‡åœ°å€
+  47                     src:æºåœ°å€
+  48                     len:æ•°æ®é•¿åº¦
+  49          è¿”å›å‚æ•° : æ— 
   50          *****************************************************************************/
   51          unsigned short set_bt_uart_buffer(unsigned short dest, unsigned char *src, unsigned short len)
   52          {
   53   1        unsigned char *obj = (unsigned char *)bt_uart_tx_buf + DATA_START + dest;
   54   1        
-C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 2   
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/12/2020 09:44:13 PAGE 2   
 
   55   1        my_memcpy(obj,src,len);
   56   1        
@@ -70,11 +70,11 @@ line level    source
   58   1        return dest;
   59   1      }
   60          /*****************************************************************************
-  61          º¯ÊıÃû³Æ : bt_uart_write_data
-  62          ¹¦ÄÜÃèÊö : Ïòbt uartĞ´ÈëÁ¬ĞøÊı¾İ
-  63          ÊäÈë²ÎÊı : in:·¢ËÍ»º´æÖ¸Õë
-  64                     len:Êı¾İ·¢ËÍ³¤¶È
-  65          ·µ»Ø²ÎÊı : ÎŞ
+  61          å‡½æ•°åç§° : bt_uart_write_data
+  62          åŠŸèƒ½æè¿° : å‘bt uartå†™å…¥è¿ç»­æ•°æ®
+  63          è¾“å…¥å‚æ•° : in:å‘é€ç¼“å­˜æŒ‡é’ˆ
+  64                     len:æ•°æ®å‘é€é•¿åº¦
+  65          è¿”å›å‚æ•° : æ— 
   66          *****************************************************************************/
   67          static void bt_uart_write_data(unsigned char *in, unsigned short len)
   68          {
@@ -90,11 +90,11 @@ line level    source
   78   2        }
   79   1      }
   80          /*****************************************************************************
-  81          º¯ÊıÃû³Æ : get_check_sum
-  82          ¹¦ÄÜÃèÊö : ¼ÆËãĞ£ÑéºÍ
-  83          ÊäÈë²ÎÊı : pack:Êı¾İÔ´Ö¸Õë
-  84                     pack_len:¼ÆËãĞ£ÑéºÍ³¤¶È
-  85          ·µ»Ø²ÎÊı : Ğ£ÑéºÍ
+  81          å‡½æ•°åç§° : get_check_sum
+  82          åŠŸèƒ½æè¿° : è®¡ç®—æ ¡éªŒå’Œ
+  83          è¾“å…¥å‚æ•° : pack:æ•°æ®æºæŒ‡é’ˆ
+  84                     pack_len:è®¡ç®—æ ¡éªŒå’Œé•¿åº¦
+  85          è¿”å›å‚æ•° : æ ¡éªŒå’Œ
   86          *****************************************************************************/
   87          unsigned char get_check_sum(unsigned char *pack, unsigned short pack_len)
   88          {
@@ -109,11 +109,11 @@ line level    source
   97   1        return check_sum;
   98   1      }
   99          /*****************************************************************************
- 100          º¯ÊıÃû³Æ : bt_uart_write_frame
- 101          ¹¦ÄÜÃèÊö : Ïòbt´®¿Ú·¢ËÍÒ»Ö¡Êı¾İ
- 102          ÊäÈë²ÎÊı : fr_type:Ö¡ÀàĞÍ
- 103                     len:Êı¾İ³¤¶È
- 104          ·µ»Ø²ÎÊı : ÎŞ
+ 100          å‡½æ•°åç§° : bt_uart_write_frame
+ 101          åŠŸèƒ½æè¿° : å‘btä¸²å£å‘é€ä¸€å¸§æ•°æ®
+ 102          è¾“å…¥å‚æ•° : fr_type:å¸§ç±»å‹
+ 103                     len:æ•°æ®é•¿åº¦
+ 104          è¿”å›å‚æ•° : æ— 
  105          *****************************************************************************/
  106          void bt_uart_write_frame(unsigned char fr_type, unsigned short len)
  107          {
@@ -126,7 +126,7 @@ line level    source
  114   1        bt_uart_tx_buf[LENGTH_HIGH] = len >> 8;
  115   1        bt_uart_tx_buf[LENGTH_LOW] = len & 0xff;
  116   1        
-C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 3   
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/12/2020 09:44:13 PAGE 3   
 
  117   1        len += PROTOCOL_HEAD;
  118   1        check_sum = get_check_sum((unsigned char *)bt_uart_tx_buf, len - 1);
@@ -134,229 +134,200 @@ line level    source
  120   1        //
  121   1        bt_uart_write_data((unsigned char *)bt_uart_tx_buf, len);
  122   1      }
- 123          
- 124          
- 125          void bt_uart_mesh_write_frame(unsigned char fr_type, unsigned short len)
- 126          {
- 127   1        unsigned char check_sum = 0;
- 128   1      
- 129   1      len = len+2;
- 130   1      
- 131   1      bt_uart_tx_buf[0] = 0x55;
- 132   1      bt_uart_tx_buf[1] = 0xaa;
- 133   1      bt_uart_tx_buf[2] = 0x00;
- 134   1      bt_uart_tx_buf[3] = fr_type;
- 135   1      
- 136   1      bt_uart_tx_buf[4] = len >> 8;
- 137   1      bt_uart_tx_buf[5] = len & 0xff;
- 138   1      bt_uart_tx_buf[6] = 0XFF;
- 139   1      bt_uart_tx_buf[7] = 0xff;
- 140   1      
- 141   1      
- 142   1      len += PROTOCOL_HEAD;
- 143   1      check_sum = get_check_sum((unsigned char *)bt_uart_tx_buf, len - 1);
- 144   1      bt_uart_tx_buf[len - 1] = check_sum;
- 145   1      //
- 146   1      bt_uart_write_data((unsigned char *)bt_uart_tx_buf, len);
- 147   1      
- 148   1      
- 149   1      }
- 150          
- 151          /*****************************************************************************
- 152          º¯ÊıÃû³Æ : heat_beat_check
- 153          ¹¦ÄÜÃèÊö : ĞÄÌø°ü¼ì²â
- 154          ÊäÈë²ÎÊı : ÎŞ
- 155          ·µ»Ø²ÎÊı : ÎŞ
- 156          *****************************************************************************/
- 157          static void heat_beat_check(void)
- 158          {
- 159   1        unsigned char length = 0;
- 160   1        static unsigned char mcu_reset_state = FALSE;
- 161   1        
- 162   1        if(FALSE == mcu_reset_state)
- 163   1        {
- 164   2          length = set_bt_uart_byte(length,FALSE);
- 165   2          mcu_reset_state = TRUE;
- 166   2        }
- 167   1        else
- 168   1        {
- 169   2          length = set_bt_uart_byte(length,TRUE);
- 170   2        }
- 171   1        
- 172   1        bt_uart_write_frame(HEAT_BEAT_CMD, length);
- 173   1      }
- 174          /*****************************************************************************
- 175          º¯ÊıÃû³Æ  : product_info_update
- 176          ¹¦ÄÜÃèÊö  : ²úÆ·ĞÅÏ¢ÉÏ´«
- 177          ÊäÈë²ÎÊı : ÎŞ
- 178          ·µ»Ø²ÎÊı : ÎŞ
-C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 4   
-
- 179          *****************************************************************************/
- 180          static void product_info_update(void)
- 181          {
- 182   1        unsigned char length = 0;
- 183   1        
- 184   1        length = set_bt_uart_buffer(length,(unsigned char *)PRODUCT_KEY,my_strlen((unsigned char *)PRODUCT_KEY))
+ 123          /*****************************************************************************
+ 124          å‡½æ•°åç§° : heat_beat_check
+ 125          åŠŸèƒ½æè¿° : å¿ƒè·³åŒ…æ£€æµ‹
+ 126          è¾“å…¥å‚æ•° : æ— 
+ 127          è¿”å›å‚æ•° : æ— 
+ 128          *****************************************************************************/
+ 129          static void heat_beat_check(void)
+ 130          {
+ 131   1        unsigned char length = 0;
+ 132   1        static unsigned char mcu_reset_state = FALSE;
+ 133   1        
+ 134   1        if(FALSE == mcu_reset_state)
+ 135   1        {
+ 136   2          length = set_bt_uart_byte(length,FALSE);
+ 137   2          mcu_reset_state = TRUE;
+ 138   2        }
+ 139   1        else
+ 140   1        {
+ 141   2          length = set_bt_uart_byte(length,TRUE);
+ 142   2        }
+ 143   1        
+ 144   1        bt_uart_write_frame(HEAT_BEAT_CMD, length);
+ 145   1      }
+ 146          /*****************************************************************************
+ 147          å‡½æ•°åç§°  : product_info_update
+ 148          åŠŸèƒ½æè¿°  : äº§å“ä¿¡æ¯ä¸Šä¼ 
+ 149          è¾“å…¥å‚æ•° : æ— 
+ 150          è¿”å›å‚æ•° : æ— 
+ 151          *****************************************************************************/
+ 152          static void product_info_update(void)
+ 153          {
+ 154   1        unsigned char length = 0;
+ 155   1        
+ 156   1        length = set_bt_uart_buffer(length,(unsigned char *)PRODUCT_KEY,my_strlen((unsigned char *)PRODUCT_KEY))
              -;
- 185   1        length = set_bt_uart_buffer(length,(unsigned char *)MCU_VER,my_strlen((unsigned char *)MCU_VER));
- 186   1        
- 187   1        bt_uart_write_frame(PRODUCT_INFO_CMD, length);
- 188   1      }
- 189          /*****************************************************************************
- 190          º¯ÊıÃû³Æ : get_mcu_bt_mode
- 191          ¹¦ÄÜÃèÊö : ²éÑ¯mcuºÍbtµÄ¹¤×÷Ä£Ê½
- 192          ÊäÈë²ÎÊı : ÎŞ
- 193          ·µ»Ø²ÎÊı : ÎŞ
- 194          *****************************************************************************/
- 195          static void get_mcu_bt_mode(void)
- 196          {
- 197   1        unsigned char length = 0;
- 198   1        
- 199   1      #ifdef BT_CONTROL_SELF_MODE                                   //Ä£¿é×Ô´¦Àí
+ 157   1        length = set_bt_uart_buffer(length,(unsigned char *)MCU_VER,my_strlen((unsigned char *)MCU_VER));
+ 158   1        
+ 159   1        bt_uart_write_frame(PRODUCT_INFO_CMD, length);
+ 160   1      }
+ 161          /*****************************************************************************
+ 162          å‡½æ•°åç§° : get_mcu_bt_mode
+ 163          åŠŸèƒ½æè¿° : æŸ¥è¯¢mcuå’Œbtçš„å·¥ä½œæ¨¡å¼
+ 164          è¾“å…¥å‚æ•° : æ— 
+ 165          è¿”å›å‚æ•° : æ— 
+ 166          *****************************************************************************/
+ 167          static void get_mcu_bt_mode(void)
+ 168          {
+ 169   1        unsigned char length = 0;
+ 170   1        
+ 171   1      #ifdef BT_CONTROL_SELF_MODE                                   //æ¨¡å—è‡ªå¤„ç†
                 length = set_bt_uart_byte(length, BT_STATE_KEY);
                 length = set_bt_uart_byte(length, BT_RESERT_KEY);
               #else                                                           
- 203   1        //ÎŞĞè´¦ÀíÊı¾İ
- 204   1      #endif
- 205   1        
- 206   1        bt_uart_write_frame(WORK_MODE_CMD, length);
- 207   1      }
- 208          /*****************************************************************************
- 209          º¯ÊıÃû³Æ : get_update_dpid_index
- 210          ¹¦ÄÜÃèÊö : »òĞíÖÆ¶¨DPIDÔÚÊı×éÖĞµÄĞòºÅ
- 211          ÊäÈë²ÎÊı : dpid:dpid
- 212          ·µ»Ø²ÎÊı : index:dpĞòºÅ
- 213          *****************************************************************************/
- 214          static unsigned char get_dowmload_dpid_index(unsigned char dpid)
- 215          {
- 216   1        unsigned char index;
- 217   1        unsigned char total = get_download_cmd_total();
- 218   1        
- 219   1        for(index = 0; index < total; index ++)
- 220   1        {
- 221   2          if(download_cmd[index].dp_id == dpid)
- 222   2          {
- 223   3            break;
- 224   3          }
- 225   2        }
- 226   1        
- 227   1        return index;
- 228   1      }
- 229          /*****************************************************************************
- 230          º¯ÊıÃû³Æ : data_point_handle
- 231          ¹¦ÄÜÃèÊö : ÏÂ·¢Êı¾İ´¦Àí
- 232          ÊäÈë²ÎÊı : value:ÏÂ·¢Êı¾İÔ´Ö¸Õë
- 233          ·µ»Ø²ÎÊı : ret:·µ»ØÊı¾İ´¦Àí½á¹û
- 234          *****************************************************************************/
- 235          static unsigned char data_point_handle(const unsigned char value[])
- 236          {
- 237   1        unsigned char dp_id,index;
- 238   1        unsigned char dp_type;
- 239   1        unsigned char ret;
-C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 5   
+ 175   1        //æ— éœ€å¤„ç†æ•°æ®
+ 176   1      #endif
+ 177   1        
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/12/2020 09:44:13 PAGE 4   
 
- 240   1        unsigned short dp_len;
- 241   1        
- 242   1        dp_id = value[0];
- 243   1        dp_type = value[1];
- 244   1        dp_len = value[2] * 0x100;
- 245   1        dp_len += value[3];
- 246   1        
- 247   1        index = get_dowmload_dpid_index(dp_id);
- 248   1      
- 249   1        if(dp_type != download_cmd[index].dp_type)
- 250   1        {
- 251   2          //´íÎóÌáÊ¾
- 252   2          return FALSE;
- 253   2        }
- 254   1        else
- 255   1        {
- 256   2          ret = dp_download_handle(dp_id,value + 4,dp_len);
- 257   2        }
- 258   1        
- 259   1        return ret;
- 260   1      }
- 261          /*****************************************************************************
- 262          º¯ÊıÃû³Æ : data_handle
- 263          ¹¦ÄÜÃèÊö : Êı¾İÖ¡´¦Àí
- 264          ÊäÈë²ÎÊı : offset:Êı¾İÆğÊ¼Î»
- 265          ·µ»Ø²ÎÊı : ÎŞ
- 266          *****************************************************************************/
- 267          void data_handle(unsigned short offset)
- 268          {
- 269   1      #ifdef SUPPORT_MCU_FIRM_UPDATE
+ 178   1        bt_uart_write_frame(WORK_MODE_CMD, length);
+ 179   1      }
+ 180          /*****************************************************************************
+ 181          å‡½æ•°åç§° : get_update_dpid_index
+ 182          åŠŸèƒ½æè¿° : æˆ–è®¸åˆ¶å®šDPIDåœ¨æ•°ç»„ä¸­çš„åºå·
+ 183          è¾“å…¥å‚æ•° : dpid:dpid
+ 184          è¿”å›å‚æ•° : index:dpåºå·
+ 185          *****************************************************************************/
+ 186          static unsigned char get_dowmload_dpid_index(unsigned char dpid)
+ 187          {
+ 188   1        unsigned char index;
+ 189   1        unsigned char total = get_download_cmd_total();
+ 190   1        
+ 191   1        for(index = 0; index < total; index ++)
+ 192   1        {
+ 193   2          if(download_cmd[index].dp_id == dpid)
+ 194   2          {
+ 195   3            break;
+ 196   3          }
+ 197   2        }
+ 198   1        
+ 199   1        return index;
+ 200   1      }
+ 201          /*****************************************************************************
+ 202          å‡½æ•°åç§° : data_point_handle
+ 203          åŠŸèƒ½æè¿° : ä¸‹å‘æ•°æ®å¤„ç†
+ 204          è¾“å…¥å‚æ•° : value:ä¸‹å‘æ•°æ®æºæŒ‡é’ˆ
+ 205          è¿”å›å‚æ•° : ret:è¿”å›æ•°æ®å¤„ç†ç»“æœ
+ 206          *****************************************************************************/
+ 207          static unsigned char data_point_handle(const unsigned char value[])
+ 208          {
+ 209   1        unsigned char dp_id,index;
+ 210   1        unsigned char dp_type;
+ 211   1        unsigned char ret;
+ 212   1        unsigned short dp_len;
+ 213   1        
+ 214   1        dp_id = value[0];
+ 215   1        dp_type = value[1];
+ 216   1        dp_len = value[2] * 0x100;
+ 217   1        dp_len += value[3];
+ 218   1        
+ 219   1        index = get_dowmload_dpid_index(dp_id);
+ 220   1      
+ 221   1        if(dp_type != download_cmd[index].dp_type)
+ 222   1        {
+ 223   2          //é”™è¯¯æç¤º
+ 224   2          return FALSE;
+ 225   2        }
+ 226   1        else
+ 227   1        {
+ 228   2          ret = dp_download_handle(dp_id,value + 4,dp_len);
+ 229   2        }
+ 230   1        
+ 231   1        return ret;
+ 232   1      }
+ 233          /*****************************************************************************
+ 234          å‡½æ•°åç§° : data_handle
+ 235          åŠŸèƒ½æè¿° : æ•°æ®å¸§å¤„ç†
+ 236          è¾“å…¥å‚æ•° : offset:æ•°æ®èµ·å§‹ä½
+ 237          è¿”å›å‚æ•° : æ— 
+ 238          *****************************************************************************/
+ 239          void data_handle(unsigned short offset)
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/12/2020 09:44:13 PAGE 5   
+
+ 240          {
+ 241   1      #ifdef SUPPORT_MCU_FIRM_UPDATE
                 unsigned char *firmware_addr;
-                static unsigned long firm_length;                                             //MCUÉı¼¶ÎÄ¼ş³¤¶È
-                static unsigned char firm_update_flag;                                        //MCUÉı¼¶±êÖ¾
+                static unsigned long firm_length;                                             //MCUå‡çº§æ–‡ä»¶é•¿åº¦
+                static unsigned char firm_update_flag;                                        //MCUå‡çº§æ ‡å¿—
                 unsigned long dp_len;
               #else
- 275   1        unsigned short dp_len;
- 276   1      #endif
- 277   1        
- 278   1        unsigned char ret;
- 279   1        unsigned short i,total_len;
- 280   1        unsigned char cmd_type = bt_uart_rx_buf[offset + FRAME_TYPE];
- 281   1        
- 282   1        switch(cmd_type)
- 283   1        {
- 284   2        case HEAT_BEAT_CMD:                                   //ĞÄÌø°ü
- 285   2          heat_beat_check();
- 286   2          break;
- 287   2          
- 288   2        case PRODUCT_INFO_CMD:                                //²úÆ·ĞÅÏ¢
- 289   2          product_info_update();
- 290   2          break;
- 291   2          
- 292   2        case WORK_MODE_CMD:                                   //²éÑ¯MCUÉè¶¨µÄÄ£¿é¹¤×÷Ä£Ê½
- 293   2          get_mcu_bt_mode();
- 294   2          break;
- 295   2          
- 296   2      #ifndef BT_CONTROL_SELF_MODE
- 297   2        case BT_STATE_CMD:                                  //bt¹¤×÷×´Ì¬  
- 298   2          bt_work_state = bt_uart_rx_buf[offset + DATA_START];
- 299   2          bt_uart_write_frame(BT_STATE_CMD,0);
- 300   2          break;
- 301   2      
-C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 6   
+ 247   1        unsigned short dp_len;
+ 248   1      #endif
+ 249   1        
+ 250   1        unsigned char ret;
+ 251   1        unsigned short i,total_len;
+ 252   1        unsigned char cmd_type = bt_uart_rx_buf[offset + FRAME_TYPE];
+ 253   1        
+ 254   1        switch(cmd_type)
+ 255   1        {
+ 256   2        case HEAT_BEAT_CMD:                                   //å¿ƒè·³åŒ…
+ 257   2          heat_beat_check();
+ 258   2          break;
+ 259   2          
+ 260   2        case PRODUCT_INFO_CMD:                                //äº§å“ä¿¡æ¯
+ 261   2          product_info_update();
+ 262   2          break;
+ 263   2          
+ 264   2        case WORK_MODE_CMD:                                   //æŸ¥è¯¢MCUè®¾å®šçš„æ¨¡å—å·¥ä½œæ¨¡å¼
+ 265   2          get_mcu_bt_mode();
+ 266   2          break;
+ 267   2          
+ 268   2      #ifndef BT_CONTROL_SELF_MODE
+ 269   2        case BT_STATE_CMD:                                  //btå·¥ä½œçŠ¶æ€  
+ 270   2          bt_work_state = bt_uart_rx_buf[offset + DATA_START];
+ 271   2          bt_uart_write_frame(BT_STATE_CMD,0);
+ 272   2          break;
+ 273   2      
+ 274   2        case BT_RESET_CMD:                                  //é‡ç½®bt(btè¿”å›æˆåŠŸ)
+ 275   2          reset_bt_flag = RESET_BT_SUCCESS;
+ 276   2          break;
+ 277   2      #endif
+ 278   2          
+ 279   2        case DATA_QUERT_CMD:                                  //å‘½ä»¤ä¸‹å‘
+ 280   2          total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
+ 281   2          total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
+ 282   2          
+ 283   2          for(i = 0;i < total_len;)
+ 284   2          {
+ 285   3            dp_len = bt_uart_rx_buf[offset + DATA_START + i + 2] * 0x100;
+ 286   3            dp_len += bt_uart_rx_buf[offset + DATA_START + i + 3];
+ 287   3            //
+ 288   3            ret = data_point_handle((unsigned char *)bt_uart_rx_buf + offset + DATA_START + i);
+ 289   3            
+ 290   3            if(SUCCESS == ret)
+ 291   3            {
+ 292   4              //æˆåŠŸæç¤º
+ 293   4            }
+ 294   3            else
+ 295   3            {
+ 296   4              //é”™è¯¯æç¤º
+ 297   4            }
+ 298   3            
+ 299   3            i += (dp_len + 4);
+ 300   3          }
+ 301   2          
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/12/2020 09:44:13 PAGE 6   
 
- 302   2        case BT_RESET_CMD:                                  //ÖØÖÃbt(bt·µ»Ø³É¹¦)
- 303   2          reset_bt_flag = RESET_BT_SUCCESS;
- 304   2          break;
- 305   2      #endif
- 306   2          
- 307   2        case DATA_QUERT_CMD:                                  //ÃüÁîÏÂ·¢
- 308   2          total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
- 309   2          total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
- 310   2          
- 311   2          for(i = 0;i < total_len;)
- 312   2          {
- 313   3            dp_len = bt_uart_rx_buf[offset + DATA_START + i + 2] * 0x100;
- 314   3            dp_len += bt_uart_rx_buf[offset + DATA_START + i + 3];
- 315   3            //
- 316   3            ret = data_point_handle((unsigned char *)bt_uart_rx_buf + offset + DATA_START + i);
- 317   3            
- 318   3            if(SUCCESS == ret)
- 319   3            {
- 320   4              //³É¹¦ÌáÊ¾
- 321   4              savevar();
- 322   4            }
- 323   3            else
- 324   3            {
- 325   4              //´íÎóÌáÊ¾
- 326   4            }
- 327   3            
- 328   3            i += (dp_len + 4);
- 329   3          }
- 330   2          
- 331   2          break;
- 332   2          
- 333   2        case STATE_QUERY_CMD:                                 //×´Ì¬²éÑ¯
- 334   2          all_data_update();                               
- 335   2          break;
- 336   2          
- 337   2      #ifdef SUPPORT_MCU_FIRM_UPDATE
-                case UPDATE_START_CMD:                                //Éı¼¶¿ªÊ¼
+ 302   2          break;
+ 303   2          
+ 304   2        case STATE_QUERY_CMD:                                 //çŠ¶æ€æŸ¥è¯¢
+ 305   2          all_data_update();                               
+ 306   2          break;
+ 307   2          
+ 308   2      #ifdef SUPPORT_MCU_FIRM_UPDATE
+                case UPDATE_START_CMD:                                //å‡çº§å¼€å§‹
                   firm_length = bt_uart_rx_buf[offset + DATA_START];
                   firm_length <<= 8;
                   firm_length |= bt_uart_rx_buf[offset + DATA_START + 1];
@@ -369,10 +340,10 @@ line level    source
                   firm_update_flag = UPDATE_START_CMD;
                    break;
                   
-                case UPDATE_TRANS_CMD:                                //Éı¼¶´«Êä
+                case UPDATE_TRANS_CMD:                                //å‡çº§ä¼ è¾“
                   if(firm_update_flag == UPDATE_START_CMD)
                   {
-                    //Í£Ö¹Ò»ÇĞÊı¾İÉÏ±¨
+                    //åœæ­¢ä¸€åˆ‡æ•°æ®ä¸ŠæŠ¥
                     stop_update_flag = ENABLE;                                                 
                     
                     total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
@@ -382,8 +353,6 @@ line level    source
                     dp_len <<= 8;
                     dp_len |= bt_uart_rx_buf[offset + DATA_START + 1];
                     dp_len <<= 8;
-C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 7   
-
                     dp_len |= bt_uart_rx_buf[offset + DATA_START + 2];
                     dp_len <<= 8;
                     dp_len |= bt_uart_rx_buf[offset + DATA_START + 3];
@@ -391,7 +360,7 @@ line level    source
                     firmware_addr = bt_uart_rx_buf + offset + DATA_START + 4;
                     if((total_len == 4) && (dp_len == firm_length))
                     {
-                      //×îºóÒ»°ü
+                      //æœ€åä¸€åŒ…
                       ret = mcu_firm_update_handle(firmware_addr,dp_len,0);
                       
                       firm_update_flag = 0;
@@ -410,64 +379,64 @@ line level    source
                     {
                       bt_uart_write_frame(UPDATE_TRANS_CMD,0);
                     }
-                    //»Ö¸´Ò»ÇĞÊı¾İÉÏ±¨
+                    //æ¢å¤ä¸€åˆ‡æ•°æ®ä¸ŠæŠ¥
                     stop_update_flag = DISABLE;    
                   }
+C51 COMPILER V9.52.0.0   SYSTEM                                                            10/12/2020 09:44:13 PAGE 7   
+
                   break;
               #endif      
- 395   2      
- 396   2        default:
- 397   2          break;
- 398   2        }
- 399   1      }
- 400          /*****************************************************************************
- 401          º¯ÊıÃû³Æ : get_queue_total_data
- 402          ¹¦ÄÜÃèÊö : ¶ÁÈ¡¶ÓÁĞÄÚÊı¾İ
- 403          ÊäÈë²ÎÊı : ÎŞ
- 404          ·µ»Ø²ÎÊı : ÎŞ
- 405          *****************************************************************************/
- 406          unsigned char get_queue_total_data(void)
- 407          {
- 408   1        if(queue_in != queue_out)
- 409   1          return 1;
- 410   1        else
- 411   1          return 0;
- 412   1      }
- 413          /*****************************************************************************
- 414          º¯ÊıÃû³Æ : Queue_Read_Byte
- 415          ¹¦ÄÜÃèÊö : ¶ÁÈ¡¶ÓÁĞ1×Ö½ÚÊı¾İ
- 416          ÊäÈë²ÎÊı : ÎŞ
- 417          ·µ»Ø²ÎÊı : ÎŞ
- 418          *****************************************************************************/
- 419          unsigned char Queue_Read_Byte(void)
- 420          {
- 421   1        unsigned char value;
- 422   1        
- 423   1        if(queue_out != queue_in)
- 424   1        {
- 425   2          //ÓĞÊı¾İ
-C51 COMPILER V9.52.0.0   SYSTEM                                                            10/06/2020 15:47:35 PAGE 8   
-
- 426   2          if(queue_out >= (unsigned char *)(bt_queue_buf + sizeof(bt_queue_buf)))
- 427   2          {
- 428   3            //Êı¾İÒÑ¾­µ½Ä©Î²
- 429   3            queue_out = (unsigned char *)(bt_queue_buf);
- 430   3          }
- 431   2          
- 432   2          value = *queue_out ++;   
- 433   2        }
- 434   1        
- 435   1        return value;
- 436   1      }
- 437          
+ 366   2      
+ 367   2        default:
+ 368   2          break;
+ 369   2        }
+ 370   1      }
+ 371          /*****************************************************************************
+ 372          å‡½æ•°åç§° : get_queue_total_data
+ 373          åŠŸèƒ½æè¿° : è¯»å–é˜Ÿåˆ—å†…æ•°æ®
+ 374          è¾“å…¥å‚æ•° : æ— 
+ 375          è¿”å›å‚æ•° : æ— 
+ 376          *****************************************************************************/
+ 377          unsigned char get_queue_total_data(void)
+ 378          {
+ 379   1        if(queue_in != queue_out)
+ 380   1          return 1;
+ 381   1        else
+ 382   1          return 0;
+ 383   1      }
+ 384          /*****************************************************************************
+ 385          å‡½æ•°åç§° : Queue_Read_Byte
+ 386          åŠŸèƒ½æè¿° : è¯»å–é˜Ÿåˆ—1å­—èŠ‚æ•°æ®
+ 387          è¾“å…¥å‚æ•° : æ— 
+ 388          è¿”å›å‚æ•° : æ— 
+ 389          *****************************************************************************/
+ 390          unsigned char Queue_Read_Byte(void)
+ 391          {
+ 392   1        unsigned char value;
+ 393   1        
+ 394   1        if(queue_out != queue_in)
+ 395   1        {
+ 396   2          //æœ‰æ•°æ®
+ 397   2          if(queue_out >= (unsigned char *)(bt_queue_buf + sizeof(bt_queue_buf)))
+ 398   2          {
+ 399   3            //æ•°æ®å·²ç»åˆ°æœ«å°¾
+ 400   3            queue_out = (unsigned char *)(bt_queue_buf);
+ 401   3          }
+ 402   2          
+ 403   2          value = *queue_out ++;   
+ 404   2        }
+ 405   1        
+ 406   1        return value;
+ 407   1      }
+ 408          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    957    ----
+   CODE SIZE        =    851    ----
    CONSTANT SIZE    =     15    ----
    XDATA SIZE       =     89    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      7      38
+   DATA SIZE        =      7      37
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

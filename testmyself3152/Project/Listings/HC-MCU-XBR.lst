@@ -1,10 +1,10 @@
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 1   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE HC_MCU_XBR
 OBJECT MODULE PLACED IN .\Objects\HC-MCU-XBR.obj
-COMPILER INVOKED BY: C:\Keil4\C51\BIN\C51.EXE ..\User\HC-MCU-XBR.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\HC-MCU-XBR
-                    -.lst) TABS(2) OBJECT(.\Objects\HC-MCU-XBR.obj)
+COMPILER INVOKED BY: d:\cccc2020\TOOL\Keil\C51\BIN\C51.EXE ..\User\HC-MCU-XBR.c BROWSE DEBUG OBJECTEXTEND PRINT(.\Listin
+                    -gs\HC-MCU-XBR.lst) TABS(2) OBJECT(.\Objects\HC-MCU-XBR.obj)
 
 line level    source
 
@@ -17,8 +17,7 @@ line level    source
    7          
    8          
    9          
-  10          #define  VERSION  0X21
-*** WARNING C317 IN LINE 10 OF ..\User\HC-MCU-XBR.c: attempt to redefine macro 'VERSION'
+  10          //#define  VERSION  0X21
   11          
   12          #define  TH_LOW   30000
   13          #define  TH_HIGH  4000000
@@ -62,9 +61,9 @@ line level    source
   51           //u8 Uart1_TX_Buff[20] = {0};           //用于存放UART1发送数据
   52           //u8 Uart1_TX_Cnt = 0;                //UART1发送计数
   53           
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 2   
-
   54          // u16 AN1_Data = 0;
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 2   
+
   55          // u16 AN7_Data = 0;
   56          // u8 Uart_Cnt = 0;
   57          
@@ -126,9 +125,9 @@ line level    source
  111   1        for(j=0;j<q;j++)
  112   1        {
  113   2            ;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 3   
-
  114   2        }
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 3   
+
  115   1      }
  116          
  117          void Delay_ms(uint t)
@@ -190,9 +189,9 @@ line level    source
  173            * @说明   定时器初始化函数
  174            * @参数   无
  175            * @返回值 无
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 4   
-
  176            * @注     无
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 4   
+
  177          ***************************************************************************************/
  178          void Timer_Init()
  179          {
@@ -254,9 +253,9 @@ line level    source
  235   1        //0xFFEF->57600
  236   1        
  237   1        
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 5   
-
  238   1        TH4 = 0xFF;
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 5   
+
  239   1        TL4 = 0x98; //波特率9600    //0xEE;       //波特率56000
  240   1        SCON2 = 0x02;                        //8位UART，波特率可变
  241   1        SCON = 0x10;                         //允许串行接收
@@ -318,9 +317,9 @@ line level    source
                 P0M0 = P0M0&0xF0|0x08;          //P00
                 
                 P0M0 = P0M0&0x0F|0x30;          //P01
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 6   
-
                 P0M3 = P0M3&0x0F|0x30;          //P07
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 6   
+
               //  P0M0 = P0M0&0x0F|0x80;          //P01
                 
                 P0M3 = P0M3&0xF0|0x08;          //P06
@@ -382,9 +381,9 @@ line level    source
  359                  Tampe = Timer1Count1 % 100;
  360                  if(Tampe == 0)
  361                      Time_100mS_FLAG = 1;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 7   
-
  362                  Tampe = Timer1Count1 % 200;
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 7   
+
  363                  if(Tampe == 0)
  364                      Time_200mS_FLAG = 1;
  365                  Tampe = Timer1Count1 % 500;
@@ -446,9 +445,9 @@ line level    source
  421                      //User TASK
  422          
  423                  
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 8   
-
  424                  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 8   
+
  425                      //User TASK
  426                  }
  427                  if(Time_500mS_FLAG)
@@ -510,9 +509,9 @@ line level    source
  483          {
  484   1          SBUF = d;
  485   1          while(!(SCON & 0x02));
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 9   
-
  486   1          SCON &=~ 0x02;
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 9   
+
  487   1      }
  488          
  489          uchar read_ad(uchar ch)
@@ -574,9 +573,9 @@ line level    source
  545   2            
  546   2      
  547   2          ADCC0 |= 0x40;          //启动ADC转换
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 10  
-
  548   2          while(!(ADCC0&0x20));   //等待ADC转换结束
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 10  
+
  549   2          ADCC0 &=~ 0x20;         //清除标志位
  550   2          ad_sum += ADCR;       //获取ADC的值
  551   2          
@@ -584,7 +583,7 @@ line level    source
  553   2        }
  554   1        
  555   1        //ADC_P14_AN5;
- 556   1        ADCC1 =1;
+ 556   1        ADCC1 =1;   //切换到an1
  557   1        i=ad_sum>>8;
  558   1        
  559   1        Delay_us(100);
@@ -638,9 +637,9 @@ line level    source
  607          void XBRHandle(void)
  608          {
  609   1        u8 i,j;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 11  
-
  610   1        u16 k;
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 11  
+
  611   1      //    if(while_1flag==0)
  612   1      //    send_data(0x55);
  613   1          //while(1)
@@ -702,9 +701,9 @@ line level    source
  669   2            if(times>=8192) //250ms   //12800)  //330ms
  670   2            {
  671   3      
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 12  
-
  672   3              WDTC |= 0x10;   //清看门狗
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 12  
+
  673   3              
  674   3              times=0;
  675   3      
@@ -732,7 +731,7 @@ line level    source
  697   4                if(LIGHT==0)  
  698   4                {
  699   5                  //light_ad=READ_LIGHT();
- 700   5                  light_ad=read_ad(10);
+ 700   5                  light_ad=read_ad(10);   //切换到an10
  701   5      
  702   5                  if((light_ad<=(light_ad0+2))&&(light_ad0<=(light_ad+2)))
  703   5                    light_ad=light_ad0;
@@ -766,9 +765,9 @@ line level    source
  731   4                  if(MAX_DELTA>MAX_DELTA1)MAX_DELTA=MAX_DELTA1;
  732   4                  
  733   4                  if(SUM0>SUM10)
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 13  
-
  734   4                  {
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 13  
+
  735   5                    SUM=SUM0-SUM10;
  736   5                    if(SUM>80000)SUM0_num=6;
  737   5                    else if(SUM>40000)SUM0_num=9;
@@ -830,9 +829,9 @@ line level    source
  793   6                    }
  794   5      //              else if((LIGHT>0)&&(TH==TH_LOW))
  795   5      //              {
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 14  
-
  796   5      //                SUM=SUM10-SUM0; 
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 14  
+
  797   5      //                TH+=SUM;    //?????????????
  798   5      //              }
  799   5      
@@ -894,9 +893,9 @@ line level    source
  855   3      //        check_sum+=1;
  856   3      //        send_data(check_sum);
  857   3      
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 15  
-
  858   3              if(stop_times>0)  //
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 15  
+
  859   3              {
  860   4                stop_times--; 
  861   4                if((SUM0>(SUM01+6000))&&(SUM1<(SUM01+15000)))SUM0=SUM01+6000;
@@ -958,15 +957,15 @@ line level    source
  917   6                      //{
  918   6                      //  alarm_times++;
  919   6                    //    }
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 16  
-
  920   6                      //if(alarm_times>=2)  //??????????????
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 16  
+
  921   6                      {
  922   7                        if(LIGHT==0)SUM01=SUM0;
  923   7                        LIGHT=1;
  924   7                    
  925   7                        //PC3=0;
- 926   7                        LIGHT_ON;
+ 926   7                        //LIGHT_ON;
  927   7                        //slowchcnt = slowchcnt+20;//
  928   7                        //if(slowchcnt>100)
  929   7                        //{
@@ -1022,9 +1021,9 @@ line level    source
  979   4                
  980   4                if(LIGHT>DELAY_NUM)
  981   4                {
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 17  
-
  982   5                  LIGHT=0;
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 17  
+
  983   5                  while_1flag=1;
  984   5                  //while_2flag = 0;
  985   5                  //break;
@@ -1046,7 +1045,7 @@ line level    source
 1001   2      //          send_data(0x55);
 1002   2              //}
 1003   2              //PC3=1;
-1004   2              LIGHT_OFF;
+1004   2              //LIGHT_OFF;
 1005   2              //slowchcnt = lightvalue;
 1006   2              //PWM3init(lightvalue);
 1007   2              lowlight1mincount = 0;
@@ -1086,9 +1085,9 @@ line level    source
 1039          void wait1(void)
 1040          {
 1041   1        u8 i,j;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 18  
-
 1042   1      
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 18  
+
 1043   1        //等待直流电压稳定
 1044   1        j=0;
 1045   1        while(1)
@@ -1150,9 +1149,9 @@ line level    source
 1101   2          
 1102   2          //WDTC |= 0x10;   //清看门狗
 1103   2      
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 19  
-
 1104   2          i=SUM>>11;
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 19  
+
 1105   2          if((i>12)&&(i<141)&&(j>20))break;
 1106   2      
 1107   2          j++;
@@ -1214,9 +1213,9 @@ line level    source
 1162   1        #ifdef V11
               /************************************PWM3初始化****************************************/
                 //P0M3 = P0M3&0xF0|0x08;    //P06设置为推挽输出
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 20  
-
                 PWM3_MAP = 0x05;          //PWM3映射P05口
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 20  
+
                 
                 #endif
 1168   1        
@@ -1256,10 +1255,10 @@ line level    source
 1201          void main()
 1202          {
 1203   1        u8 i,j;
-1204   1        bt_protocol_init();
+1204   1        bt_protocol_init();   //mcu_sdk
 1205   1        InitSYS();
 1206   1        GPIO_Init();
-1207   1        LIGHT_ON;
+1207   1        //LIGHT_ON;
 1208   1        //P0_6=0;
 1209   1        PWM3init(100);
 1210   1        Timer_Init();
@@ -1277,16 +1276,16 @@ line level    source
 1222   1        
 1223   1        Delay_ms(200);
 1224   1        
-1225   1        LIGHT_ON;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 21  
-
+1225   1        //LIGHT_ON;
 1226   1        PWM3init(100);
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 21  
+
 1227   1        SWITCHflag = 1;
 1228   1        light_ad=read_ad(10);
 1229   1        light_ad0=light_ad;
 1230   1        
 1231   1        EA=0;
-1232   1        set_var();
+1232   1        set_var();  //从flash读取出变量
 1233   1        
 1234   1        //for(i=0;i<5;i++)send_data(guc_Read_a[i]);
 1235   1        
@@ -1304,47 +1303,47 @@ line level    source
 1247   1      //  for(i=0;i<7;i++)send_data(TXdata[i]); 
 1248   1        resetbtcnt++;
 1249   1        
-1250   1        Flash_EraseBlock(0X2F80);
+1250   1        Flash_EraseBlock(0x2F80);
 1251   1        Delay_us_1(10000);
-1252   1        FLASH_WriteData(resetbtcnt,0X2F80);
+1252   1        FLASH_WriteData(resetbtcnt, 0x2F80);
 1253   1        Delay_us_1(100);
 1254   1        
 1255   1        EA=1;
 1256   1        
-1257   1      
-1258   1        wait1();
-1259   1      
-1260   1        slowchcnt = lightvalue;
-1261   1        //Delay_ms(200);
-1262   1        PWM3init(lightvalue);
-1263   1        LIGHT_OFF;
-1264   1        //P0_6=1;
-1265   1        Delay_ms(300);
-1266   1        
-1267   1        wait2();
-1268   1      
-1269   1        SUM=0;
-1270   1        while(1)
-1271   1        {
-1272   2          if(resetbtcnt>=3)
-1273   2          {
-1274   3            resetbtcnt = 0;
-1275   3            send_data(0x55);
-1276   3            send_data(0xAA);
-1277   3            send_data(0X00);
-1278   3            send_data(0X04);
+1257   1        wait1();
+1258   1      
+1259   1        slowchcnt = lightvalue;
+1260   1        //Delay_ms(200);
+1261   1        PWM3init(lightvalue);
+1262   1        //LIGHT_OFF;
+1263   1        //P0_6=1;
+1264   1        Delay_ms(300);
+1265   1        
+1266   1        wait2();
+1267   1      
+1268   1        SUM=0;
+1269   1        while(1)
+1270   1        {
+1271   2          if(resetbtcnt>=3)
+1272   2          {
+1273   3            resetbtcnt = 0;
+1274   3            send_data(0x55);//p15，重置模块
+1275   3            send_data(0xAA);
+1276   3            send_data(0X00);
+1277   3            send_data(0X04);
+1278   3            send_data(0X00);
 1279   3            send_data(0X00);
-1280   3            send_data(0X00);
-1281   3            send_data(0X03);
-1282   3            
-1283   3          }
+1280   3            send_data(0X03);
+1281   3            
+1282   3          }
+1283   2      
 1284   2          WDTC |= 0x10;   //清看门狗
 1285   2          bt_uart_service();
 1286   2          
-1287   2          if(SWITCHfXBR==1)//雷达开
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 22  
-
+1287   2          if(SWITCHfXBR==1)//雷达开, app控制
 1288   2          {
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 22  
+
 1289   3            if(while_2flag==0)
 1290   3            {
 1291   4              while_1flag=0;
@@ -1406,9 +1405,9 @@ line level    source
 1347   4            }
 1348   3            else
 1349   3            {//关灯
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 23  
-
 1350   4              PWM3init(XRBoffbrightvalue);
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 23  
+
 1351   4              
 1352   4              while_1flag=0;
 1353   4      
@@ -1470,9 +1469,9 @@ line level    source
 1407   2          light1scount=0;
 1408   2          light1sflag=1;
 1409   2        }
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 24  
-
 1410   1      
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 24  
+
 1411   1        
 1412   1      }
 1413          
@@ -1534,9 +1533,9 @@ line level    source
 1469          void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address)
 1470          {
 1471   1        while(1)
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/06/2020 15:47:35 PAGE 25  
-
 1472   1        {
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/12/2020 09:44:12 PAGE 25  
+
 1473   2          LVDC &=~ 0x08;         //清除LVD中断标志位
 1474   2          P0_0=0;   
 1475   2          if((LVDC&0x08)==0)    break;
@@ -1597,4 +1596,4 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  8 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  7 WARNING(S),  0 ERROR(S)
