@@ -5,5 +5,6 @@
 ".\Objects\system.obj" 
 TO ".\Objects\HC-MCU-XBR" 
 PRINT(".\Listings\HC-MCU-XBR.m51") RAMSIZE(256) 
+DISABLEWARNING (16, 1, 2) 
 CODE( 0X0000-0X3FFF )
 XDATA( 0X0000-0X07FF )

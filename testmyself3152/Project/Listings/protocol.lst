@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 1   
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE PROTOCOL
@@ -40,673 +40,885 @@ line level    source
   29            
   30          
   31          extern u8 xdata switchcnt;      //复位模块点击次数计数
-  32          extern u8 xdata SWITCHflag2;   //开关灯的变量
-  33          extern u8 xdata SWITCHfXBR;    //开关雷达的变量
-  34          extern u8 xdata lightvalue;    //灯亮值
-  35          extern u8 xdata XRBoffbrightvalue;  //关雷达后的灯亮值
-  36          extern ulong xdata TH;          //雷达感应阈值
-  37          extern u8 xdata LIGHT_TH;       //感光阈值
-  38          extern u16 xdata DELAY_NUM;     //感应延时，单位为秒
-  39          extern u8 xdata lowlightDELAY_NUM;      //关灯延时，单位为分钟
-  40          extern u8 xdata light_ad;               //采到的光感的瞬时值
-  41          
-  42          const char xdata led_bn_on[]={"led on"};
-  43          const char xdata led_bn_off[]={"led off"};
-  44          const char xdata radar_bn_on[]={"radar on"};
-  45          const char xdata radar_bn_off[]={"radar off"};
-  46          
-  47          //extern TYPE_BUFFER_S FlashBuffer;
-  48          void send_data(u8 d);
-  49          void reset_bt_module(void);
-  50          unsigned char PWM3init(unsigned char ab);
-  51          void savevar(void);
-  52          void Flash_EraseBlock(unsigned int fui_Address);//flash扇区擦除
-  53          void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address);//flash写入
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 2   
+  32          extern u8 xdata reset_bt_bn;    //复位模块的全局变量
+  33          extern u8 xdata SWITCHflag2;   //开关灯的变量
+  34          extern u8 xdata SWITCHfXBR;    //开关雷达的变量
+  35          extern u8 xdata lightvalue;    //灯亮值
+  36          extern u8 xdata XRBoffbrightvalue;  //关雷达后的灯亮值
+  37          extern ulong xdata TH;          //雷达感应偏差阈值，数值越大代表越不灵敏
+  38          extern u8 xdata LIGHT_TH;       //感光阈值
+  39          extern u16 xdata DELAY_NUM;     //感应延时，单位为秒
+  40          extern u8 xdata lowlightDELAY_NUM;      //关灯延时，单位为分钟
+  41          extern u8 xdata light_ad;               //采到的光感的瞬时值
+  42          u8 xdata cdsvalue = 0;              //感光选择值
+  43          ulong xdata sensing_th = 0;     //雷达感应阈值，数值越大越灵敏
+  44          
+  45          //const char xdata led_bn_on[]={"led on"};
+  46          //const char xdata led_bn_off[]={"led off"};
+  47          //const char xdata radar_bn_on[]={"radar on"};
+  48          //const char xdata radar_bn_off[]={"radar off"};
+  49          
+  50          unsigned char DPID_SWITCH_LED2count = 0;
+  51          unsigned char DPID_SWITCH_XBRcount = 0;
+  52          unsigned char DPID_BRIGHT_VALUEcount = 0;
+  53          unsigned char DPID_CDScount = 0;
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 2   
 
-  54          void Delay_us_1(uint q1);
-  55          
-  56          void reset_bt_module(void)
-  57          {
-  58   1        send_data(0x55);
-  59   1        send_data(0xAA);
-  60   1        send_data(0X00);
-  61   1        send_data(0X04);
-  62   1        send_data(0X00);
-  63   1        send_data(0X00);
-  64   1        send_data(0X03);
-  65   1      }
-  66          
-  67          /******************************************************************************
-  68                                          移植须知:
-  69          1:MCU必须在while中直接调用mcu_api.c内的bt_uart_service()函数
-  70          2:程序正常初始化完成后,建议不进行关串口中断,如必须关中断,关中断时间必须�
+  54          unsigned char DPID_PIR_DELAYcount = 0;
+  55          unsigned char DPID_STANDBY_TIMEcount = 0;
+  56          unsigned char DPID_SENSING_RADIUScount = 0;
+  57          
+  58          extern u16 idata groupaddr[8];
+  59          
+  60          //extern TYPE_BUFFER_S FlashBuffer;
+  61          void send_data(u8 d);
+  62          void reset_bt_module(void);
+  63          unsigned char PWM3init(unsigned char ab);
+  64          void savevar(void);
+  65          void Flash_EraseBlock(unsigned int fui_Address);//flash扇区擦除
+  66          void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address);//flash写入
+  67          void Delay_us_1(uint q1);
+  68          
+  69          void reset_bt_module(void)
+  70          {
+  71   1        send_data(0x55);
+  72   1        send_data(0xAA);
+  73   1        send_data(0x00);
+  74   1        send_data(0x04);
+  75   1        send_data(0x00);
+  76   1        send_data(0x00);
+  77   1        send_data(0x03);
+  78   1      }
+  79          
+  80          /******************************************************************************
+  81                                          移植须知:
+  82          1:MCU必须在while中直接调用mcu_api.c内的bt_uart_service()函数
+  83          2:程序正常初始化完成后,建议不进行关串口中断,如必须关中断,关中断时间必须�
              -�,关中断会引起串口数据包丢失
-  71          3:请勿在中断/定时器中断内调用上报函数
-  72          ******************************************************************************/
-  73          
-  74                   
-  75          /******************************************************************************
-  76                                        第一步:初始化
-  77          1:在需要使用到bt相关文件的文件中include "bt.h"
-  78          2:在MCU初始化中调用mcu_api.c文件中的bt_protocol_init()函数
-  79          3:将MCU串口单字节发送函数填入protocol.c文件中uart_transmit_output函数内,并删除#error
-  80          4:在MCU串口接收函数中调用mcu_api.c文件内的uart_receive_input函数,并将接收到的字节�
+  84          3:请勿在中断/定时器中断内调用上报函数
+  85          ******************************************************************************/
+  86          
+  87                   
+  88          /******************************************************************************
+  89                                        第一步:初始化
+  90          1:在需要使用到bt相关文件的文件中include "bt.h"
+  91          2:在MCU初始化中调用mcu_api.c文件中的bt_protocol_init()函数
+  92          3:将MCU串口单字节发送函数填入protocol.c文件中uart_transmit_output函数内,并删除#error
+  93          4:在MCU串口接收函数中调用mcu_api.c文件内的uart_receive_input函数,并将接收到的字节�
              -��为参数传入
-  81          5:单片机进入while循环后调用mcu_api.c文件内的bt_uart_service()函数
-  82          ******************************************************************************/
-  83          
-  84          /******************************************************************************
-  85                                  1:dp数据点序列类型对照表
-  86                    **此为自动生成代码,如在开发平台有相关修改请重新下载MCU_SDK**         
-  87          ******************************************************************************/
-  88          const DOWNLOAD_CMD_S download_cmd[] =
-  89          {
-  90            {DPID_SWITCH_LED, DP_TYPE_BOOL},
-  91            {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
-  92            {DPID_CDS, DP_TYPE_ENUM},
-  93            {DPID_PIR_DELAY, DP_TYPE_VALUE},
-  94            {DPID_SWITCH_XBR, DP_TYPE_BOOL},
-  95            {DPID_STANDBY_TIME, DP_TYPE_VALUE},
-  96            {DPID_SENSE_STRESS, DP_TYPE_VALUE},
-  97            {DPID_ADDR, DP_TYPE_VALUE},
-  98            {DPID_ADDREND, DP_TYPE_VALUE},
-  99            {DPID_GROUP, DP_TYPE_VALUE},
- 100            {DPID_DEBUG, DP_TYPE_STRING},
- 101            {DPID_TEST_BN0, DP_TYPE_BOOL},
- 102            {DPID_TEST_BN1, DP_TYPE_BOOL},
- 103            {DPID_TEST_BN2, DP_TYPE_BOOL},
- 104            {DPID_SWITCH_LED2, DP_TYPE_BOOL},
- 105          };
- 106          
- 107          
- 108          
- 109          
- 110          /******************************************************************************
- 111                                     2:串口单字节发送函数
- 112          请将MCU串口发送函数填入该函数内,并将接收到的数据作为参数传入串口发送函数
- 113          ******************************************************************************/
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 3   
+  94          5:单片机进入while循环后调用mcu_api.c文件内的bt_uart_service()函数
+  95          ******************************************************************************/
+  96          
+  97          /******************************************************************************
+  98                                  1:dp数据点序列类型对照表
+  99                    **此为自动生成代码,如在开发平台有相关修改请重新下载MCU_SDK**         
+ 100          ******************************************************************************/
+ 101          const DOWNLOAD_CMD_S xdata download_cmd[] =
+ 102          {
+ 103            {DPID_SWITCH_LED, DP_TYPE_BOOL},
+ 104            {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
+ 105            {DPID_CDS, DP_TYPE_ENUM},
+ 106            {DPID_PIR_DELAY, DP_TYPE_VALUE},
+ 107            {DPID_SWITCH_XBR, DP_TYPE_BOOL},
+ 108            {DPID_STANDBY_TIME, DP_TYPE_VALUE},
+ 109            {DPID_SENSE_STRESS, DP_TYPE_VALUE},
+ 110            {DPID_ADDR, DP_TYPE_VALUE},
+ 111            {DPID_ADDREND, DP_TYPE_VALUE},
+ 112            {DPID_GROUP, DP_TYPE_VALUE},
+ 113            {DPID_DEBUG, DP_TYPE_STRING},
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 3   
 
- 114          
- 115          /*****************************************************************************
- 116          函数名称 : uart_transmit_output
- 117          功能描述 : 发数据处理
- 118          输入参数 : value:串口收到字节数据
- 119          返回参数 : 无
- 120          使用说明 : 请将MCU串口发送函数填入该函数内,并将接收到的数据作为参数传入串
+ 114            {DPID_TEST_BN0, DP_TYPE_BOOL},
+ 115            {DPID_TEST_BN1, DP_TYPE_BOOL},
+ 116            {DPID_TEST_BN2, DP_TYPE_BOOL},
+ 117            {DPID_SWITCH_LED2, DP_TYPE_BOOL},
+ 118          };
+ 119          
+ 120          
+ 121          
+ 122          
+ 123          /******************************************************************************
+ 124                                     2:串口单字节发送函数
+ 125          请将MCU串口发送函数填入该函数内,并将接收到的数据作为参数传入串口发送函数
+ 126          ******************************************************************************/
+ 127          
+ 128          /*****************************************************************************
+ 129          函数名称 : uart_transmit_output
+ 130          功能描述 : 发数据处理
+ 131          输入参数 : value:串口收到字节数据
+ 132          返回参数 : 无
+ 133          使用说明 : 请将MCU串口发送函数填入该函数内,并将接收到的数据作为参数传入串
              -口发送函数
- 121          *****************************************************************************/
- 122          void uart_transmit_output(unsigned char value)
- 123          {
- 124   1      // #error "请将MCU串口发送函数填入该函数,并删除该行"
- 125   1          send_data(value);
- 126   1        
- 127   1      /*
- 128   1        //示例:
- 129   1        extern void Uart_PutChar(unsigned char value);
- 130   1        Uart_PutChar(value);                                  //串口发送函数
- 131   1      */  
- 132   1      }
- 133          /******************************************************************************
- 134                                     第二步:实现具体用户函数
- 135          1:APP下发数据处理
- 136          2:数据上报处理
- 137          ******************************************************************************/
- 138          
- 139          /******************************************************************************
- 140                                      1:所有数据上报处理
- 141          当前函数处理全部数据上报(包括可下发/可上报和只上报)
- 142            需要用户按照实际情况实现:
- 143            1:需要实现可下发/可上报数据点上报
- 144            2:需要实现只上报数据点上报
- 145          此函数为MCU内部必须调用
- 146          用户也可调用此函数实现全部数据上报
- 147          ******************************************************************************/
- 148          
- 149          //自动化生成数据上报函数
- 150          
- 151          /*****************************************************************************
- 152          函数名称 : all_data_update
- 153          功能描述 : 系统所有dp点信息上传,实现APP和muc数据同步
- 154          输入参数 : 无
- 155          返回参数 : 无
- 156          使用说明 : 此函数SDK内部需调用;
- 157                     MCU必须实现该函数内数据上报功能;包括只上报和可上报可下发型数据
- 158          *****************************************************************************/
- 159          void all_data_update(void)
- 160          {
- 161   1          u8 light;
- 162   1          u8 radius;
- 163   1        //#error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
- 164   1        //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报
+ 134          *****************************************************************************/
+ 135          void uart_transmit_output(unsigned char value)
+ 136          {
+ 137   1      // #error "请将MCU串口发送函数填入该函数,并删除该行"
+ 138   1          send_data(value);
+ 139   1        
+ 140   1      /*
+ 141   1        //示例:
+ 142   1        extern void Uart_PutChar(unsigned char value);
+ 143   1        Uart_PutChar(value);                                  //串口发送函数
+ 144   1      */  
+ 145   1      }
+ 146          /******************************************************************************
+ 147                                     第二步:实现具体用户函数
+ 148          1:APP下发数据处理
+ 149          2:数据上报处理
+ 150          ******************************************************************************/
+ 151          
+ 152          /******************************************************************************
+ 153                                      1:所有数据上报处理
+ 154          当前函数处理全部数据上报(包括可下发/可上报和只上报)
+ 155            需要用户按照实际情况实现:
+ 156            1:需要实现可下发/可上报数据点上报
+ 157            2:需要实现只上报数据点上报
+ 158          此函数为MCU内部必须调用
+ 159          用户也可调用此函数实现全部数据上报
+ 160          ******************************************************************************/
+ 161          
+ 162          //自动化生成数据上报函数
+ 163          
+ 164          /*****************************************************************************
+ 165          函数名称 : all_data_update
+ 166          功能描述 : 系统所有dp点信息上传,实现APP和muc数据同步
+ 167          输入参数 : 无
+ 168          返回参数 : 无
+ 169          使用说明 : 此函数SDK内部需调用;
+ 170                     MCU必须实现该函数内数据上报功能;包括只上报和可上报可下发型数据
+ 171          *****************************************************************************/
+ 172          void all_data_update(void)
+ 173          {
+ 174   1          u8 light;
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 4   
+
+ 175   1          u8 radius;
+ 176   1        //#error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
+ 177   1        //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报
              -函数
- 165   1        
- 166   1          mcu_dp_bool_update(DPID_SWITCH_LED, 1); //复位模块
- 167   1          mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2); //灯的开关
- 168   1          mcu_dp_value_update(DPID_BRIGHT_VALUE, lightvalue); //VALUE型数据上报;
- 169   1      
- 170   1        if(LIGHT_TH==255)
- 171   1          light=0;
- 172   1        else if(LIGHT_TH==200)
- 173   1          light=2;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 4   
-
- 174   1        else if(LIGHT_TH==40)
- 175   1          light=3;    
- 176   1        else if(LIGHT_TH==20)
- 177   1          light=4;
- 178   1        else //if(LIGHT_TH==200)
- 179   1          light=5;
- 180   1      
- 181   1          mcu_dp_enum_update(DPID_CDS, light); //枚举型数据上报;
- 182   1          mcu_dp_value_update(DPID_PIR_DELAY, DELAY_NUM); //VALUE型数据上报;
- 183   1          mcu_dp_bool_update(DPID_SWITCH_XBR, SWITCHfXBR); //BOOL型数据上报;
- 184   1          mcu_dp_value_update(DPID_STANDBY_TIME, lowlightDELAY_NUM); //VALUE型数据上报;
- 185   1      
- 186   1        radius=TH/10000;
- 187   1        radius=50-radius;
- 188   1      
- 189   1          mcu_dp_value_update(DPID_SENSE_STRESS, radius); //VALUE型数据上报;
- 190   1      
- 191   1          mcu_dp_value_update(DPID_ADDR, 10); //VALUE型数据上报;
- 192   1          mcu_dp_value_update(DPID_ADDREND, 11); //VALUE型数据上报;
- 193   1          mcu_dp_value_update(DPID_GROUP, 12); //VALUE型数据上报;
- 194   1      
- 195   1      
- 196   1          mcu_dp_string_update(DPID_DEBUG, "111", 3); //STRING型数据上报;
- 197   1      
+ 178   1        
+ 179   1          mcu_dp_bool_update(DPID_SWITCH_LED, reset_bt_bn); //复位模块
+ 180   1          mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2); //灯的开关
+ 181   1          mcu_dp_value_update(DPID_BRIGHT_VALUE, lightvalue); //VALUE型数据上报;
+ 182   1      
+ 183   1        if(LIGHT_TH==255)
+ 184   1          light=0;
+ 185   1        else if(LIGHT_TH==200)
+ 186   1          light=2;
+ 187   1        else if(LIGHT_TH==40)
+ 188   1          light=3;    
+ 189   1        else if(LIGHT_TH==20)
+ 190   1          light=4;
+ 191   1        else //if(LIGHT_TH==200)
+ 192   1          light=5;
+ 193   1      
+ 194   1          mcu_dp_enum_update(DPID_CDS, light); //枚举型数据上报;
+ 195   1          mcu_dp_value_update(DPID_PIR_DELAY, DELAY_NUM); //VALUE型数据上报;
+ 196   1          mcu_dp_bool_update(DPID_SWITCH_XBR, SWITCHfXBR); //BOOL型数据上报;
+ 197   1          mcu_dp_value_update(DPID_STANDBY_TIME, lowlightDELAY_NUM); //VALUE型数据上报;
  198   1      
- 199   1          //mcu_dp_bool_update(DPID_TEST_BN0,当前测试开关0); //BOOL型数据上报;
- 200   1          //mcu_dp_bool_update(DPID_TEST_BN1,当前测试开关1); //BOOL型数据上报;
- 201   1          //mcu_dp_bool_update(DPID_TEST_BN2,当前测试开关2); //BOOL型数据上报;
- 202   1      
+ 199   1        radius=TH/10000;
+ 200   1        radius=50-radius;
+ 201   1      
+ 202   1          mcu_dp_value_update(DPID_SENSE_STRESS, radius); //VALUE型数据上报;
  203   1      
- 204   1      
- 205   1      }
- 206          
- 207          
- 208          /******************************************************************************
- 209                                          WARNING!!!    
- 210                                      2:所有数据上报处理
- 211          自动化代码模板函数,具体请用户自行实现数据处理
- 212          ******************************************************************************/
- 213          
- 214          /*****************************************************************************
- 215          函数名称 : dp_download_switch_led_handle
- 216          功能描述 : 针对DPID_SWITCH_LED的处理函数
- 217          输入参数 : value:数据源数据
- 218                  : length:数据长度
- 219          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 220          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 221          *****************************************************************************/
- 222          static unsigned char dp_download_switch_led_handle(const unsigned char value[], unsigned short length)
- 223          {
- 224   1          //示例:当前DP类型为BOOL
- 225   1          unsigned char ret;
- 226   1          //0:关/1:开
- 227   1          unsigned char switch_led;
- 228   1          
- 229   1          switch_led = mcu_get_dp_download_bool(value,length);
- 230   1          if(switch_led == 0) {
- 231   2              //开关关
- 232   2              //PWM3init(0);
- 233   2          }else {
- 234   2              //开关开
- 235   2              //PWM3init(100);
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 5   
+ 204   1          mcu_dp_value_update(DPID_ADDR, 10); //VALUE型数据上报;
+ 205   1          mcu_dp_value_update(DPID_ADDREND, 11); //VALUE型数据上报;
+ 206   1          mcu_dp_value_update(DPID_GROUP, 12); //VALUE型数据上报;
+ 207   1      
+ 208   1      
+ 209   1          mcu_dp_string_update(DPID_DEBUG, "1012", 4); //STRING型数据上报;
+ 210   1      
+ 211   1      
+ 212   1          //mcu_dp_bool_update(DPID_TEST_BN0,当前测试开关0); //BOOL型数据上报;
+ 213   1          //mcu_dp_bool_update(DPID_TEST_BN1,当前测试开关1); //BOOL型数据上报;
+ 214   1          //mcu_dp_bool_update(DPID_TEST_BN2,当前测试开关2); //BOOL型数据上报;
+ 215   1      
+ 216   1      
+ 217   1      
+ 218   1      }
+ 219          
+ 220          
+ 221          /******************************************************************************
+ 222                                          WARNING!!!    
+ 223                                      2:所有数据上报处理
+ 224          自动化代码模板函数,具体请用户自行实现数据处理
+ 225          ******************************************************************************/
+ 226          
+ 227          /*****************************************************************************
+ 228          函数名称 : dp_download_switch_led_handle
+ 229          功能描述 : 针对DPID_SWITCH_LED的处理函数
+ 230          输入参数 : value:数据源数据
+ 231                  : length:数据长度
+ 232          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 233          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 234          *****************************************************************************/
+ 235          static unsigned char dp_download_switch_led_handle(const unsigned char value[], unsigned short length)
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 5   
 
- 236   2          }
- 237   1        
- 238   1          //处理完DP数据后应有反馈
- 239   1          ret = mcu_dp_bool_update(DPID_SWITCH_LED, 1);
- 240   1          if(ret == SUCCESS)
- 241   1              return SUCCESS;
- 242   1          else
- 243   1              return ERROR;
- 244   1      }
- 245          /*****************************************************************************
- 246          函数名称 : dp_download_bright_value_handle
- 247          功能描述 : 针对DPID_BRIGHT_VALUE的处理函数
- 248          输入参数 : value:数据源数据
- 249                  : length:数据长度
- 250          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 251          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 252          *****************************************************************************/
- 253          static unsigned char dp_download_bright_value_handle(const unsigned char value[], unsigned short length)
- 254          {
- 255   1          //示例:当前DP类型为VALUE
- 256   1          unsigned char ret;
- 257   1          unsigned long bright_value;
- 258   1          
- 259   1          bright_value = mcu_get_dp_download_value(value,length);
- 260   1          lightvalue = bright_value;
- 261   1      
- 262   1        if(SWITCHfXBR==0)
- 263   1        {
- 264   2          XRBoffbrightvalue = bright_value;
- 265   2        }
- 266   1        
- 267   1        savevar();
+ 236          {
+ 237   1          //示例:当前DP类型为BOOL
+ 238   1          unsigned char ret;
+ 239   1          //0:关/1:开
+ 240   1          unsigned char switch_led;
+ 241   1          
+ 242   1          switch_led = mcu_get_dp_download_bool(value,length);
+ 243   1      
+ 244   1          reset_bt_bn = switch_led;
+ 245   1        
+ 246   1          
+ 247   1          //处理完DP数据后应有反馈
+ 248   1          ret = mcu_dp_bool_update(DPID_SWITCH_LED, reset_bt_bn);
+ 249   1          if(ret == SUCCESS)
+ 250   1              return SUCCESS;
+ 251   1          else
+ 252   1              return ERROR;
+ 253   1      }
+ 254          /*****************************************************************************
+ 255          函数名称 : dp_download_bright_value_handle
+ 256          功能描述 : 针对DPID_BRIGHT_VALUE的处理函数
+ 257          输入参数 : value:数据源数据
+ 258                  : length:数据长度
+ 259          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 260          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 261          *****************************************************************************/
+ 262          static unsigned char dp_download_bright_value_handle(const unsigned char value[], unsigned short length)
+ 263          {
+ 264   1          //示例:当前DP类型为VALUE
+ 265   1          unsigned char ret;
+ 266   1          unsigned long bright_value;
+ 267   1          unsigned char i;
  268   1          
- 269   1          //处理完DP数据后应有反馈
- 270   1          ret = mcu_dp_value_update(DPID_BRIGHT_VALUE, lightvalue);
- 271   1      
- 272   1          if(ret == SUCCESS)
- 273   1              return SUCCESS;
- 274   1          else
- 275   1              return ERROR;
- 276   1      }
- 277          /*****************************************************************************
- 278          函数名称 : dp_download_cds_handle
- 279          功能描述 : 针对DPID_CDS的处理函数
- 280          输入参数 : value:数据源数据
- 281                  : length:数据长度
- 282          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 283          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 284          *****************************************************************************/
- 285          static unsigned char dp_download_cds_handle(const unsigned char value[], unsigned short length)
- 286          {
- 287   1          //示例:当前DP类型为ENUM
- 288   1          unsigned char ret;
- 289   1          unsigned char cds;
- 290   1          
- 291   1          cds = mcu_get_dp_download_enum(value,length);
- 292   1          switch(cds) {
- 293   2              case 0:   //2000LUS
- 294   2            LIGHT_TH=255;//cds*4;
- 295   2              break;
- 296   2              
- 297   2              case 1:   //300LUX
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 6   
+ 269   1          bright_value = mcu_get_dp_download_value(value,length);
+ 270   1        
+ 271   1        DPID_BRIGHT_VALUEcount++;
+ 272   1        if(bright_value==lightvalue)
+ 273   1        {
+ 274   2          //
+ 275   2        }
+ 276   1        else
+ 277   1        {
+ 278   2          DPID_BRIGHT_VALUEcount=0;
+ 279   2          for(i=0;i<8;i++)
+ 280   2          {
+ 281   3            if(groupaddr[i] != 0)
+ 282   3            {
+ 283   4              mcu_dp_value_mesh_update(DPID_BRIGHT_VALUE,bright_value,groupaddr[i]);
+ 284   4            }
+ 285   3          }
+ 286   2        } 
+ 287   1        
+ 288   1          lightvalue = bright_value;
+ 289   1      
+ 290   1        if(SWITCHfXBR==0)
+ 291   1        {
+ 292   2          XRBoffbrightvalue = bright_value;
+ 293   2        }
+ 294   1        
+ 295   1        savevar();
+ 296   1          
+ 297   1          //处理完DP数据后应有反馈
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 6   
 
- 298   2            LIGHT_TH=255;//cds*4;
- 299   2              break;
- 300   2              
- 301   2              case 2:   //50LUX
- 302   2            LIGHT_TH=200;
- 303   2              break;
- 304   2              
- 305   2              case 3: //10LUX
- 306   2            LIGHT_TH=40;
- 307   2              break;
- 308   2              
- 309   2              case 4: //5LUX
- 310   2            LIGHT_TH=20;
- 311   2              break;
- 312   2              
- 313   2          case 5:
- 314   2            LIGHT_TH = light_ad;
- 315   2          break;
- 316   2              
- 317   2              default:
- 318   2          
- 319   2              break;
- 320   2          }
- 321   1      
- 322   1          savevar();
- 323   1          //sprintf(temp_str, "%3d", LIGHT_TH);
- 324   1          //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));
- 325   1          //处理完DP数据后应有反馈
- 326   1          ret = mcu_dp_enum_update(DPID_CDS, cds);
- 327   1          if(ret == SUCCESS)
- 328   1              return SUCCESS;
- 329   1          else
- 330   1              return ERROR;
- 331   1      }
- 332          /*****************************************************************************
- 333          函数名称 : dp_download_pir_delay_handle
- 334          功能描述 : 针对DPID_PIR_DELAY的处理函数
- 335          输入参数 : value:数据源数据
- 336                  : length:数据长度
- 337          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 338          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 339          *****************************************************************************/
- 340          static unsigned char dp_download_pir_delay_handle(const unsigned char value[], unsigned short length)
- 341          {
- 342   1          //示例:当前DP类型为VALUE
- 343   1          unsigned char ret;
- 344   1          unsigned long pir_delay;
- 345   1          
- 346   1          pir_delay = mcu_get_dp_download_value(value,length);
- 347   1          /*
- 348   1          //VALUE类型数据处理
- 349   1          */
- 350   1          DELAY_NUM = pir_delay;
- 351   1        savevar();
- 352   1          
- 353   1          //处理完DP数据后应有反馈
- 354   1          ret = mcu_dp_value_update(DPID_PIR_DELAY, DELAY_NUM);
- 355   1          if(ret == SUCCESS)
- 356   1              return SUCCESS;
- 357   1          else
- 358   1              return ERROR;
- 359   1      }
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 7   
+ 298   1          ret = mcu_dp_value_update(DPID_BRIGHT_VALUE, lightvalue);
+ 299   1      
+ 300   1          if(ret == SUCCESS)
+ 301   1              return SUCCESS;
+ 302   1          else
+ 303   1              return ERROR;
+ 304   1      }
+ 305          /*****************************************************************************
+ 306          函数名称 : dp_download_cds_handle
+ 307          功能描述 : 针对DPID_CDS的处理函数
+ 308          输入参数 : value:数据源数据
+ 309                  : length:数据长度
+ 310          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 311          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 312          *****************************************************************************/
+ 313          static unsigned char dp_download_cds_handle(const unsigned char value[], unsigned short length)
+ 314          {
+ 315   1          //示例:当前DP类型为ENUM
+ 316   1          unsigned char ret;
+ 317   1          unsigned char cds;
+ 318   1          unsigned char i;
+ 319   1          
+ 320   1          cds = mcu_get_dp_download_enum(value,length);
+ 321   1        
+ 322   1        DPID_CDScount++;
+ 323   1        if(cds==cdsvalue)
+ 324   1        {
+ 325   2          if(DPID_CDScount<2)
+ 326   2          {
+ 327   3            for(i=0;i<8;i++)
+ 328   3            {
+ 329   4              if(groupaddr[i] != 0)
+ 330   4              {
+ 331   5                mcu_dp_enum_mesh_update(DPID_CDS,cds,groupaddr[i]);
+ 332   5              }
+ 333   4            }
+ 334   3          }
+ 335   2          if((cds==5)&&(light_ad!=LIGHT_TH))
+ 336   2          {
+ 337   3            DPID_CDScount=0;
+ 338   3          }
+ 339   2        }
+ 340   1        else
+ 341   1        {
+ 342   2          DPID_CDScount=0;
+ 343   2          for(i=0;i<8;i++)
+ 344   2          {
+ 345   3            if(groupaddr[i] != 0)
+ 346   3            {
+ 347   4              mcu_dp_enum_mesh_update(DPID_CDS,cds,groupaddr[i]);
+ 348   4            }
+ 349   3          }
+ 350   2        } 
+ 351   1        
+ 352   1          switch(cds) {
+ 353   2              case 0:   //2000LUS
+ 354   2            LIGHT_TH=255;//cds*4;
+ 355   2              break;
+ 356   2              
+ 357   2              case 1:   //300LUX
+ 358   2            LIGHT_TH=255;//cds*4;
+ 359   2              break;
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 7   
 
- 360          /*****************************************************************************
- 361          函数名称 : dp_download_switch_xbr_handle
- 362          功能描述 : 针对DPID_SWITCH_XBR的处理函数
- 363          输入参数 : value:数据源数据
- 364                  : length:数据长度
- 365          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 366          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 367          *****************************************************************************/
- 368          static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], unsigned short length)
- 369          {
- 370   1          //示例:当前DP类型为BOOL
- 371   1          unsigned char ret;
- 372   1          //0:关/1:开
- 373   1          unsigned char switch_xbr;
- 374   1          
- 375   1          switch_xbr = mcu_get_dp_download_bool(value,length);
- 376   1          if(switch_xbr == 0) {
- 377   2              //开关关
- 378   2              SWITCHfXBR = 0;
- 379   2              mcu_dp_string_update(DPID_DEBUG, radar_bn_off, strlen(radar_bn_off));
- 380   2          }else {
- 381   2              //开关开
- 382   2              SWITCHfXBR = 1;
- 383   2              mcu_dp_string_update(DPID_DEBUG, radar_bn_on, strlen(radar_bn_on));
- 384   2          }
- 385   1        
- 386   1          savevar();
+ 360   2              
+ 361   2              case 2:   //50LUX
+ 362   2            LIGHT_TH=200;
+ 363   2              break;
+ 364   2              
+ 365   2              case 3: //10LUX
+ 366   2            LIGHT_TH=40;
+ 367   2              break;
+ 368   2              
+ 369   2              case 4: //5LUX
+ 370   2            LIGHT_TH=20;
+ 371   2              break;
+ 372   2              
+ 373   2          case 5:
+ 374   2            LIGHT_TH = light_ad;
+ 375   2          break;
+ 376   2              
+ 377   2              default:
+ 378   2          
+ 379   2              break;
+ 380   2          }
+ 381   1      
+ 382   1          cdsvalue = cds;
+ 383   1      
+ 384   1          savevar();
+ 385   1          //sprintf(temp_str, "%3d", LIGHT_TH);
+ 386   1          //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));
  387   1          //处理完DP数据后应有反馈
- 388   1          ret = mcu_dp_bool_update(DPID_SWITCH_XBR,SWITCHfXBR);
+ 388   1          ret = mcu_dp_enum_update(DPID_CDS, cdsvalue);
  389   1          if(ret == SUCCESS)
  390   1              return SUCCESS;
  391   1          else
  392   1              return ERROR;
  393   1      }
  394          /*****************************************************************************
- 395          函数名称 : dp_download_standby_time_handle
- 396          功能描述 : 针对DPID_STANDBY_TIME的处理函数
+ 395          函数名称 : dp_download_pir_delay_handle
+ 396          功能描述 : 针对DPID_PIR_DELAY的处理函数
  397          输入参数 : value:数据源数据
  398                  : length:数据长度
  399          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
  400          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
  401          *****************************************************************************/
- 402          static unsigned char dp_download_standby_time_handle(const unsigned char value[], unsigned short length)
+ 402          static unsigned char dp_download_pir_delay_handle(const unsigned char value[], unsigned short length)
  403          {
  404   1          //示例:当前DP类型为VALUE
  405   1          unsigned char ret;
- 406   1          unsigned long standby_time;
- 407   1          
- 408   1          standby_time = mcu_get_dp_download_value(value,length);
- 409   1          /*
- 410   1          //VALUE类型数据处理
- 411   1          
+ 406   1          unsigned long pir_delay;
+ 407   1          unsigned char i;
+ 408   1          
+ 409   1          pir_delay = mcu_get_dp_download_value(value,length);
+ 410   1          /*
+ 411   1          //VALUE类型数据处理
  412   1          */
- 413   1          lowlightDELAY_NUM=standby_time;
- 414   1          
- 415   1          savevar();
- 416   1          //处理完DP数据后应有反馈
- 417   1          ret = mcu_dp_value_update(DPID_STANDBY_TIME, lowlightDELAY_NUM);
- 418   1          if(ret == SUCCESS)
- 419   1              return SUCCESS;
- 420   1          else
- 421   1              return ERROR;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 8   
+ 413   1        
+ 414   1        DPID_PIR_DELAYcount++;
+ 415   1        if(pir_delay==DELAY_NUM)
+ 416   1        {
+ 417   2          if(DPID_PIR_DELAYcount<2)
+ 418   2          {
+ 419   3            for(i=0;i<8;i++)
+ 420   3            {
+ 421   4              if(groupaddr[i] != 0)
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 8   
 
- 422   1      }
- 423          /*****************************************************************************
- 424          函数名称 : dp_download_sense_stress_handle
- 425          功能描述 : 针对DPID_SENSE_STRESS的处理函数
- 426          输入参数 : value:数据源数据
- 427                  : length:数据长度
- 428          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 429          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 430          *****************************************************************************/
- 431          static unsigned char dp_download_sense_stress_handle(const unsigned char value[], unsigned short length)
- 432          {
- 433   1          //示例:当前DP类型为VALUE
- 434   1          unsigned char ret;
- 435   1          unsigned long sense_stress;
- 436   1          unsigned long sense_cccc;
- 437   1          
- 438   1          sense_stress = mcu_get_dp_download_value(value,length);
- 439   1          /*
- 440   1          //VALUE类型数据处理
- 441   1          
- 442   1          */
- 443   1        sense_cccc=50-sense_stress;
- 444   1        TH=sense_cccc*10000;
- 445   1          
- 446   1        savevar();
- 447   1          
- 448   1          //sprintf(temp_str, "%6d", TH);
- 449   1          //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));    
- 450   1          //处理完DP数据后应有反馈
- 451   1          ret = mcu_dp_value_update(DPID_SENSE_STRESS, sense_stress);
- 452   1          if(ret == SUCCESS)
- 453   1              return SUCCESS;
- 454   1          else
- 455   1              return ERROR;
- 456   1      }
- 457          /*****************************************************************************
- 458          函数名称 : dp_download_addr_handle
- 459          功能描述 : 针对DPID_ADDR的处理函数
- 460          输入参数 : value:数据源数据
- 461                  : length:数据长度
- 462          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 463          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 464          *****************************************************************************/
- 465          static unsigned char dp_download_addr_handle(const unsigned char value[], unsigned short length)
- 466          {
- 467   1          //示例:当前DP类型为VALUE
- 468   1          unsigned char ret;
- 469   1          unsigned long addr;
- 470   1          
- 471   1          addr = mcu_get_dp_download_value(value,length);
- 472   1          /*
- 473   1          //VALUE类型数据处理
- 474   1          
- 475   1          */
- 476   1          
- 477   1          //处理完DP数据后应有反馈
- 478   1          ret = mcu_dp_value_update(DPID_ADDR,addr);
- 479   1          if(ret == SUCCESS)
- 480   1              return SUCCESS;
- 481   1          else
- 482   1              return ERROR;
- 483   1      }
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 9   
+ 422   4              {
+ 423   5                mcu_dp_value_mesh_update(DPID_PIR_DELAY,pir_delay,groupaddr[i]);
+ 424   5              }
+ 425   4            }
+ 426   3          }
+ 427   2        
+ 428   2        }
+ 429   1        else
+ 430   1        {
+ 431   2          DPID_PIR_DELAYcount=0;
+ 432   2          for(i=0;i<8;i++)
+ 433   2          {
+ 434   3            if(groupaddr[i] != 0)
+ 435   3            {
+ 436   4              mcu_dp_value_mesh_update(DPID_PIR_DELAY,pir_delay,groupaddr[i]);
+ 437   4            }
+ 438   3          }
+ 439   2        }
+ 440   1        
+ 441   1          DELAY_NUM = pir_delay;
+ 442   1        savevar();
+ 443   1          
+ 444   1          //处理完DP数据后应有反馈
+ 445   1          ret = mcu_dp_value_update(DPID_PIR_DELAY, DELAY_NUM);
+ 446   1          if(ret == SUCCESS)
+ 447   1              return SUCCESS;
+ 448   1          else
+ 449   1              return ERROR;
+ 450   1      }
+ 451          /*****************************************************************************
+ 452          函数名称 : dp_download_switch_xbr_handle
+ 453          功能描述 : 针对DPID_SWITCH_XBR的处理函数
+ 454          输入参数 : value:数据源数据
+ 455                  : length:数据长度
+ 456          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 457          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 458          *****************************************************************************/
+ 459          static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], unsigned short length)
+ 460          {
+ 461   1          //示例:当前DP类型为BOOL
+ 462   1          unsigned char ret;
+ 463   1          //0:关/1:开
+ 464   1          unsigned char switch_xbr;
+ 465   1          unsigned char i;
+ 466   1          
+ 467   1          switch_xbr = mcu_get_dp_download_bool(value,length);
+ 468   1        
+ 469   1        DPID_SWITCH_XBRcount++;
+ 470   1        if(switch_xbr==SWITCHfXBR)
+ 471   1        {
+ 472   2          if(DPID_SWITCH_XBRcount<2)
+ 473   2          {
+ 474   3            for(i=0;i<8;i++)
+ 475   3            {
+ 476   4              if(groupaddr[i] != 0)
+ 477   4              {
+ 478   5                mcu_dp_bool_mesh_update(DPID_SWITCH_XBR,switch_xbr,groupaddr[i]);
+ 479   5              }
+ 480   4            }
+ 481   3          }
+ 482   2        
+ 483   2        }
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 9   
 
- 484          /*****************************************************************************
- 485          函数名称 : dp_download_addrend_handle
- 486          功能描述 : 针对DPID_ADDREND的处理函数
- 487          输入参数 : value:数据源数据
- 488                  : length:数据长度
- 489          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 490          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 491          *****************************************************************************/
- 492          static unsigned char dp_download_addrend_handle(const unsigned char value[], unsigned short length)
- 493          {
- 494   1          //示例:当前DP类型为VALUE
- 495   1          unsigned char ret;
- 496   1          unsigned long addrend;
- 497   1          
- 498   1          addrend = mcu_get_dp_download_value(value,length);
- 499   1          /*
- 500   1          //VALUE类型数据处理
- 501   1          
- 502   1          */
- 503   1          
- 504   1          //处理完DP数据后应有反馈
- 505   1          ret = mcu_dp_value_update(DPID_ADDREND,addrend);
- 506   1          if(ret == SUCCESS)
- 507   1              return SUCCESS;
- 508   1          else
- 509   1              return ERROR;
- 510   1      }
- 511          /*****************************************************************************
- 512          函数名称 : dp_download_group_handle
- 513          功能描述 : 针对DPID_GROUP的处理函数
- 514          输入参数 : value:数据源数据
- 515                  : length:数据长度
- 516          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 517          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 518          *****************************************************************************/
- 519          static unsigned char dp_download_group_handle(const unsigned char value[], unsigned short length)
- 520          {
- 521   1          //示例:当前DP类型为VALUE
- 522   1          unsigned char ret;
- 523   1          unsigned long group;
- 524   1          
- 525   1          group = mcu_get_dp_download_value(value,length);
- 526   1          /*
- 527   1          //VALUE类型数据处理
- 528   1          
- 529   1          */
- 530   1          
- 531   1          //处理完DP数据后应有反馈
- 532   1          ret = mcu_dp_value_update(DPID_GROUP,group);
- 533   1          if(ret == SUCCESS)
- 534   1              return SUCCESS;
- 535   1          else
- 536   1              return ERROR;
- 537   1      }
- 538          /*****************************************************************************
- 539          函数名称 : dp_download_test_bn0_handle
- 540          功能描述 : 针对DPID_TEST_BN0的处理函数
- 541          输入参数 : value:数据源数据
- 542                  : length:数据长度
- 543          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 544          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 545          *****************************************************************************/
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 10  
+ 484   1        else
+ 485   1        {
+ 486   2          DPID_SWITCH_XBRcount=0;
+ 487   2          for(i=0;i<8;i++)
+ 488   2          {
+ 489   3            if(groupaddr[i] != 0)
+ 490   3            {
+ 491   4              mcu_dp_bool_mesh_update(DPID_SWITCH_XBR,switch_xbr,groupaddr[i]);
+ 492   4            }
+ 493   3          }
+ 494   2        
+ 495   2        }
+ 496   1        
+ 497   1          if(switch_xbr == 0) {
+ 498   2              //开关关
+ 499   2              SWITCHfXBR = 0;
+ 500   2              //mcu_dp_string_update(DPID_DEBUG, radar_bn_off, strlen(radar_bn_off));
+ 501   2          }else {
+ 502   2              //开关开
+ 503   2              SWITCHfXBR = 1;
+ 504   2              //mcu_dp_string_update(DPID_DEBUG, radar_bn_on, strlen(radar_bn_on));
+ 505   2          }
+ 506   1        
+ 507   1          savevar();
+ 508   1          //处理完DP数据后应有反馈
+ 509   1          ret = mcu_dp_bool_update(DPID_SWITCH_XBR,SWITCHfXBR);
+ 510   1          if(ret == SUCCESS)
+ 511   1              return SUCCESS;
+ 512   1          else
+ 513   1              return ERROR;
+ 514   1      }
+ 515          /*****************************************************************************
+ 516          函数名称 : dp_download_standby_time_handle
+ 517          功能描述 : 针对DPID_STANDBY_TIME的处理函数
+ 518          输入参数 : value:数据源数据
+ 519                  : length:数据长度
+ 520          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 521          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 522          *****************************************************************************/
+ 523          static unsigned char dp_download_standby_time_handle(const unsigned char value[], unsigned short length)
+ 524          {
+ 525   1          //示例:当前DP类型为VALUE
+ 526   1          unsigned char ret;
+ 527   1          unsigned long standby_time;
+ 528   1          unsigned char i;
+ 529   1          
+ 530   1          standby_time = mcu_get_dp_download_value(value,length);
+ 531   1          /*
+ 532   1          //VALUE类型数据处理
+ 533   1          
+ 534   1          */
+ 535   1        DPID_STANDBY_TIMEcount++;
+ 536   1        if(standby_time==lowlightDELAY_NUM)
+ 537   1        {
+ 538   2          if(DPID_STANDBY_TIMEcount<2)
+ 539   2          {
+ 540   3            for(i=0;i<8;i++)
+ 541   3            {
+ 542   4              if(groupaddr[i] != 0)
+ 543   4              {
+ 544   5                mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
+ 545   5              }
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 10  
 
- 546          static unsigned char dp_download_test_bn0_handle(const unsigned char value[], unsigned short length)
- 547          {
- 548   1          //示例:当前DP类型为BOOL
- 549   1          unsigned char ret;
- 550   1          //0:关/1:开
- 551   1          unsigned char test_bn0;
- 552   1          
- 553   1          test_bn0 = mcu_get_dp_download_bool(value,length);
- 554   1          if(test_bn0 == 0) {
- 555   2              //开关关
- 556   2          }else {
- 557   2              //开关开
- 558   2          }
- 559   1        
- 560   1          //处理完DP数据后应有反馈
- 561   1          ret = mcu_dp_bool_update(DPID_TEST_BN0,test_bn0);
- 562   1          if(ret == SUCCESS)
- 563   1              return SUCCESS;
- 564   1          else
- 565   1              return ERROR;
- 566   1      }
- 567          /*****************************************************************************
- 568          函数名称 : dp_download_test_bn1_handle
- 569          功能描述 : 针对DPID_TEST_BN1的处理函数
- 570          输入参数 : value:数据源数据
- 571                  : length:数据长度
- 572          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 573          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 574          *****************************************************************************/
- 575          static unsigned char dp_download_test_bn1_handle(const unsigned char value[], unsigned short length)
- 576          {
- 577   1          //示例:当前DP类型为BOOL
- 578   1          unsigned char ret;
- 579   1          //0:关/1:开
- 580   1          unsigned char test_bn1;
- 581   1          
- 582   1          test_bn1 = mcu_get_dp_download_bool(value,length);
- 583   1          if(test_bn1 == 0) {
- 584   2              //开关关
- 585   2          }else {
- 586   2              //开关开
- 587   2          }
- 588   1        
- 589   1          //处理完DP数据后应有反馈
- 590   1          ret = mcu_dp_bool_update(DPID_TEST_BN1,test_bn1);
- 591   1          if(ret == SUCCESS)
- 592   1              return SUCCESS;
- 593   1          else
- 594   1              return ERROR;
- 595   1      }
- 596          /*****************************************************************************
- 597          函数名称 : dp_download_test_bn2_handle
- 598          功能描述 : 针对DPID_TEST_BN2的处理函数
- 599          输入参数 : value:数据源数据
- 600                  : length:数据长度
- 601          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 602          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 603          *****************************************************************************/
- 604          static unsigned char dp_download_test_bn2_handle(const unsigned char value[], unsigned short length)
- 605          {
- 606   1          //示例:当前DP类型为BOOL
- 607   1          unsigned char ret;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 11  
+ 546   4            }
+ 547   3          }
+ 548   2        
+ 549   2        }
+ 550   1        else
+ 551   1        {
+ 552   2          DPID_STANDBY_TIMEcount=0;
+ 553   2          for(i=0;i<8;i++)
+ 554   2            {
+ 555   3              if(groupaddr[i] != 0)
+ 556   3              {
+ 557   4                mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
+ 558   4              }
+ 559   3            }
+ 560   2        
+ 561   2        }
+ 562   1        
+ 563   1          lowlightDELAY_NUM=standby_time;
+ 564   1          
+ 565   1          savevar();
+ 566   1          //处理完DP数据后应有反馈
+ 567   1          ret = mcu_dp_value_update(DPID_STANDBY_TIME, lowlightDELAY_NUM);
+ 568   1          if(ret == SUCCESS)
+ 569   1              return SUCCESS;
+ 570   1          else
+ 571   1              return ERROR;
+ 572   1      }
+ 573          /*****************************************************************************
+ 574          函数名称 : dp_download_sense_stress_handle
+ 575          功能描述 : 针对DPID_SENSE_STRESS的处理函数
+ 576          输入参数 : value:数据源数据
+ 577                  : length:数据长度
+ 578          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 579          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 580          *****************************************************************************/
+ 581          static unsigned char dp_download_sense_stress_handle(const unsigned char value[], unsigned short length)
+ 582          {
+ 583   1          //示例:当前DP类型为VALUE
+ 584   1          unsigned char ret;
+ 585   1          unsigned long sense_stress;
+ 586   1          unsigned char i;
+ 587   1          
+ 588   1          sense_stress = mcu_get_dp_download_value(value,length);
+ 589   1          /*
+ 590   1          //VALUE类型数据处理
+ 591   1          
+ 592   1          */
+ 593   1        DPID_SENSING_RADIUScount++;
+ 594   1        if(sense_stress==sensing_th)
+ 595   1        {
+ 596   2          if(DPID_SENSING_RADIUScount<2)
+ 597   2          {
+ 598   3            for(i=0;i<8;i++)
+ 599   3            {
+ 600   4              if(groupaddr[i] != 0)
+ 601   4              {
+ 602   5                mcu_dp_value_mesh_update(DPID_SENSE_STRESS,sense_stress,groupaddr[i]);
+ 603   5              }
+ 604   4            }
+ 605   3          }
+ 606   2        }
+ 607   1        else
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 11  
 
- 608   1          //0:关/1:开
- 609   1          unsigned char test_bn2;
- 610   1          
- 611   1          test_bn2 = mcu_get_dp_download_bool(value,length);
- 612   1          if(test_bn2 == 0) {
- 613   2              //开关关
- 614   2          }else {
- 615   2              //开关开
- 616   2          }
- 617   1        
- 618   1          //处理完DP数据后应有反馈
- 619   1          ret = mcu_dp_bool_update(DPID_TEST_BN2,test_bn2);
- 620   1          if(ret == SUCCESS)
- 621   1              return SUCCESS;
- 622   1          else
- 623   1              return ERROR;
- 624   1      }
- 625          /*****************************************************************************
- 626          函数名称 : dp_download_switch_led2_handle
- 627          功能描述 : 针对DPID_SWITCH_LED2的处理函数
- 628          输入参数 : value:数据源数据
- 629                  : length:数据长度
- 630          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
- 631          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
- 632          *****************************************************************************/
- 633          static unsigned char dp_download_switch_led2_handle(const unsigned char value[], unsigned short length)
- 634          {
- 635   1          //示例:当前DP类型为BOOL
- 636   1          unsigned char ret;
- 637   1          //0:关/1:开
- 638   1          unsigned char switch_led2;
- 639   1          
- 640   1          switch_led2 = mcu_get_dp_download_bool(value,length);
- 641   1          if(switch_led2 == 0) {
- 642   2              //灯开关关
- 643   2              mcu_dp_string_update(DPID_DEBUG, led_bn_off, strlen(led_bn_off));
- 644   2          if(SWITCHfXBR==1)
- 645   2          {
- 646   3            PWM3init(0);
- 647   3          }
- 648   2              SWITCHflag2=0;
- 649   2          }else {
- 650   2              //灯开关开
- 651   2              mcu_dp_string_update(DPID_DEBUG, led_bn_on, strlen(led_bn_on));
- 652   2              if(SWITCHfXBR==1)
- 653   2          {
- 654   3            PWM3init(100);
- 655   3          }
- 656   2              SWITCHflag2=1;
- 657   2          }
- 658   1        
- 659   1          //处理完DP数据后应有反馈
- 660   1          ret = mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2);
- 661   1          if(ret == SUCCESS)
- 662   1              return SUCCESS;
- 663   1          else
- 664   1              return ERROR;
- 665   1      }
- 666          
- 667          
- 668          /******************************************************************************
- 669                                          WARNING!!!                     
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 12  
+ 608   1        {
+ 609   2          DPID_SENSING_RADIUScount=0;
+ 610   2          for(i=0;i<8;i++)
+ 611   2          {
+ 612   3            if(groupaddr[i] != 0)
+ 613   3            {
+ 614   4              mcu_dp_value_mesh_update(DPID_SENSE_STRESS,sense_stress,groupaddr[i]);
+ 615   4            }
+ 616   3          }
+ 617   2        } 
+ 618   1        
+ 619   1        sensing_th = sense_stress;
+ 620   1        TH=(50-sense_stress)*10000;
+ 621   1          
+ 622   1        savevar();
+ 623   1          
+ 624   1          //sprintf(temp_str, "%6d", TH);
+ 625   1          //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));    
+ 626   1          //处理完DP数据后应有反馈
+ 627   1          ret = mcu_dp_value_update(DPID_SENSE_STRESS, sensing_th);
+ 628   1          if(ret == SUCCESS)
+ 629   1              return SUCCESS;
+ 630   1          else
+ 631   1              return ERROR;
+ 632   1      }
+ 633          /*****************************************************************************
+ 634          函数名称 : dp_download_addr_handle
+ 635          功能描述 : 针对DPID_ADDR的处理函数
+ 636          输入参数 : value:数据源数据
+ 637                  : length:数据长度
+ 638          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 639          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 640          *****************************************************************************/
+ 641          static unsigned char dp_download_addr_handle(const unsigned char value[], unsigned short length)
+ 642          {
+ 643   1          //示例:当前DP类型为VALUE
+ 644   1          unsigned char ret;
+ 645   1          unsigned long addr;
+ 646   1          
+ 647   1          addr = mcu_get_dp_download_value(value,length);
+ 648   1          /*
+ 649   1          //VALUE类型数据处理
+ 650   1          
+ 651   1          */
+ 652   1          
+ 653   1          //处理完DP数据后应有反馈
+ 654   1          ret = mcu_dp_value_update(DPID_ADDR,addr);
+ 655   1          if(ret == SUCCESS)
+ 656   1              return SUCCESS;
+ 657   1          else
+ 658   1              return ERROR;
+ 659   1      }
+ 660          /*****************************************************************************
+ 661          函数名称 : dp_download_addrend_handle
+ 662          功能描述 : 针对DPID_ADDREND的处理函数
+ 663          输入参数 : value:数据源数据
+ 664                  : length:数据长度
+ 665          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 666          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 667          *****************************************************************************/
+ 668          static unsigned char dp_download_addrend_handle(const unsigned char value[], unsigned short length)
+ 669          {
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 12  
 
- 670          此代码为SDK内部调用,请按照实际dp数据实现函数内部数据
- 671          ******************************************************************************/
- 672          #ifdef SUPPORT_MCU_FIRM_UPDATE
+ 670   1          //示例:当前DP类型为VALUE
+ 671   1          unsigned char ret;
+ 672   1          unsigned long addrend;
+ 673   1          
+ 674   1          addrend = mcu_get_dp_download_value(value,length);
+ 675   1          /*
+ 676   1          //VALUE类型数据处理
+ 677   1          
+ 678   1          */
+ 679   1          
+ 680   1          //处理完DP数据后应有反馈
+ 681   1          ret = mcu_dp_value_update(DPID_ADDREND,addrend);
+ 682   1          if(ret == SUCCESS)
+ 683   1              return SUCCESS;
+ 684   1          else
+ 685   1              return ERROR;
+ 686   1      }
+ 687          /*****************************************************************************
+ 688          函数名称 : dp_download_group_handle
+ 689          功能描述 : 针对DPID_GROUP的处理函数
+ 690          输入参数 : value:数据源数据
+ 691                  : length:数据长度
+ 692          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 693          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 694          *****************************************************************************/
+ 695          static unsigned char dp_download_group_handle(const unsigned char value[], unsigned short length)
+ 696          {
+ 697   1          //示例:当前DP类型为VALUE
+ 698   1          unsigned char ret;
+ 699   1          unsigned long group;
+ 700   1          
+ 701   1          group = mcu_get_dp_download_value(value,length);
+ 702   1          /*
+ 703   1          //VALUE类型数据处理
+ 704   1          
+ 705   1          */
+ 706   1          
+ 707   1          //处理完DP数据后应有反馈
+ 708   1          ret = mcu_dp_value_update(DPID_GROUP,group);
+ 709   1          if(ret == SUCCESS)
+ 710   1              return SUCCESS;
+ 711   1          else
+ 712   1              return ERROR;
+ 713   1      }
+ 714          /*****************************************************************************
+ 715          函数名称 : dp_download_test_bn0_handle
+ 716          功能描述 : 针对DPID_TEST_BN0的处理函数
+ 717          输入参数 : value:数据源数据
+ 718                  : length:数据长度
+ 719          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 720          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 721          *****************************************************************************/
+ 722          static unsigned char dp_download_test_bn0_handle(const unsigned char value[], unsigned short length)
+ 723          {
+ 724   1          //示例:当前DP类型为BOOL
+ 725   1          unsigned char ret;
+ 726   1          //0:关/1:开
+ 727   1          unsigned char test_bn0;
+ 728   1          
+ 729   1          test_bn0 = mcu_get_dp_download_bool(value,length);
+ 730   1          if(test_bn0 == 0) {
+ 731   2              //开关关
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 13  
+
+ 732   2          }else {
+ 733   2              //开关开
+ 734   2          }
+ 735   1        
+ 736   1          //处理完DP数据后应有反馈
+ 737   1          ret = mcu_dp_bool_update(DPID_TEST_BN0,test_bn0);
+ 738   1          if(ret == SUCCESS)
+ 739   1              return SUCCESS;
+ 740   1          else
+ 741   1              return ERROR;
+ 742   1      }
+ 743          /*****************************************************************************
+ 744          函数名称 : dp_download_test_bn1_handle
+ 745          功能描述 : 针对DPID_TEST_BN1的处理函数
+ 746          输入参数 : value:数据源数据
+ 747                  : length:数据长度
+ 748          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 749          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 750          *****************************************************************************/
+ 751          static unsigned char dp_download_test_bn1_handle(const unsigned char value[], unsigned short length)
+ 752          {
+ 753   1          //示例:当前DP类型为BOOL
+ 754   1          unsigned char ret;
+ 755   1          //0:关/1:开
+ 756   1          unsigned char test_bn1;
+ 757   1          
+ 758   1          test_bn1 = mcu_get_dp_download_bool(value,length);
+ 759   1          if(test_bn1 == 0) {
+ 760   2              //开关关
+ 761   2          }else {
+ 762   2              //开关开
+ 763   2          }
+ 764   1        
+ 765   1          //处理完DP数据后应有反馈
+ 766   1          ret = mcu_dp_bool_update(DPID_TEST_BN1,test_bn1);
+ 767   1          if(ret == SUCCESS)
+ 768   1              return SUCCESS;
+ 769   1          else
+ 770   1              return ERROR;
+ 771   1      }
+ 772          /*****************************************************************************
+ 773          函数名称 : dp_download_test_bn2_handle
+ 774          功能描述 : 针对DPID_TEST_BN2的处理函数
+ 775          输入参数 : value:数据源数据
+ 776                  : length:数据长度
+ 777          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 778          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 779          *****************************************************************************/
+ 780          static unsigned char dp_download_test_bn2_handle(const unsigned char value[], unsigned short length)
+ 781          {
+ 782   1          //示例:当前DP类型为BOOL
+ 783   1          unsigned char ret;
+ 784   1          //0:关/1:开
+ 785   1          unsigned char test_bn2;
+ 786   1          
+ 787   1          test_bn2 = mcu_get_dp_download_bool(value,length);
+ 788   1          if(test_bn2 == 0) {
+ 789   2              //开关关
+ 790   2          }else {
+ 791   2              //开关开
+ 792   2          }
+ 793   1        
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 14  
+
+ 794   1          //处理完DP数据后应有反馈
+ 795   1          ret = mcu_dp_bool_update(DPID_TEST_BN2,test_bn2);
+ 796   1          if(ret == SUCCESS)
+ 797   1              return SUCCESS;
+ 798   1          else
+ 799   1              return ERROR;
+ 800   1      }
+ 801          /*****************************************************************************
+ 802          函数名称 : dp_download_switch_led2_handle
+ 803          功能描述 : 针对DPID_SWITCH_LED2的处理函数
+ 804          输入参数 : value:数据源数据
+ 805                  : length:数据长度
+ 806          返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+ 807          使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+ 808          *****************************************************************************/
+ 809          static unsigned char dp_download_switch_led2_handle(const unsigned char value[], unsigned short length)
+ 810          {
+ 811   1          //示例:当前DP类型为BOOL
+ 812   1          unsigned char ret;
+ 813   1          //0:关/1:开
+ 814   1          unsigned char switch_led2;
+ 815   1          unsigned char i;
+ 816   1          
+ 817   1          switch_led2 = mcu_get_dp_download_bool(value,length);
+ 818   1      
+ 819   1          DPID_SWITCH_LED2count++;
+ 820   1          if(switch_led2==SWITCHflag2)
+ 821   1          {
+ 822   2            if(DPID_SWITCH_LED2count<2)
+ 823   2            {
+ 824   3              for(i=0;i<8;i++)
+ 825   3              {
+ 826   4                if(groupaddr[i] != 0)
+ 827   4                {
+ 828   5                  mcu_dp_bool_mesh_update(DPID_SWITCH_LED2,switch_led2,groupaddr[i]);
+ 829   5                }
+ 830   4              }
+ 831   3            }
+ 832   2      
+ 833   2          }
+ 834   1          else
+ 835   1          {
+ 836   2            DPID_SWITCH_LED2count=0;
+ 837   2            for(i=0;i<8;i++)
+ 838   2            {
+ 839   3              if(groupaddr[i] != 0)
+ 840   3              {
+ 841   4                mcu_dp_bool_mesh_update(DPID_SWITCH_LED2,switch_led2,groupaddr[i]);
+ 842   4              }
+ 843   3            }   
+ 844   2      
+ 845   2          }
+ 846   1      
+ 847   1          if(switch_led2 == 0) {
+ 848   2              //灯开关关
+ 849   2              //mcu_dp_string_update(DPID_DEBUG, led_bn_off, strlen(led_bn_off));
+ 850   2          if(SWITCHfXBR==1)
+ 851   2          {
+ 852   3            PWM3init(0);
+ 853   3          }
+ 854   2              SWITCHflag2=0;
+ 855   2          }else {
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 15  
+
+ 856   2              //灯开关开
+ 857   2              //mcu_dp_string_update(DPID_DEBUG, led_bn_on, strlen(led_bn_on));
+ 858   2              if(SWITCHfXBR==1)
+ 859   2          {
+ 860   3            PWM3init(100);
+ 861   3          }
+ 862   2              SWITCHflag2=1;
+ 863   2          }
+ 864   1        
+ 865   1          //处理完DP数据后应有反馈
+ 866   1          ret = mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2);
+ 867   1          if(ret == SUCCESS)
+ 868   1              return SUCCESS;
+ 869   1          else
+ 870   1              return ERROR;
+ 871   1      }
+ 872          
+ 873          
+ 874          /******************************************************************************
+ 875                                          WARNING!!!                     
+ 876          此代码为SDK内部调用,请按照实际dp数据实现函数内部数据
+ 877          ******************************************************************************/
+ 878          #ifdef SUPPORT_MCU_FIRM_UPDATE
               /*****************************************************************************
               函数名称 : mcu_firm_update_handle
               功能描述 : MCU进入固件升级模式
@@ -746,6 +958,8 @@ line level    source
                   if(position % 1024 == 0)
                   {
                     if(Earse_Flash(addr + position) == ERROR)
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 16  
+
                       return ERROR;
                   }
                   
@@ -756,200 +970,200 @@ line level    source
                 return SUCCESS;
               }
               #endif
- 721          /******************************************************************************
- 722                                          WARNING!!!                     
- 723          以下函数用户请勿修改!!
- 724          ******************************************************************************/
- 725          
- 726          /*****************************************************************************
- 727          函数名称 : dp_download_handle
- 728          功能描述 : dp下发处理函数
- 729          输入参数 : dpid:DP序号
- 730                     value:dp数据缓冲区地址
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 13  
+ 927          /******************************************************************************
+ 928                                          WARNING!!!                     
+ 929          以下函数用户请勿修改!!
+ 930          ******************************************************************************/
+ 931          
+ 932          /*****************************************************************************
+ 933          函数名称 : dp_download_handle
+ 934          功能描述 : dp下发处理函数
+ 935          输入参数 : dpid:DP序号
+ 936                     value:dp数据缓冲区地址
+ 937                     length:dp数据长度
+ 938          返回参数 : 成功返回:SUCCESS/失败返回:ERRO
+ 939          使用说明 : 该函数用户不能修改
+ 940          *****************************************************************************/
+ 941          unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[], unsigned short length)
+ 942          {
+ 943   1        /*********************************
+ 944   1        当前函数处理可下发/可上报数据调用                    
+ 945   1        具体函数内需要实现下发数据处理
+ 946   1        完成用需要将处理结果反馈至APP端,否则APP会认为下发失败
+ 947   1        ***********************************/
+ 948   1        unsigned char ret;
+ 949   1        switch(dpid)
+ 950   1        {
+ 951   2              case DPID_SWITCH_LED:
+ 952   2                  //开关处理函数
+ 953   2                  ret = dp_download_switch_led_handle(value,length);
+ 954   2            if(ret==1)
+ 955   2            {
+ 956   3              switchcnt ++;
+ 957   3              if(switchcnt>=5)
+ 958   3              {
+ 959   4                switchcnt = 0;
+ 960   4                          reset_bt_module();
+ 961   4              }
+ 962   3            }
+ 963   2              break;
+ 964   2              case DPID_BRIGHT_VALUE:
+ 965   2                  //亮度值处理函数
+ 966   2                  ret = dp_download_bright_value_handle(value,length);
+ 967   2                  switchcnt = 0;
+ 968   2              break;
+ 969   2              case DPID_CDS:
+ 970   2                  //光敏参数处理函数
+ 971   2                  ret = dp_download_cds_handle(value,length);
+ 972   2                  switchcnt = 0;
+ 973   2              break;
+ 974   2              case DPID_PIR_DELAY:
+ 975   2                  //感应延时处理函数
+ 976   2                  ret = dp_download_pir_delay_handle(value,length);
+ 977   2                  switchcnt = 0;
+ 978   2              break;
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 17  
 
- 731                     length:dp数据长度
- 732          返回参数 : 成功返回:SUCCESS/失败返回:ERRO
- 733          使用说明 : 该函数用户不能修改
- 734          *****************************************************************************/
- 735          unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[], unsigned short length)
- 736          {
- 737   1        /*********************************
- 738   1        当前函数处理可下发/可上报数据调用                    
- 739   1        具体函数内需要实现下发数据处理
- 740   1        完成用需要将处理结果反馈至APP端,否则APP会认为下发失败
- 741   1        ***********************************/
- 742   1        unsigned char ret;
- 743   1        switch(dpid)
- 744   1        {
- 745   2              case DPID_SWITCH_LED:
- 746   2                  //开关处理函数
- 747   2                  ret = dp_download_switch_led_handle(value,length);
- 748   2            if(ret==1)
- 749   2            {
- 750   3              switchcnt ++;
- 751   3              if(switchcnt>=5)
- 752   3              {
- 753   4                switchcnt = 0;
- 754   4                          reset_bt_module();
- 755   4              }
- 756   3            }
- 757   2              break;
- 758   2              case DPID_BRIGHT_VALUE:
- 759   2                  //亮度值处理函数
- 760   2                  ret = dp_download_bright_value_handle(value,length);
- 761   2                  switchcnt = 0;
- 762   2              break;
- 763   2              case DPID_CDS:
- 764   2                  //光敏参数处理函数
- 765   2                  ret = dp_download_cds_handle(value,length);
- 766   2                  switchcnt = 0;
- 767   2              break;
- 768   2              case DPID_PIR_DELAY:
- 769   2                  //感应延时处理函数
- 770   2                  ret = dp_download_pir_delay_handle(value,length);
- 771   2                  switchcnt = 0;
- 772   2              break;
- 773   2              case DPID_SWITCH_XBR:
- 774   2                  //感应开关处理函数
- 775   2                  ret = dp_download_switch_xbr_handle(value,length);
- 776   2                  switchcnt = 0;
- 777   2              break;
- 778   2              case DPID_STANDBY_TIME:
- 779   2                  //伴亮延时处理函数
- 780   2                  ret = dp_download_standby_time_handle(value,length);
- 781   2                  switchcnt = 0;
- 782   2              break;
- 783   2              case DPID_SENSE_STRESS:
- 784   2                  //感应强度处理函数
- 785   2                  ret = dp_download_sense_stress_handle(value,length);
- 786   2                  switchcnt = 0;
- 787   2              break;
- 788   2              case DPID_ADDR:
- 789   2                  //设备地址处理函数
- 790   2                  ret = dp_download_addr_handle(value,length);
- 791   2                  switchcnt = 0;
- 792   2              break;
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 14  
+ 979   2              case DPID_SWITCH_XBR:
+ 980   2                  //感应开关处理函数
+ 981   2                  ret = dp_download_switch_xbr_handle(value,length);
+ 982   2                  switchcnt = 0;
+ 983   2              break;
+ 984   2              case DPID_STANDBY_TIME:
+ 985   2                  //伴亮延时处理函数
+ 986   2                  ret = dp_download_standby_time_handle(value,length);
+ 987   2                  switchcnt = 0;
+ 988   2              break;
+ 989   2              case DPID_SENSE_STRESS:
+ 990   2                  //感应强度处理函数
+ 991   2                  ret = dp_download_sense_stress_handle(value,length);
+ 992   2                  switchcnt = 0;
+ 993   2              break;
+ 994   2              case DPID_ADDR:
+ 995   2                  //设备地址处理函数
+ 996   2                  ret = dp_download_addr_handle(value,length);
+ 997   2                  switchcnt = 0;
+ 998   2              break;
+ 999   2              case DPID_ADDREND:
+1000   2                  //设备地址结束值处理函数
+1001   2                  ret = dp_download_addrend_handle(value,length);
+1002   2                  switchcnt = 0;
+1003   2              break;
+1004   2              case DPID_GROUP:
+1005   2                  //设备群组处理函数
+1006   2                  ret = dp_download_group_handle(value,length);
+1007   2                  switchcnt = 0;
+1008   2              break;
+1009   2              case DPID_TEST_BN0:
+1010   2                  //测试开关0处理函数
+1011   2                  ret = dp_download_test_bn0_handle(value,length);
+1012   2                  switchcnt = 0;
+1013   2              break;
+1014   2              case DPID_TEST_BN1:
+1015   2                  //测试开关1处理函数
+1016   2                  ret = dp_download_test_bn1_handle(value,length);
+1017   2                  switchcnt = 0;
+1018   2              break;
+1019   2              case DPID_TEST_BN2:
+1020   2                  //测试开关2处理函数
+1021   2                  ret = dp_download_test_bn2_handle(value,length);
+1022   2                  switchcnt = 0;
+1023   2              break;
+1024   2              case DPID_SWITCH_LED2:
+1025   2                  //灯开关处理函数
+1026   2                  ret = dp_download_switch_led2_handle(value,length);
+1027   2                  switchcnt = 0;
+1028   2              break;
+1029   2      
+1030   2      
+1031   2        default:
+1032   2              switchcnt = 0;
+1033   2          break;
+1034   2        }
+1035   1        return ret;
+1036   1      }
+1037          /*****************************************************************************
+1038          函数名称 : get_download_cmd_total
+1039          功能描述 : 获取所有dp命令总和
+1040          输入参数 : 无
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 18  
 
- 793   2              case DPID_ADDREND:
- 794   2                  //设备地址结束值处理函数
- 795   2                  ret = dp_download_addrend_handle(value,length);
- 796   2                  switchcnt = 0;
- 797   2              break;
- 798   2              case DPID_GROUP:
- 799   2                  //设备群组处理函数
- 800   2                  ret = dp_download_group_handle(value,length);
- 801   2                  switchcnt = 0;
- 802   2              break;
- 803   2              case DPID_TEST_BN0:
- 804   2                  //测试开关0处理函数
- 805   2                  ret = dp_download_test_bn0_handle(value,length);
- 806   2                  switchcnt = 0;
- 807   2              break;
- 808   2              case DPID_TEST_BN1:
- 809   2                  //测试开关1处理函数
- 810   2                  ret = dp_download_test_bn1_handle(value,length);
- 811   2                  switchcnt = 0;
- 812   2              break;
- 813   2              case DPID_TEST_BN2:
- 814   2                  //测试开关2处理函数
- 815   2                  ret = dp_download_test_bn2_handle(value,length);
- 816   2                  switchcnt = 0;
- 817   2              break;
- 818   2              case DPID_SWITCH_LED2:
- 819   2                  //灯开关处理函数
- 820   2                  ret = dp_download_switch_led2_handle(value,length);
- 821   2                  switchcnt = 0;
- 822   2              break;
- 823   2      
- 824   2      
- 825   2        default:
- 826   2              switchcnt = 0;
- 827   2          break;
- 828   2        }
- 829   1        return ret;
- 830   1      }
- 831          /*****************************************************************************
- 832          函数名称 : get_download_cmd_total
- 833          功能描述 : 获取所有dp命令总和
- 834          输入参数 : 无
- 835          返回参数 : 下发命令总和
- 836          使用说明 : 该函数用户不能修改
- 837          *****************************************************************************/
- 838          unsigned char get_download_cmd_total(void)
- 839          {
- 840   1        return(sizeof(download_cmd) / sizeof(download_cmd[0]));
- 841   1      }
- 842          
- 843          void savevar(void)
- 844          {
- 845   1        unsigned char i;
- 846   1        Flash_EraseBlock(0x2F00);
- 847   1        Delay_us_1(10000);
- 848   1      
- 849   1        i=(TH/1000)>>8;
- 850   1        FLASH_WriteData(i,0x2F00+0);
- 851   1        Delay_us_1(100);
- 852   1        
- 853   1          i=(TH/1000)&0xff;
- 854   1        FLASH_WriteData(i,0x2F00+1);
-C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/12/2020 09:44:13 PAGE 15  
+1041          返回参数 : 下发命令总和
+1042          使用说明 : 该函数用户不能修改
+1043          *****************************************************************************/
+1044          unsigned char get_download_cmd_total(void)
+1045          {
+1046   1        return(sizeof(download_cmd) / sizeof(download_cmd[0]));
+1047   1      }
+1048          
+1049          void savevar(void)
+1050          {
+1051   1        unsigned char i;
+1052   1        Flash_EraseBlock(0x2F00);
+1053   1        Delay_us_1(10000);
+1054   1      
+1055   1        i=(TH/1000)>>8;
+1056   1        FLASH_WriteData(i,0x2F00+0);
+1057   1        Delay_us_1(100);
+1058   1        
+1059   1          i=(TH/1000)&0xff;
+1060   1        FLASH_WriteData(i,0x2F00+1);
+1061   1        Delay_us_1(100);
+1062   1        
+1063   1          i=LIGHT_TH;
+1064   1        FLASH_WriteData(i,0x2F00+2);
+1065   1        Delay_us_1(100);
+1066   1        
+1067   1        i=DELAY_NUM>>8;
+1068   1        FLASH_WriteData(i,0x2F00+3);
+1069   1        Delay_us_1(100);
+1070   1        i=DELAY_NUM&0xff;//&0xff;
+1071   1        FLASH_WriteData(i,0x2F00+4);
+1072   1        Delay_us_1(100);
+1073   1        
+1074   1        i=lightvalue;
+1075   1        FLASH_WriteData(i,0x2F00+5);
+1076   1        Delay_us_1(100);
+1077   1        
+1078   1        i=lowlightDELAY_NUM;
+1079   1        FLASH_WriteData(i,0x2F00+6);
+1080   1        Delay_us_1(100);
+1081   1        
+1082   1        i=SWITCHfXBR;//&0xff;
+1083   1        FLASH_WriteData(i,0x2F00+7);
+1084   1        Delay_us_1(100);
+1085   1        
+1086   1      //  i=addr;//&0xff;
+1087   1      //  FLASH_WriteData(i,0X2F00+7);
+1088   1      //  Delay_us_1(100);
+1089   1      //  
+1090   1      //  i=devgroup;//&0xff;
+1091   1      //  FLASH_WriteData(i,0X2F00+8);
+1092   1      //  Delay_us_1(100);
+1093   1      
+1094   1      //  i=addrend;
+1095   1      //  FLASH_WriteData(i,0X2F00+9);
+1096   1      //  Delay_us_1(100);
+1097   1        
+1098   1        Flash_EraseBlock(0x2F80);
+1099   1        Delay_us_1(10000);
+1100   1        FLASH_WriteData(0,0x2F80+0);
+1101   1        
+1102   1        EA=1;       //-20200927
+C51 COMPILER V9.52.0.0   PROTOCOL                                                          10/13/2020 10:11:56 PAGE 19  
 
- 855   1        Delay_us_1(100);
- 856   1        
- 857   1          i=LIGHT_TH;
- 858   1        FLASH_WriteData(i,0x2F00+2);
- 859   1        Delay_us_1(100);
- 860   1        
- 861   1        i=DELAY_NUM>>8;
- 862   1        FLASH_WriteData(i,0x2F00+3);
- 863   1        Delay_us_1(100);
- 864   1        i=DELAY_NUM&0xff;//&0xff;
- 865   1        FLASH_WriteData(i,0x2F00+4);
- 866   1        Delay_us_1(100);
- 867   1        
- 868   1        i=lightvalue;
- 869   1        FLASH_WriteData(i,0x2F00+5);
- 870   1        Delay_us_1(100);
- 871   1        
- 872   1        i=lowlightDELAY_NUM;
- 873   1        FLASH_WriteData(i,0x2F00+6);
- 874   1        Delay_us_1(100);
- 875   1        
- 876   1        i=SWITCHfXBR;//&0xff;
- 877   1        FLASH_WriteData(i,0x2F00+7);
- 878   1        Delay_us_1(100);
- 879   1        
- 880   1      //  i=addr;//&0xff;
- 881   1      //  FLASH_WriteData(i,0X2F00+7);
- 882   1      //  Delay_us_1(100);
- 883   1      //  
- 884   1      //  i=devgroup;//&0xff;
- 885   1      //  FLASH_WriteData(i,0X2F00+8);
- 886   1      //  Delay_us_1(100);
- 887   1      
- 888   1      //  i=addrend;
- 889   1      //  FLASH_WriteData(i,0X2F00+9);
- 890   1      //  Delay_us_1(100);
- 891   1        
- 892   1        Flash_EraseBlock(0x2F80);
- 893   1        Delay_us_1(10000);
- 894   1        FLASH_WriteData(0,0x2F80+0);
- 895   1        
- 896   1        EA=1;       //-20200927
- 897   1      
- 898   1      }
- 899          
- 900          
+1103   1      
+1104   1      }
+1105          
+1106          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1548    ----
-   CONSTANT SIZE    =      4    ----
-   XDATA SIZE       =     64    ----
+   CODE SIZE        =   2260    ----
+   CONSTANT SIZE    =      5    ----
+   XDATA SIZE       =     35    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----      42
+   DATA SIZE        =      7      46
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
