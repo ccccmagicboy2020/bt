@@ -4,10 +4,10 @@
 #include "bluetooth.h"
 
 #define V12
+//#define V10
 
 
-
-#define  VERSION  0X21
+//#define  VERSION  0X21
 
 #define  TH_LOW		30000
 #define  TH_HIGH	4000000
@@ -1221,7 +1221,7 @@ unsigned char PWM3init(unsigned char ab)
 ***************************************************************************************/
 void main()
 {
-	//u8 i,j;
+	u8 i;
 	bt_protocol_init();		//mcu_sdk
 	InitSYS();
 	GPIO_Init();

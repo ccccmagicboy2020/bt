@@ -41,6 +41,8 @@ extern u8 xdata lowlightDELAY_NUM;      //关灯延时，单位为分钟
 extern u8 xdata light_ad;               //采到的光感的瞬时值
 u8 xdata cdsvalue = 0;              //感光选择值
 ulong xdata sensing_th = 0;     //雷达感应阈值，数值越大越灵敏
+extern  u8 idata Linkage_flag;	//联动的开关的全局
+extern  u8 idata Light_on_flag;	//
 
 //const char xdata led_bn_on[]={"led on"};
 //const char xdata led_bn_off[]={"led off"};
@@ -53,7 +55,7 @@ unsigned char DPID_BRIGHT_VALUEcount = 0;
 unsigned char DPID_CDScount = 0;
 unsigned char DPID_PIR_DELAYcount = 0;
 unsigned char DPID_STANDBY_TIMEcount = 0;
-unsigned char DPID_SENSING_RADIUScount = 0;
+unsigned char DPID_SENSE_STRESScount = 0;
 
 extern u16 idata groupaddr[8];
 
@@ -111,10 +113,11 @@ const DOWNLOAD_CMD_S xdata download_cmd[] =
   {DPID_ADDREND, DP_TYPE_VALUE},
   {DPID_GROUP, DP_TYPE_VALUE},
   {DPID_DEBUG, DP_TYPE_STRING},
-  {DPID_TEST_BN0, DP_TYPE_BOOL},
-  {DPID_TEST_BN1, DP_TYPE_BOOL},
-  {DPID_TEST_BN2, DP_TYPE_BOOL},
+  //{DPID_TEST_BN0, DP_TYPE_BOOL},
+  //{DPID_TEST_BN1, DP_TYPE_BOOL},
+  //{DPID_TEST_BN2, DP_TYPE_BOOL},
   {DPID_SWITCH_LED2, DP_TYPE_BOOL},
+  {DPID_SWITCH_LINKAGE, DP_TYPE_BOOL},
 };
 
 
@@ -212,6 +215,8 @@ void all_data_update(void)
     //mcu_dp_bool_update(DPID_TEST_BN0,当前测试开关0); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_TEST_BN1,当前测试开关1); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_TEST_BN2,当前测试开关2); //BOOL型数据上报;
+	
+	mcu_dp_bool_update(DPID_SWITCH_LINKAGE,Linkage_flag); //BOOL型数据上报;
 
 
 
@@ -271,7 +276,18 @@ static unsigned char dp_download_bright_value_handle(const unsigned char value[]
 	DPID_BRIGHT_VALUEcount++;
 	if(bright_value==lightvalue)
 	{
-		//
+/* 		if(DPID_BRIGHT_VALUEcount<2)
+		{
+			//DPID_BRIGHT_VALUEcount = 0;
+			
+			for(i=0;i<8;i++)
+			{
+				if(groupaddr[i] != 0)
+				{
+					mcu_dp_value_mesh_update(DPID_BRIGHT_VALUE,bright_value,groupaddr[i]);
+				}
+			}
+		} */
 	}
 	else
 	{
@@ -324,13 +340,13 @@ static unsigned char dp_download_cds_handle(const unsigned char value[], unsigne
 	{
 		if(DPID_CDScount<2)
 		{
-			for(i=0;i<8;i++)
+/* 			for(i=0;i<8;i++)
 			{
 				if(groupaddr[i] != 0)
 				{
 					mcu_dp_enum_mesh_update(DPID_CDS,cds,groupaddr[i]);
 				}
-			}
+			} */
 		}
 		if((cds==5)&&(light_ad!=LIGHT_TH))
 		{
@@ -414,7 +430,7 @@ static unsigned char dp_download_pir_delay_handle(const unsigned char value[], u
 	DPID_PIR_DELAYcount++;
 	if(pir_delay==DELAY_NUM)
 	{
-		if(DPID_PIR_DELAYcount<2)
+/* 		if(DPID_PIR_DELAYcount<2)
 		{
 			for(i=0;i<8;i++)
 			{
@@ -423,8 +439,7 @@ static unsigned char dp_download_pir_delay_handle(const unsigned char value[], u
 					mcu_dp_value_mesh_update(DPID_PIR_DELAY,pir_delay,groupaddr[i]);
 				}
 			}
-		}
-	
+		} */
 	}
 	else
 	{
@@ -469,7 +484,7 @@ static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], 
 	DPID_SWITCH_XBRcount++;
 	if(switch_xbr==SWITCHfXBR)
 	{
-		if(DPID_SWITCH_XBRcount<2)
+/* 		if(DPID_SWITCH_XBRcount<2)
 		{
 			for(i=0;i<8;i++)
 			{
@@ -478,8 +493,7 @@ static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], 
 					mcu_dp_bool_mesh_update(DPID_SWITCH_XBR,switch_xbr,groupaddr[i]);
 				}
 			}
-		}
-	
+		} */
 	}
 	else
 	{
@@ -535,7 +549,7 @@ static unsigned char dp_download_standby_time_handle(const unsigned char value[]
 	DPID_STANDBY_TIMEcount++;
 	if(standby_time==lowlightDELAY_NUM)
 	{
-		if(DPID_STANDBY_TIMEcount<2)
+/* 		if(DPID_STANDBY_TIMEcount<2)
 		{
 			for(i=0;i<8;i++)
 			{
@@ -544,8 +558,7 @@ static unsigned char dp_download_standby_time_handle(const unsigned char value[]
 					mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
 				}
 			}
-		}
-	
+		} */
 	}
 	else
 	{
@@ -590,10 +603,10 @@ static unsigned char dp_download_sense_stress_handle(const unsigned char value[]
     //VALUE类型数据处理
     
     */
-	DPID_SENSING_RADIUScount++;
+	DPID_SENSE_STRESScount++;
 	if(sense_stress==sensing_th)
 	{
-		if(DPID_SENSING_RADIUScount<2)
+/* 		if(DPID_SENSE_STRESScount<2)
 		{
 			for(i=0;i<8;i++)
 			{
@@ -602,11 +615,11 @@ static unsigned char dp_download_sense_stress_handle(const unsigned char value[]
 					mcu_dp_value_mesh_update(DPID_SENSE_STRESS,sense_stress,groupaddr[i]);
 				}
 			}
-		}
+		} */
 	}
 	else
 	{
-		DPID_SENSING_RADIUScount=0;
+		DPID_SENSE_STRESScount=0;
 		for(i=0;i<8;i++)
 		{
 			if(groupaddr[i] != 0)
@@ -719,7 +732,7 @@ static unsigned char dp_download_group_handle(const unsigned char value[], unsig
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_test_bn0_handle(const unsigned char value[], unsigned short length)
+/* static unsigned char dp_download_test_bn0_handle(const unsigned char value[], unsigned short length)
 {
     //示例:当前DP类型为BOOL
     unsigned char ret;
@@ -739,7 +752,7 @@ static unsigned char dp_download_test_bn0_handle(const unsigned char value[], un
         return SUCCESS;
     else
         return ERROR;
-}
+} */
 /*****************************************************************************
 函数名称 : dp_download_test_bn1_handle
 功能描述 : 针对DPID_TEST_BN1的处理函数
@@ -748,7 +761,7 @@ static unsigned char dp_download_test_bn0_handle(const unsigned char value[], un
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_test_bn1_handle(const unsigned char value[], unsigned short length)
+/* static unsigned char dp_download_test_bn1_handle(const unsigned char value[], unsigned short length)
 {
     //示例:当前DP类型为BOOL
     unsigned char ret;
@@ -768,7 +781,7 @@ static unsigned char dp_download_test_bn1_handle(const unsigned char value[], un
         return SUCCESS;
     else
         return ERROR;
-}
+} */
 /*****************************************************************************
 函数名称 : dp_download_test_bn2_handle
 功能描述 : 针对DPID_TEST_BN2的处理函数
@@ -777,7 +790,7 @@ static unsigned char dp_download_test_bn1_handle(const unsigned char value[], un
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_test_bn2_handle(const unsigned char value[], unsigned short length)
+/* static unsigned char dp_download_test_bn2_handle(const unsigned char value[], unsigned short length)
 {
     //示例:当前DP类型为BOOL
     unsigned char ret;
@@ -797,7 +810,7 @@ static unsigned char dp_download_test_bn2_handle(const unsigned char value[], un
         return SUCCESS;
     else
         return ERROR;
-}
+} */
 /*****************************************************************************
 函数名称 : dp_download_switch_led2_handle
 功能描述 : 针对DPID_SWITCH_LED2的处理函数
@@ -819,7 +832,7 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
     DPID_SWITCH_LED2count++;
     if(switch_led2==SWITCHflag2)
     {
-    	if(DPID_SWITCH_LED2count<2)
+/*     	if(DPID_SWITCH_LED2count<2)
     	{
     		for(i=0;i<8;i++)
     		{
@@ -828,8 +841,7 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
     				mcu_dp_bool_mesh_update(DPID_SWITCH_LED2,switch_led2,groupaddr[i]);
     			}
     		}
-    	}
-
+    	} */
     }
     else
     {
@@ -846,18 +858,13 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
 
     if(switch_led2 == 0) {
         //灯开关关
-        //mcu_dp_string_update(DPID_DEBUG, led_bn_off, strlen(led_bn_off));
-		if(SWITCHfXBR==1)
-		{
-			PWM3init(0);
-		}
         SWITCHflag2=0;
     }else {
         //灯开关开
         //mcu_dp_string_update(DPID_DEBUG, led_bn_on, strlen(led_bn_on));
         if(SWITCHfXBR==1)
 		{
-			PWM3init(100);
+			Light_on_flag=1;
 		}
         SWITCHflag2=1;
     }
@@ -869,7 +876,56 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
     else
         return ERROR;
 }
-
+/*****************************************************************************
+函数名称 : dp_download_switch_linkage_handle
+功能描述 : 针对DPID_SWITCH_LINKAGE的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_switch_linkage_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char switch_Linkage;
+    unsigned char i;
+    switch_Linkage = mcu_get_dp_download_bool(value,length);
+		
+	if(switch_Linkage==Linkage_flag)
+	{
+		//
+	}
+	else
+	{
+		for(i=0;i<8;i++)
+		{
+			if(groupaddr[i] != 0)
+			{
+				mcu_dp_bool_mesh_update(DPID_SWITCH_LINKAGE,switch_Linkage,groupaddr[i]);
+			}
+		}
+	}
+    if(switch_Linkage == 0) {
+        //雷达开关关
+        //LIGHT_OFF;
+        //PWM3init(0);
+        Linkage_flag=0;
+    }else {
+        //雷达开关开
+        //LIGHT_ON;
+        //PWM3init(100);
+        Linkage_flag=1;
+    }
+  	
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_SWITCH_LINKAGE,switch_Linkage);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
 
 /******************************************************************************
                                 WARNING!!!                     
@@ -1006,7 +1062,7 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
             ret = dp_download_group_handle(value,length);
             switchcnt = 0;
         break;
-        case DPID_TEST_BN0:
+/*         case DPID_TEST_BN0:
             //测试开关0处理函数
             ret = dp_download_test_bn0_handle(value,length);
             switchcnt = 0;
@@ -1020,13 +1076,17 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
             //测试开关2处理函数
             ret = dp_download_test_bn2_handle(value,length);
             switchcnt = 0;
-        break;
+        break; */
         case DPID_SWITCH_LED2:
             //灯开关处理函数
             ret = dp_download_switch_led2_handle(value,length);
             switchcnt = 0;
         break;
-
+        case DPID_SWITCH_LINKAGE:
+            //联动 处理函数
+            ret = dp_download_switch_linkage_handle(value,length);
+            switchcnt = 0;
+        break;
 
   default:
         switchcnt = 0;
