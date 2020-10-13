@@ -66,6 +66,7 @@ const DOWNLOAD_CMD_S download_cmd[] =
   {DPID_TEST_BN1, DP_TYPE_BOOL},
   {DPID_TEST_BN2, DP_TYPE_BOOL},
   {DPID_SWITCH_LED2, DP_TYPE_BOOL},
+  {DPID_SWITCH_LINKAGE, DP_TYPE_BOOL},
 };
 
 
@@ -137,6 +138,7 @@ void all_data_update(void)
     mcu_dp_bool_update(DPID_TEST_BN1,当前测试开关1); //BOOL型数据上报;
     mcu_dp_bool_update(DPID_TEST_BN2,当前测试开关2); //BOOL型数据上报;
     mcu_dp_bool_update(DPID_SWITCH_LED2,当前灯开关); //BOOL型数据上报;
+    mcu_dp_bool_update(DPID_SWITCH_LINKAGE,当前联动 ); //BOOL型数据上报;
 
 
 
@@ -558,6 +560,35 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
     else
         return ERROR;
 }
+/*****************************************************************************
+函数名称 : dp_download_switch_linkage_handle
+功能描述 : 针对DPID_SWITCH_LINKAGE的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_switch_linkage_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char switch_linkage;
+    
+    switch_linkage = mcu_get_dp_download_bool(value,length);
+    if(switch_linkage == 0) {
+        //开关关
+    }else {
+        //开关开
+    }
+  
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_SWITCH_LINKAGE,switch_linkage);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
 
 
 /******************************************************************************
@@ -692,6 +723,10 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
         case DPID_SWITCH_LED2:
             //灯开关处理函数
             ret = dp_download_switch_led2_handle(value,length);
+        break;
+        case DPID_SWITCH_LINKAGE:
+            //联动 处理函数
+            ret = dp_download_switch_linkage_handle(value,length);
         break;
 
 

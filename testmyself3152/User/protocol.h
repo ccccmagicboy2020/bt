@@ -87,52 +87,57 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功能
           **此为自动生成代码,如在开发平台有相关修改请重新下载MCU_SDK**         
 ******************************************************************************/
 //开关(可下发可上报)
-//备注:上电/掉电
+//备注:
 #define DPID_SWITCH_LED 1
+//模式(可下发可上报)
+//备注:
+#define DPID_WORK_MODE 2
 //亮度值(可下发可上报)
-//备注:灯的亮度值
+//备注:
 #define DPID_BRIGHT_VALUE 3
+//设备模式(可下发可上报)
+//备注:auto：PIR主控，App辅控；manual：App操控，PIR无效
+#define DPID_DEVICE_MODE 51
+//感应状态(只上报)
+//备注:pir：有人；none：无人
+#define DPID_PIR_STATE 52
 //光敏参数(可下发可上报)
-//备注:红外对光的敏感度
-#define DPID_CDS 101
+//备注:2000lux：白天；300lux：黄昏；50lux：傍晚；10lux：晚上；5lux：黑夜；now：记录当下环境值（当下电压）
+#define DPID_CDS 53
+//灵敏度(可下发可上报)
+//备注:pir感应的灵敏度，不同的灵敏度的直观感受是感应的距离远近与范围大小
+#define DPID_PIR_SENSITIVITY 54
 //感应延时(可下发可上报)
-//备注:如果雷达感应到人体，灯点亮延长时间
-#define DPID_PIR_DELAY 102
+//备注:当检测到有人后，从有人状态跳变为无人状态算起所持续的时间，延时范围为5s~1h
+#define DPID_PIR_DELAY 55
 //感应开关(可下发可上报)
-//备注:雷达感应开关
-#define DPID_SWITCH_XBR 103
+//备注:auto模式下：点击某一开关操作可以切换PIR触发状态（禁止PIR触发；允许PIR触发）
+#define DPID_SWITCH_PIR 56
+//感应恢复倒计时(只上报)
+//备注:auto模式且禁止PIR触发，恢复成PIR触发生效状态的倒计时剩余时间，每一分钟上报一次
+#define DPID_PIR_RESUME_COUNTDOWN 57
 //伴亮延时(可下发可上报)
-//备注:到完全关闭的时间
-#define DPID_STANDBY_TIME 104
-//感应强度(可下发可上报)
-//备注:雷达模组感应强度值
-#define DPID_SENSE_STRESS 105
-//设备地址(可下发可上报)
-//备注:mesh设备地址
-#define DPID_ADDR 106
-//设备地址结束值(可下发可上报)
-//备注:设备地址结束值
-#define DPID_ADDREND 107
-//设备群组(可下发可上报)
-//备注:mesh群组
-#define DPID_GROUP 108
-//调试字串(只上报)
-//备注:调试用字串
-#define DPID_DEBUG 109
-//测试开关0(可下发可上报)
+//备注:从感应延时结束开始算起所持续的时间，延时范围为1min~8h
+#define DPID_STANDBY_TIME 58
+//感应半径(可下发可上报)
 //备注:
-#define DPID_TEST_BN0 110
-//测试开关1(可下发可上报)
+#define DPID_SENSING_RADIUS 101
+//挂高(可下发可上报)
 //备注:
-#define DPID_TEST_BN1 111
-//测试开关2(可下发可上报)
+#define DPID_HANG_HIGH 102
+//switch(可下发可上报)
 //备注:
-#define DPID_TEST_BN2 112
-//灯开关(可下发可上报)
-//备注:灯开关，默认的为模块复位触发开关
-#define DPID_SWITCH_LED2 113
+#define DPID_SWITCH_LED2 103
 
 
+#define DPID_SWITCH_XBR 104
+
+#define DPID_dev_addr 105
+
+
+#define DPID_dev_addrend 106
+
+#define DPID_SWITCH_Linkage 108
 
 /*****************************************************************************
 函数名称 : all_data_update

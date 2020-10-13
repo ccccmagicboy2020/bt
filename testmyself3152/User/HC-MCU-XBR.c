@@ -7,7 +7,7 @@
 
 
 
-//#define  VERSION  0X21
+#define  VERSION  0X21
 
 #define  TH_LOW		30000
 #define  TH_HIGH	4000000
@@ -88,6 +88,10 @@ volatile ulong Timer_Counter=0;
 	 u16 idata groupaddr[8] = {0};
 	 u8 idata check_group_flag = 0;
 	 u8 idata check_group_count = 0;
+	 u8 idata Linkage_flag  =0;
+	 u8 idata Light_on_flag = 0;
+	 u8 idata Light_on_flagpre = 0;
+	 
 	 /*
 	 u8 idata groupaddr2 = 0;
 	 u8 idata groupaddr3 = 0;
@@ -667,7 +671,7 @@ void XBRHandle(void)
 					}
 					PWM3init(slowchcnt);
 				}
-				else if((SWITCHflag2==0)&&(LIGHT_off ==1))
+				else if(LIGHT_off ==1)//else if((SWITCHflag2==0)&&(LIGHT_off ==1))
 				{
 					if(slowchcnt>lightvalue)
 					{
@@ -933,7 +937,7 @@ void XBRHandle(void)
 								{
 									if(LIGHT==0)SUM01=SUM0;
 									LIGHT=1;
-							
+									Light_on_flag = 1;
 									//PC3=0;
 									//LIGHT_ON;
 									//slowchcnt = slowchcnt+20;//
@@ -993,6 +997,8 @@ void XBRHandle(void)
 					{
 						LIGHT=0;
 						while_1flag=1;
+						Light_on_flag=0;
+						Light_on_flagpre=0;
 						//while_2flag = 0;
 						//break;
 					}
@@ -1376,6 +1382,27 @@ void main()
 //					PWM3init(slowchcnt);
 				}
 			}
+
+			//Áª¶¯
+			if(Linkage_flag==1)
+			{
+				if(Light_on_flagpre!=Light_on_flag)
+				{
+					Light_on_flagpre = Light_on_flag;
+					LIGHT = 1;
+					//PWM3init(100);
+					for(i=0;i<8;i++)
+					{
+						if(groupaddr[i] != 0)
+						{
+							mcu_dp_bool_mesh_update(DPID_SWITCH_LED2,SWITCHflag2,groupaddr[i]);
+						}	
+					}
+
+
+				}
+
+			}	
 			
 		}
 		else
