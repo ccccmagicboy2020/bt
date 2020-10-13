@@ -1,18 +1,18 @@
 /****************************************Copyright (c)*************************
-**                               ç‰ˆæƒæ‰€æœ‰ (C), 2015-2017, æ¶‚é¸¦ç§‘æŠ€
+**                               °æÈ¨ËùÓĞ (C), 2015-2017, Í¿Ñ»¿Æ¼¼
 **
 **                                 http://www.tuya.com
 **
-**--------------æ–‡ä»¶ä¿¡æ¯-------------------------------------------------------
-**æ–‡   ä»¶   å: system.c
-**æ        è¿°: bluetoothæ•°æ®å¤„ç†å‡½æ•°
-**ä½¿ ç”¨ è¯´ æ˜ : ç”¨æˆ·æ— éœ€å…³å¿ƒè¯¥æ–‡ä»¶å®ç°å†…å®¹
+**--------------ÎÄ¼şĞÅÏ¢-------------------------------------------------------
+**ÎÄ   ¼ş   Ãû: system.c
+**Ãè        Êö: bluetoothÊı¾İ´¦Àíº¯Êı
+**Ê¹ ÓÃ Ëµ Ã÷ : ÓÃ»§ÎŞĞè¹ØĞÄ¸ÃÎÄ¼şÊµÏÖÄÚÈİ
 **
 **
-**--------------å½“å‰ç‰ˆæœ¬ä¿®è®¢---------------------------------------------------
-** ç‰ˆ  æœ¬: v1.0
-** æ—¥ã€€æœŸ: 2017å¹´5æœˆ3æ—¥
-** æã€€è¿°: 1:åˆ›å»ºæ¶‚é¸¦bluetoothå¯¹æ¥MCU_SDK
+**--------------µ±Ç°°æ±¾ĞŞ¶©---------------------------------------------------
+** °æ  ±¾: v1.0
+** ÈÕ¡¡ÆÚ: 2017Äê5ÔÂ3ÈÕ
+** Ãè¡¡Êö: 1:´´½¨Í¿Ñ»bluetooth¶Ô½ÓMCU_SDK
 **
 **-----------------------------------------------------------------------------
 ******************************************************************************/
@@ -21,15 +21,28 @@
 #include "bluetooth.h"
 //
 //
+/*
+extern u8 idata groupaddr1 ;
+extern u8 idata groupaddr2 ;
+extern u8 idata groupaddr3 ;
+extern u8 idata groupaddr4 ;
+extern u8 idata groupaddr5 ;
+extern u8 idata groupaddr6 ;
+extern u8 idata groupaddr7 ;
+extern u8 idata groupaddr8 ;
+*/
+
+extern u16 idata groupaddr[8];
+
 void savevar(void);
 extern const DOWNLOAD_CMD_S xdata download_cmd[];
 
 /*****************************************************************************
-å‡½æ•°åç§° : set_bt_uart_byte
-åŠŸèƒ½æè¿° : å†™bt_uartå­—èŠ‚
-è¾“å…¥å‚æ•° : dest:ç¼“å­˜åŒºå…¶å®åœ°å€;
-           byte:å†™å…¥å­—èŠ‚å€¼
-è¿”å›å‚æ•° : å†™å…¥å®Œæˆåçš„æ€»é•¿åº¦
+º¯ÊıÃû³Æ : set_bt_uart_byte
+¹¦ÄÜÃèÊö : Ğ´bt_uart×Ö½Ú
+ÊäÈë²ÎÊı : dest:»º´æÇøÆäÊµµØÖ·;
+           byte:Ğ´Èë×Ö½ÚÖµ
+·µ»Ø²ÎÊı : Ğ´ÈëÍê³ÉºóµÄ×Ü³¤¶È
 *****************************************************************************/
 unsigned short set_bt_uart_byte(unsigned short dest, unsigned char byte)
 {
@@ -41,12 +54,12 @@ unsigned short set_bt_uart_byte(unsigned short dest, unsigned char byte)
   return dest;
 }
 /*****************************************************************************
-å‡½æ•°åç§° : set_bt_uart_buffer
-åŠŸèƒ½æè¿° : å†™bt_uart_buffer
-è¾“å…¥å‚æ•° : dest:ç›®æ ‡åœ°å€
-           src:æºåœ°å€
-           len:æ•°æ®é•¿åº¦
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ : set_bt_uart_buffer
+¹¦ÄÜÃèÊö : Ğ´bt_uart_buffer
+ÊäÈë²ÎÊı : dest:Ä¿±êµØÖ·
+           src:Ô´µØÖ·
+           len:Êı¾İ³¤¶È
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 unsigned short set_bt_uart_buffer(unsigned short dest, unsigned char *src, unsigned short len)
 {
@@ -58,11 +71,11 @@ unsigned short set_bt_uart_buffer(unsigned short dest, unsigned char *src, unsig
   return dest;
 }
 /*****************************************************************************
-å‡½æ•°åç§° : bt_uart_write_data
-åŠŸèƒ½æè¿° : å‘bt uartå†™å…¥è¿ç»­æ•°æ®
-è¾“å…¥å‚æ•° : in:å‘é€ç¼“å­˜æŒ‡é’ˆ
-           len:æ•°æ®å‘é€é•¿åº¦
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ : bt_uart_write_data
+¹¦ÄÜÃèÊö : Ïòbt uartĞ´ÈëÁ¬ĞøÊı¾İ
+ÊäÈë²ÎÊı : in:·¢ËÍ»º´æÖ¸Õë
+           len:Êı¾İ·¢ËÍ³¤¶È
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 static void bt_uart_write_data(unsigned char *in, unsigned short len)
 {
@@ -78,11 +91,11 @@ static void bt_uart_write_data(unsigned char *in, unsigned short len)
   }
 }
 /*****************************************************************************
-å‡½æ•°åç§° : get_check_sum
-åŠŸèƒ½æè¿° : è®¡ç®—æ ¡éªŒå’Œ
-è¾“å…¥å‚æ•° : pack:æ•°æ®æºæŒ‡é’ˆ
-           pack_len:è®¡ç®—æ ¡éªŒå’Œé•¿åº¦
-è¿”å›å‚æ•° : æ ¡éªŒå’Œ
+º¯ÊıÃû³Æ : get_check_sum
+¹¦ÄÜÃèÊö : ¼ÆËãĞ£ÑéºÍ
+ÊäÈë²ÎÊı : pack:Êı¾İÔ´Ö¸Õë
+           pack_len:¼ÆËãĞ£ÑéºÍ³¤¶È
+·µ»Ø²ÎÊı : Ğ£ÑéºÍ
 *****************************************************************************/
 unsigned char get_check_sum(unsigned char *pack, unsigned short pack_len)
 {
@@ -97,11 +110,11 @@ unsigned char get_check_sum(unsigned char *pack, unsigned short pack_len)
   return check_sum;
 }
 /*****************************************************************************
-å‡½æ•°åç§° : bt_uart_write_frame
-åŠŸèƒ½æè¿° : å‘btä¸²å£å‘é€ä¸€å¸§æ•°æ®
-è¾“å…¥å‚æ•° : fr_type:å¸§ç±»å‹
-           len:æ•°æ®é•¿åº¦
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ : bt_uart_write_frame
+¹¦ÄÜÃèÊö : Ïòbt´®¿Ú·¢ËÍÒ»Ö¡Êı¾İ
+ÊäÈë²ÎÊı : fr_type:Ö¡ÀàĞÍ
+           len:Êı¾İ³¤¶È
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 void bt_uart_write_frame(unsigned char fr_type, unsigned short len)
 {
@@ -120,11 +133,39 @@ void bt_uart_write_frame(unsigned char fr_type, unsigned short len)
   //
   bt_uart_write_data((unsigned char *)bt_uart_tx_buf, len);
 }
+
+
+void bt_uart_mesh_write_frame(unsigned char fr_type, unsigned short len)
+{
+  unsigned char check_sum = 0;
+
+len = len+2;
+
+bt_uart_tx_buf[0] = 0x55;
+bt_uart_tx_buf[1] = 0xaa;
+bt_uart_tx_buf[2] = 0x00;
+bt_uart_tx_buf[3] = fr_type;
+
+bt_uart_tx_buf[4] = len >> 8;
+bt_uart_tx_buf[5] = len & 0xff;
+bt_uart_tx_buf[6] = 0XFF;
+bt_uart_tx_buf[7] = 0xff;
+
+
+len += PROTOCOL_HEAD;
+check_sum = get_check_sum((unsigned char *)bt_uart_tx_buf, len - 1);
+bt_uart_tx_buf[len - 1] = check_sum;
+//
+bt_uart_write_data((unsigned char *)bt_uart_tx_buf, len);
+
+
+}
+
 /*****************************************************************************
-å‡½æ•°åç§° : heat_beat_check
-åŠŸèƒ½æè¿° : å¿ƒè·³åŒ…æ£€æµ‹
-è¾“å…¥å‚æ•° : æ— 
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ : heat_beat_check
+¹¦ÄÜÃèÊö : ĞÄÌø°ü¼ì²â
+ÊäÈë²ÎÊı : ÎŞ
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 static void heat_beat_check(void)
 {
@@ -144,10 +185,10 @@ static void heat_beat_check(void)
   bt_uart_write_frame(HEAT_BEAT_CMD, length);
 }
 /*****************************************************************************
-å‡½æ•°åç§°  : product_info_update
-åŠŸèƒ½æè¿°  : äº§å“ä¿¡æ¯ä¸Šä¼ 
-è¾“å…¥å‚æ•° : æ— 
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ  : product_info_update
+¹¦ÄÜÃèÊö  : ²úÆ·ĞÅÏ¢ÉÏ´«
+ÊäÈë²ÎÊı : ÎŞ
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 static void product_info_update(void)
 {
@@ -159,29 +200,29 @@ static void product_info_update(void)
   bt_uart_write_frame(PRODUCT_INFO_CMD, length);
 }
 /*****************************************************************************
-å‡½æ•°åç§° : get_mcu_bt_mode
-åŠŸèƒ½æè¿° : æŸ¥è¯¢mcuå’Œbtçš„å·¥ä½œæ¨¡å¼
-è¾“å…¥å‚æ•° : æ— 
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ : get_mcu_bt_mode
+¹¦ÄÜÃèÊö : ²éÑ¯mcuºÍbtµÄ¹¤×÷Ä£Ê½
+ÊäÈë²ÎÊı : ÎŞ
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 static void get_mcu_bt_mode(void)
 {
   unsigned char length = 0;
   
-#ifdef BT_CONTROL_SELF_MODE                                   //æ¨¡å—è‡ªå¤„ç†
+#ifdef BT_CONTROL_SELF_MODE                                   //Ä£¿é×Ô´¦Àí
   length = set_bt_uart_byte(length, BT_STATE_KEY);
   length = set_bt_uart_byte(length, BT_RESERT_KEY);
 #else                                                           
-  //æ— éœ€å¤„ç†æ•°æ®
+  //ÎŞĞè´¦ÀíÊı¾İ
 #endif
   
   bt_uart_write_frame(WORK_MODE_CMD, length);
 }
 /*****************************************************************************
-å‡½æ•°åç§° : get_update_dpid_index
-åŠŸèƒ½æè¿° : æˆ–è®¸åˆ¶å®šDPIDåœ¨æ•°ç»„ä¸­çš„åºå·
-è¾“å…¥å‚æ•° : dpid:dpid
-è¿”å›å‚æ•° : index:dpåºå·
+º¯ÊıÃû³Æ : get_update_dpid_index
+¹¦ÄÜÃèÊö : »òĞíÖÆ¶¨DPIDÔÚÊı×éÖĞµÄĞòºÅ
+ÊäÈë²ÎÊı : dpid:dpid
+·µ»Ø²ÎÊı : index:dpĞòºÅ
 *****************************************************************************/
 static unsigned char get_dowmload_dpid_index(unsigned char dpid)
 {
@@ -199,10 +240,10 @@ static unsigned char get_dowmload_dpid_index(unsigned char dpid)
   return index;
 }
 /*****************************************************************************
-å‡½æ•°åç§° : data_point_handle
-åŠŸèƒ½æè¿° : ä¸‹å‘æ•°æ®å¤„ç†
-è¾“å…¥å‚æ•° : value:ä¸‹å‘æ•°æ®æºæŒ‡é’ˆ
-è¿”å›å‚æ•° : ret:è¿”å›æ•°æ®å¤„ç†ç»“æœ
+º¯ÊıÃû³Æ : data_point_handle
+¹¦ÄÜÃèÊö : ÏÂ·¢Êı¾İ´¦Àí
+ÊäÈë²ÎÊı : value:ÏÂ·¢Êı¾İÔ´Ö¸Õë
+·µ»Ø²ÎÊı : ret:·µ»ØÊı¾İ´¦Àí½á¹û
 *****************************************************************************/
 static unsigned char data_point_handle(const unsigned char value[])
 {
@@ -220,7 +261,7 @@ static unsigned char data_point_handle(const unsigned char value[])
 
   if(dp_type != download_cmd[index].dp_type)
   {
-    //é”™è¯¯æç¤º
+    //´íÎóÌáÊ¾
     return FALSE;
   }
   else
@@ -231,17 +272,17 @@ static unsigned char data_point_handle(const unsigned char value[])
   return ret;
 }
 /*****************************************************************************
-å‡½æ•°åç§° : data_handle
-åŠŸèƒ½æè¿° : æ•°æ®å¸§å¤„ç†
-è¾“å…¥å‚æ•° : offset:æ•°æ®èµ·å§‹ä½
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ : data_handle
+¹¦ÄÜÃèÊö : Êı¾İÖ¡´¦Àí
+ÊäÈë²ÎÊı : offset:Êı¾İÆğÊ¼Î»
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 void data_handle(unsigned short offset)
 {
 #ifdef SUPPORT_MCU_FIRM_UPDATE
   unsigned char *firmware_addr;
-  static unsigned long firm_length;                                             //MCUå‡çº§æ–‡ä»¶é•¿åº¦
-  static unsigned char firm_update_flag;                                        //MCUå‡çº§æ ‡å¿—
+  static unsigned long firm_length;                                             //MCUÉı¼¶ÎÄ¼ş³¤¶È
+  static unsigned char firm_update_flag;                                        //MCUÉı¼¶±êÖ¾
   unsigned long dp_len;
 #else
   unsigned short dp_len;
@@ -253,30 +294,30 @@ void data_handle(unsigned short offset)
   
   switch(cmd_type)
   {
-  case HEAT_BEAT_CMD:                                   //å¿ƒè·³åŒ…
+  case HEAT_BEAT_CMD:                                   //ĞÄÌø°ü
     heat_beat_check();
     break;
     
-  case PRODUCT_INFO_CMD:                                //äº§å“ä¿¡æ¯
+  case PRODUCT_INFO_CMD:                                //²úÆ·ĞÅÏ¢
     product_info_update();
     break;
     
-  case WORK_MODE_CMD:                                   //æŸ¥è¯¢MCUè®¾å®šçš„æ¨¡å—å·¥ä½œæ¨¡å¼
+  case WORK_MODE_CMD:                                   //²éÑ¯MCUÉè¶¨µÄÄ£¿é¹¤×÷Ä£Ê½
     get_mcu_bt_mode();
     break;
     
 #ifndef BT_CONTROL_SELF_MODE
-  case BT_STATE_CMD:                                  //btå·¥ä½œçŠ¶æ€	
+  case BT_STATE_CMD:                                  //bt¹¤×÷×´Ì¬	
     bt_work_state = bt_uart_rx_buf[offset + DATA_START];
     bt_uart_write_frame(BT_STATE_CMD,0);
     break;
 
-  case BT_RESET_CMD:                                  //é‡ç½®bt(btè¿”å›æˆåŠŸ)
+  case BT_RESET_CMD:                                  //ÖØÖÃbt(bt·µ»Ø³É¹¦)
     reset_bt_flag = RESET_BT_SUCCESS;
     break;
 #endif
     
-  case DATA_QUERT_CMD:                                  //å‘½ä»¤ä¸‹å‘
+  case DATA_QUERT_CMD:                                  //ÃüÁîÏÂ·¢
     total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
     total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
     
@@ -289,24 +330,56 @@ void data_handle(unsigned short offset)
       
       if(SUCCESS == ret)
       {
-        //æˆåŠŸæç¤º
+        //³É¹¦ÌáÊ¾
+				savevar();
       }
       else
       {
-        //é”™è¯¯æç¤º
+        //´íÎóÌáÊ¾
       }
       
       i += (dp_len + 4);
     }
     
     break;
-    
-  case STATE_QUERY_CMD:                                 //çŠ¶æ€æŸ¥è¯¢
+  case BT_Check_meshgroup:                                  //²éÑ¯Èº×é
+    total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
+    total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
+
+
+	groupaddr[0] = bt_uart_rx_buf[offset + 7] * 0x100;
+	groupaddr[0] += bt_uart_rx_buf[offset + 8] ;
+
+	groupaddr[1] = bt_uart_rx_buf[offset + 9] * 0x100;
+	groupaddr[1] += bt_uart_rx_buf[offset + 10] ;
+
+	groupaddr[2] = bt_uart_rx_buf[offset + 11] * 0x100;
+	groupaddr[2] += bt_uart_rx_buf[offset + 12] ;
+
+	groupaddr[3] = bt_uart_rx_buf[offset + 13] * 0x100;
+	groupaddr[3] += bt_uart_rx_buf[offset + 14] ;
+
+	groupaddr[4] = bt_uart_rx_buf[offset + 15] * 0x100;
+	groupaddr[4] += bt_uart_rx_buf[offset + 16] ;
+
+	groupaddr[5] = bt_uart_rx_buf[offset + 17] * 0x100;
+	groupaddr[5] += bt_uart_rx_buf[offset + 18] ;
+
+	groupaddr[6] = bt_uart_rx_buf[offset + 19] * 0x100;
+	groupaddr[6] += bt_uart_rx_buf[offset + 20] ;
+
+	groupaddr[7] = bt_uart_rx_buf[offset + 21] * 0x100;
+	groupaddr[7] += bt_uart_rx_buf[offset + 22] ;
+
+	
+
+    break;
+  case STATE_QUERY_CMD:                                 //×´Ì¬²éÑ¯
     all_data_update();                               
     break;
     
 #ifdef SUPPORT_MCU_FIRM_UPDATE
-  case UPDATE_START_CMD:                                //å‡çº§å¼€å§‹
+  case UPDATE_START_CMD:                                //Éı¼¶¿ªÊ¼
     firm_length = bt_uart_rx_buf[offset + DATA_START];
     firm_length <<= 8;
     firm_length |= bt_uart_rx_buf[offset + DATA_START + 1];
@@ -319,10 +392,10 @@ void data_handle(unsigned short offset)
     firm_update_flag = UPDATE_START_CMD;
      break;
     
-  case UPDATE_TRANS_CMD:                                //å‡çº§ä¼ è¾“
+  case UPDATE_TRANS_CMD:                                //Éı¼¶´«Êä
     if(firm_update_flag == UPDATE_START_CMD)
     {
-      //åœæ­¢ä¸€åˆ‡æ•°æ®ä¸ŠæŠ¥
+      //Í£Ö¹Ò»ÇĞÊı¾İÉÏ±¨
       stop_update_flag = ENABLE;                                                 
       
       total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
@@ -339,7 +412,7 @@ void data_handle(unsigned short offset)
       firmware_addr = bt_uart_rx_buf + offset + DATA_START + 4;
       if((total_len == 4) && (dp_len == firm_length))
       {
-        //æœ€åä¸€åŒ…
+        //×îºóÒ»°ü
         ret = mcu_firm_update_handle(firmware_addr,dp_len,0);
         
         firm_update_flag = 0;
@@ -358,7 +431,7 @@ void data_handle(unsigned short offset)
       {
         bt_uart_write_frame(UPDATE_TRANS_CMD,0);
       }
-      //æ¢å¤ä¸€åˆ‡æ•°æ®ä¸ŠæŠ¥
+      //»Ö¸´Ò»ÇĞÊı¾İÉÏ±¨
       stop_update_flag = DISABLE;    
     }
     break;
@@ -369,10 +442,10 @@ void data_handle(unsigned short offset)
   }
 }
 /*****************************************************************************
-å‡½æ•°åç§° : get_queue_total_data
-åŠŸèƒ½æè¿° : è¯»å–é˜Ÿåˆ—å†…æ•°æ®
-è¾“å…¥å‚æ•° : æ— 
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ : get_queue_total_data
+¹¦ÄÜÃèÊö : ¶ÁÈ¡¶ÓÁĞÄÚÊı¾İ
+ÊäÈë²ÎÊı : ÎŞ
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 unsigned char get_queue_total_data(void)
 {
@@ -382,10 +455,10 @@ unsigned char get_queue_total_data(void)
     return 0;
 }
 /*****************************************************************************
-å‡½æ•°åç§° : Queue_Read_Byte
-åŠŸèƒ½æè¿° : è¯»å–é˜Ÿåˆ—1å­—èŠ‚æ•°æ®
-è¾“å…¥å‚æ•° : æ— 
-è¿”å›å‚æ•° : æ— 
+º¯ÊıÃû³Æ : Queue_Read_Byte
+¹¦ÄÜÃèÊö : ¶ÁÈ¡¶ÓÁĞ1×Ö½ÚÊı¾İ
+ÊäÈë²ÎÊı : ÎŞ
+·µ»Ø²ÎÊı : ÎŞ
 *****************************************************************************/
 unsigned char Queue_Read_Byte(void)
 {
@@ -393,10 +466,10 @@ unsigned char Queue_Read_Byte(void)
   
   if(queue_out != queue_in)
   {
-    //æœ‰æ•°æ®
+    //ÓĞÊı¾İ
     if(queue_out >= (unsigned char *)(bt_queue_buf + sizeof(bt_queue_buf)))
     {
-      //æ•°æ®å·²ç»åˆ°æœ«å°¾
+      //Êı¾İÒÑ¾­µ½Ä©Î²
       queue_out = (unsigned char *)(bt_queue_buf);
     }
     

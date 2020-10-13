@@ -34,16 +34,28 @@ extern u8 xdata SWITCHflag2;   //开关灯的变量
 extern u8 xdata SWITCHfXBR;    //开关雷达的变量
 extern u8 xdata lightvalue;    //灯亮值
 extern u8 xdata XRBoffbrightvalue;  //关雷达后的灯亮值
-extern ulong xdata TH;          //雷达感应阈值
+extern ulong xdata TH;          //雷达感应偏差阈值，数值越大代表越不灵敏
 extern u8 xdata LIGHT_TH;       //感光阈值
 extern u16 xdata DELAY_NUM;     //感应延时，单位为秒
 extern u8 xdata lowlightDELAY_NUM;      //关灯延时，单位为分钟
 extern u8 xdata light_ad;               //采到的光感的瞬时值
+u8 xdata cdsvalue = 0;              //感光选择值
+ulong xdata sensing_th = 0;     //雷达感应阈值，数值越大越灵敏
 
-const char xdata led_bn_on[]={"led on"};
-const char xdata led_bn_off[]={"led off"};
-const char xdata radar_bn_on[]={"radar on"};
-const char xdata radar_bn_off[]={"radar off"};
+//const char xdata led_bn_on[]={"led on"};
+//const char xdata led_bn_off[]={"led off"};
+//const char xdata radar_bn_on[]={"radar on"};
+//const char xdata radar_bn_off[]={"radar off"};
+
+unsigned char DPID_SWITCH_LED2count = 0;
+unsigned char DPID_SWITCH_XBRcount = 0;
+unsigned char DPID_BRIGHT_VALUEcount = 0;
+unsigned char DPID_CDScount = 0;
+unsigned char DPID_PIR_DELAYcount = 0;
+unsigned char DPID_STANDBY_TIMEcount = 0;
+unsigned char DPID_SENSING_RADIUScount = 0;
+
+extern u16 idata groupaddr[8];
 
 //extern TYPE_BUFFER_S FlashBuffer;
 void send_data(u8 d);
@@ -58,11 +70,11 @@ void reset_bt_module(void)
 {
 	send_data(0x55);
 	send_data(0xAA);
-	send_data(0X00);
-	send_data(0X04);
-	send_data(0X00);
-	send_data(0X00);
-	send_data(0X03);
+	send_data(0x00);
+	send_data(0x04);
+	send_data(0x00);
+	send_data(0x00);
+	send_data(0x03);
 }
 
 /******************************************************************************
@@ -86,7 +98,7 @@ void reset_bt_module(void)
                         1:dp数据点序列类型对照表
           **此为自动生成代码,如在开发平台有相关修改请重新下载MCU_SDK**         
 ******************************************************************************/
-const DOWNLOAD_CMD_S download_cmd[] =
+const DOWNLOAD_CMD_S xdata download_cmd[] =
 {
   {DPID_SWITCH_LED, DP_TYPE_BOOL},
   {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
@@ -194,7 +206,7 @@ void all_data_update(void)
     mcu_dp_value_update(DPID_GROUP, 12); //VALUE型数据上报;
 
 
-    mcu_dp_string_update(DPID_DEBUG, "111", 3); //STRING型数据上报;
+    mcu_dp_string_update(DPID_DEBUG, "1012", 4); //STRING型数据上报;
 
 
     //mcu_dp_bool_update(DPID_TEST_BN0,当前测试开关0); //BOOL型数据上报;
@@ -252,8 +264,27 @@ static unsigned char dp_download_bright_value_handle(const unsigned char value[]
     //示例:当前DP类型为VALUE
     unsigned char ret;
     unsigned long bright_value;
+    unsigned char i;
     
     bright_value = mcu_get_dp_download_value(value,length);
+	
+	DPID_BRIGHT_VALUEcount++;
+	if(bright_value==lightvalue)
+	{
+		//
+	}
+	else
+	{
+		DPID_BRIGHT_VALUEcount=0;
+		for(i=0;i<8;i++)
+		{
+			if(groupaddr[i] != 0)
+			{
+				mcu_dp_value_mesh_update(DPID_BRIGHT_VALUE,bright_value,groupaddr[i]);
+			}
+		}
+	}	
+	
     lightvalue = bright_value;
 
 	if(SWITCHfXBR==0)
@@ -284,8 +315,40 @@ static unsigned char dp_download_cds_handle(const unsigned char value[], unsigne
     //示例:当前DP类型为ENUM
     unsigned char ret;
     unsigned char cds;
+    unsigned char i;
     
     cds = mcu_get_dp_download_enum(value,length);
+	
+	DPID_CDScount++;
+	if(cds==cdsvalue)
+	{
+		if(DPID_CDScount<2)
+		{
+			for(i=0;i<8;i++)
+			{
+				if(groupaddr[i] != 0)
+				{
+					mcu_dp_enum_mesh_update(DPID_CDS,cds,groupaddr[i]);
+				}
+			}
+		}
+		if((cds==5)&&(light_ad!=LIGHT_TH))
+		{
+			DPID_CDScount=0;
+		}
+	}
+	else
+	{
+		DPID_CDScount=0;
+		for(i=0;i<8;i++)
+		{
+			if(groupaddr[i] != 0)
+			{
+				mcu_dp_enum_mesh_update(DPID_CDS,cds,groupaddr[i]);
+			}
+		}
+	}	
+	
     switch(cds) {
         case 0:		//2000LUS
 			LIGHT_TH=255;//cds*4;
@@ -316,11 +379,13 @@ static unsigned char dp_download_cds_handle(const unsigned char value[], unsigne
         break;
     }
 
+    cdsvalue = cds;
+
     savevar();
     //sprintf(temp_str, "%3d", LIGHT_TH);
     //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));
     //处理完DP数据后应有反馈
-    ret = mcu_dp_enum_update(DPID_CDS, cds);
+    ret = mcu_dp_enum_update(DPID_CDS, cdsvalue);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -339,11 +404,40 @@ static unsigned char dp_download_pir_delay_handle(const unsigned char value[], u
     //示例:当前DP类型为VALUE
     unsigned char ret;
     unsigned long pir_delay;
+    unsigned char i;
     
     pir_delay = mcu_get_dp_download_value(value,length);
     /*
     //VALUE类型数据处理
     */
+	
+	DPID_PIR_DELAYcount++;
+	if(pir_delay==DELAY_NUM)
+	{
+		if(DPID_PIR_DELAYcount<2)
+		{
+			for(i=0;i<8;i++)
+			{
+				if(groupaddr[i] != 0)
+				{
+					mcu_dp_value_mesh_update(DPID_PIR_DELAY,pir_delay,groupaddr[i]);
+				}
+			}
+		}
+	
+	}
+	else
+	{
+		DPID_PIR_DELAYcount=0;
+		for(i=0;i<8;i++)
+		{
+			if(groupaddr[i] != 0)
+			{
+				mcu_dp_value_mesh_update(DPID_PIR_DELAY,pir_delay,groupaddr[i]);
+			}
+		}
+	}
+	
     DELAY_NUM = pir_delay;
 	savevar();
     
@@ -368,16 +462,46 @@ static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], 
     unsigned char ret;
     //0:关/1:开
     unsigned char switch_xbr;
+    unsigned char i;
     
     switch_xbr = mcu_get_dp_download_bool(value,length);
+	
+	DPID_SWITCH_XBRcount++;
+	if(switch_xbr==SWITCHfXBR)
+	{
+		if(DPID_SWITCH_XBRcount<2)
+		{
+			for(i=0;i<8;i++)
+			{
+				if(groupaddr[i] != 0)
+				{
+					mcu_dp_bool_mesh_update(DPID_SWITCH_XBR,switch_xbr,groupaddr[i]);
+				}
+			}
+		}
+	
+	}
+	else
+	{
+		DPID_SWITCH_XBRcount=0;
+		for(i=0;i<8;i++)
+		{
+			if(groupaddr[i] != 0)
+			{
+				mcu_dp_bool_mesh_update(DPID_SWITCH_XBR,switch_xbr,groupaddr[i]);
+			}
+		}
+	
+	}
+	
     if(switch_xbr == 0) {
         //开关关
         SWITCHfXBR = 0;
-        mcu_dp_string_update(DPID_DEBUG, radar_bn_off, strlen(radar_bn_off));
+        //mcu_dp_string_update(DPID_DEBUG, radar_bn_off, strlen(radar_bn_off));
     }else {
         //开关开
         SWITCHfXBR = 1;
-        mcu_dp_string_update(DPID_DEBUG, radar_bn_on, strlen(radar_bn_on));
+        //mcu_dp_string_update(DPID_DEBUG, radar_bn_on, strlen(radar_bn_on));
     }
   
     savevar();
@@ -401,12 +525,41 @@ static unsigned char dp_download_standby_time_handle(const unsigned char value[]
     //示例:当前DP类型为VALUE
     unsigned char ret;
     unsigned long standby_time;
+    unsigned char i;
     
     standby_time = mcu_get_dp_download_value(value,length);
     /*
     //VALUE类型数据处理
     
     */
+	DPID_STANDBY_TIMEcount++;
+	if(standby_time==lowlightDELAY_NUM)
+	{
+		if(DPID_STANDBY_TIMEcount<2)
+		{
+			for(i=0;i<8;i++)
+			{
+				if(groupaddr[i] != 0)
+				{
+					mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
+				}
+			}
+		}
+	
+	}
+	else
+	{
+		DPID_STANDBY_TIMEcount=0;
+		for(i=0;i<8;i++)
+			{
+				if(groupaddr[i] != 0)
+				{
+					mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
+				}
+			}
+	
+	}
+	
     lowlightDELAY_NUM=standby_time;
     
     savevar();
@@ -430,22 +583,48 @@ static unsigned char dp_download_sense_stress_handle(const unsigned char value[]
     //示例:当前DP类型为VALUE
     unsigned char ret;
     unsigned long sense_stress;
-    unsigned long sense_cccc;
+    unsigned char i;
     
     sense_stress = mcu_get_dp_download_value(value,length);
     /*
     //VALUE类型数据处理
     
     */
- 	sense_cccc=50-sense_stress;
-	TH=sense_cccc*10000;
+	DPID_SENSING_RADIUScount++;
+	if(sense_stress==sensing_th)
+	{
+		if(DPID_SENSING_RADIUScount<2)
+		{
+			for(i=0;i<8;i++)
+			{
+				if(groupaddr[i] != 0)
+				{
+					mcu_dp_value_mesh_update(DPID_SENSE_STRESS,sense_stress,groupaddr[i]);
+				}
+			}
+		}
+	}
+	else
+	{
+		DPID_SENSING_RADIUScount=0;
+		for(i=0;i<8;i++)
+		{
+			if(groupaddr[i] != 0)
+			{
+				mcu_dp_value_mesh_update(DPID_SENSE_STRESS,sense_stress,groupaddr[i]);
+			}
+		}
+	}	
+	
+	sensing_th = sense_stress;
+	TH=(50-sense_stress)*10000;
 		
 	savevar();
     
     //sprintf(temp_str, "%6d", TH);
     //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));    
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_SENSE_STRESS, sense_stress);
+    ret = mcu_dp_value_update(DPID_SENSE_STRESS, sensing_th);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -633,11 +812,41 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
     unsigned char ret;
     //0:关/1:开
     unsigned char switch_led2;
+    unsigned char i;
     
     switch_led2 = mcu_get_dp_download_bool(value,length);
+
+    DPID_SWITCH_LED2count++;
+    if(switch_led2==SWITCHflag2)
+    {
+    	if(DPID_SWITCH_LED2count<2)
+    	{
+    		for(i=0;i<8;i++)
+    		{
+    			if(groupaddr[i] != 0)
+    			{
+    				mcu_dp_bool_mesh_update(DPID_SWITCH_LED2,switch_led2,groupaddr[i]);
+    			}
+    		}
+    	}
+
+    }
+    else
+    {
+    	DPID_SWITCH_LED2count=0;
+    	for(i=0;i<8;i++)
+    	{
+    		if(groupaddr[i] != 0)
+    		{
+    			mcu_dp_bool_mesh_update(DPID_SWITCH_LED2,switch_led2,groupaddr[i]);
+    		}
+    	}   
+
+    }
+
     if(switch_led2 == 0) {
         //灯开关关
-        mcu_dp_string_update(DPID_DEBUG, led_bn_off, strlen(led_bn_off));
+        //mcu_dp_string_update(DPID_DEBUG, led_bn_off, strlen(led_bn_off));
 		if(SWITCHfXBR==1)
 		{
 			PWM3init(0);
@@ -645,7 +854,7 @@ static unsigned char dp_download_switch_led2_handle(const unsigned char value[],
         SWITCHflag2=0;
     }else {
         //灯开关开
-        mcu_dp_string_update(DPID_DEBUG, led_bn_on, strlen(led_bn_on));
+        //mcu_dp_string_update(DPID_DEBUG, led_bn_on, strlen(led_bn_on));
         if(SWITCHfXBR==1)
 		{
 			PWM3init(100);

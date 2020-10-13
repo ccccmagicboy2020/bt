@@ -85,6 +85,18 @@ volatile ulong Timer_Counter=0;
 	 u8 xdata addr = 0;
 	 u8 xdata devgroup = 0;
 	 u8 xdata addrend=0;
+	 u16 idata groupaddr[8] = {0};
+	 u8 idata check_group_flag = 0;
+	 u8 idata check_group_count = 0;
+	 /*
+	 u8 idata groupaddr2 = 0;
+	 u8 idata groupaddr3 = 0;
+	 u8 idata groupaddr4 = 0;
+	 u8 idata groupaddr5 = 0;
+	 u8 idata groupaddr6 = 0;
+	 u8 idata groupaddr7 = 0;
+	 u8 idata groupaddr8 = 0;
+	 */
  unsigned char PWM3init(unsigned char ab);
 void Flash_EraseBlock(unsigned int fui_Address);//扇区擦除
 //void FLASH_WriteData(unsigned char fui_Address, unsigned int fuc_SaveData);//写入一个数据
@@ -592,7 +604,7 @@ void set_var(void)
 	lowlightDELAY_NUM = guc_Read_a[6];
 	if(lowlightDELAY_NUM==0||lowlightDELAY_NUM>255)lowlightDELAY_NUM=1;
 	
-	SWITCHfXBR = guc_Read_a[7]&0x01;
+	SWITCHfXBR = (guc_Read_a[7])&0x01;
 //	addr = guc_Read_a[7];
 //	
 //	devgroup = guc_Read_a[8];
@@ -606,7 +618,7 @@ void set_var(void)
 
 void XBRHandle(void)
 {
-	u8 i,j;
+	//u8 i,j;
 	u16 k;
 //		if(while_1flag==0)
 //		send_data(0x55);
@@ -1112,7 +1124,8 @@ void wait1(void)
 }
 void wait2(void)
 {
-	u8 i,j;
+	u8 i;
+	//u8 j;
 	u16 k,t;
 
 	SUM=0;
@@ -1190,6 +1203,8 @@ unsigned char PWM3init(unsigned char ab)
 
 	PWM3D = j11;						  //PWM占空比设置
 	PWM3C = 0x94; 						//使能PWM3，关闭中断，允许输出，时钟16分频
+	
+	return 0;
 }
 
 /***************************************************************************************
@@ -1200,7 +1215,7 @@ unsigned char PWM3init(unsigned char ab)
 ***************************************************************************************/
 void main()
 {
-	u8 i,j;
+	//u8 i,j;
 	bt_protocol_init();		//mcu_sdk
 	InitSYS();
 	GPIO_Init();
@@ -1280,9 +1295,34 @@ void main()
 			send_data(0X03);
 			
 		}
-
+		if(check_group_count <=2)//一上电间隔一秒获取3次群组地址
+		{
+			if(check_group_flag == 1)
+			{
+					check_group_flag = 0;
+					check_group_count ++;
+				
+					send_data(0x55);
+					send_data(0xAA);
+					send_data(0X00);
+					send_data(0XB4);
+					send_data(0X00);
+					send_data(0X00);
+					send_data(0Xb3);
+				
+			
+			}
+			
+		
+		}
 		WDTC |= 0x10;		//清看门狗
-		bt_uart_service();
+		
+		
+		if(while_1flag==0)
+		{
+			if((times&0x1f)==0)
+				bt_uart_service();
+		}
 		
 		if(SWITCHfXBR==1)//雷达开, app控制
 		{
@@ -1404,6 +1444,7 @@ void TIMER1_Rpt(void) interrupt TIMER1_VECTOR
 	light1scount++;
 	if(light1scount>=1000)
 	{
+		check_group_flag = 1;
 		light1scount=0;
 		light1sflag=1;
 	}
