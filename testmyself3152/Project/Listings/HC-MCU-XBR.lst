@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 1   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE HC_MCU_XBR
@@ -62,7 +62,7 @@ line level    source
   52           //u8 Uart1_TX_Cnt = 0;                //UART1发送计数
   53           
   54          // u16 AN1_Data = 0;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 2   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 2   
 
   55          // u16 AN7_Data = 0;
   56          // u8 Uart_Cnt = 0;
@@ -126,7 +126,7 @@ line level    source
  112          unsigned char xdata guc_Read_a[10] = {0x00};      //用于存放读取的数据
  113          unsigned char xdata guc_Read_a1[1] = {0x00};      //用于存放读取的数据
  114          // unsigned char guc_Uartflag = 0;            //发送标志位
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 3   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 3   
 
  115          // unsigned char guc_Uartcnt = 0;           //发送计数
  116          // unsigned char guc_Uartbuf_a[2] = {0x00}; //缓存数组
@@ -190,7 +190,7 @@ line level    source
  174   1        CLKDIV = 0x01;                     //Fosc 1分频得到Fcpu，Fcpu=16MHz 
  175   1        FREQ_CLK = 0x10;                   //IAP频率
  176   1        
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 4   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 4   
 
  177   1        /**********************************低压复位初始化**************************************/
  178   1        
@@ -254,7 +254,7 @@ line level    source
  236   1        RXD_MAP = 0x04;                     //RXD映射P04    
  237   1        T4CON = 0x06;                       //T4工作模式：UART1波特率发生器
  238   1        
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 5   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 5   
 
  239   1        //波特率计算
  240   1        //波特率 = 1/16 * (T4时钟源频率 / 定时器4预分频比) / (65536 - 0xFF98)
@@ -318,7 +318,7 @@ line level    source
                 
                 P0M0 = P0M0&0x0F|0x30;          //P01设置为模拟输入
                 //P0M3 = P0M3&0x0F|0x30;          //P07设置为模拟输入
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 6   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 6   
 
               //  P0M0 = P0M0&0x0F|0x80;          //P01设置为推挽输出
                 
@@ -382,7 +382,7 @@ line level    source
  360            * @注     无
  361          ***************************************************************************************/
  362          /*
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 7   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 7   
 
  363          void System_Time_Cnt(void)
  364          {
@@ -446,7 +446,7 @@ line level    source
  422                  
  423                  
  424                  //User TASK
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 8   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 8   
 
  425                  if(Time_100mS_FLAG)
  426                  {
@@ -510,7 +510,7 @@ line level    source
  484                  }
  485                  if(Time_1H_FLAG)
  486                  {
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 9   
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 9   
 
  487                      Time_1H_FLAG = 0;
  488                      //User TASK
@@ -574,7 +574,7 @@ line level    source
  546   1        //ADC_INT_IF_CLR; //清中断标志位
  547   1        
  548   1        
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 10  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 10  
 
  549   1        for(i=0;i<16;i++)
  550   1        {
@@ -638,7 +638,7 @@ line level    source
  608   1        lowlightDELAY_NUM = guc_Read_a[6];
  609   1        if(lowlightDELAY_NUM==0||lowlightDELAY_NUM>255)lowlightDELAY_NUM=1;
  610   1        
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 11  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 11  
 
  611   1        SWITCHfXBR = (guc_Read_a[7])&0x01;
  612   1      //  addr = guc_Read_a[7];
@@ -702,7 +702,7 @@ line level    source
  670   6                  }
  671   5                }
  672   4                PWM3init(slowchcnt);
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 12  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 12  
 
  673   4              }
  674   3              else if(LIGHT_off ==1)//else if((SWITCHflag2==0)&&(LIGHT_off ==1))
@@ -766,7 +766,7 @@ line level    source
  732   3      
  733   3              if(SUM1_counter==0)
  734   3              {
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 13  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 13  
 
  735   4                SUM10=SUM1;
  736   4                MAX_DELTA=1;//SUM10>>3;   
@@ -830,7 +830,7 @@ line level    source
  794   8                          SUM0+=SUM10;
  795   8                          SUM0/=2;
  796   8                        }
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 14  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 14  
 
  797   7                        else
  798   7                        {
@@ -894,7 +894,7 @@ line level    source
  856   3      //        check_sum+=send_byte;
  857   3      //        send_data(send_byte);
  858   3      
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 15  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 15  
 
  859   3      //        send_byte=SUM0>>8;
  860   3      //        check_sum+=send_byte;
@@ -958,7 +958,7 @@ line level    source
  918   5      
  919   5                }
  920   4      
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 16  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 16  
 
  921   4                if(SUM1>(SUM0+TH))
  922   4                {
@@ -1022,7 +1022,7 @@ line level    source
  980   3              
  981   3              SUM=0;
  982   3              SUM1=0;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 17  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 17  
 
  983   3              
  984   3              if(LIGHT>0) //????
@@ -1086,7 +1086,7 @@ line level    source
 1042   2              
 1043   2              stop_times=2;
 1044   2              //if(start_times==0)TH=TH_LOW;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 18  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 18  
 
 1045   2              check_light_times=6;
 1046   2              
@@ -1150,7 +1150,7 @@ line level    source
 1104   2      //        send_data(light_ad);
 1105   2      
 1106   2      //        check_sum+=light_ad;
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 19  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 19  
 
 1107   2      //        send_data(light_ad);
 1108   2      //        
@@ -1214,7 +1214,7 @@ line level    source
 1166   1          average=SUM>>16;
 1167   1      
 1168   1      
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 20  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 20  
 
 1169   1      //  light_ad=read_ad(10);
 1170   1      //  light_ad0=light_ad;
@@ -1278,7 +1278,7 @@ line level    source
 1228   1        //LIGHT_ON;
 1229   1        //P0_6=0;
 1230   1        PWM3init(100);
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 21  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 21  
 
 1231   1        Timer_Init();
 1232   1        UART1_Init();
@@ -1342,7 +1342,7 @@ line level    source
 1290   1        while(1)
 1291   1        {
 1292   2          if(resetbtcnt>=3)
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 22  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 22  
 
 1293   2          {
 1294   3            resetbtcnt = 0;
@@ -1406,7 +1406,7 @@ line level    source
 1352   4              ALL_SUM1=0;
 1353   4            }
 1354   3            
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 23  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 23  
 
 1355   3            XBRHandle();
 1356   3            
@@ -1470,7 +1470,7 @@ line level    source
 1414   4            }
 1415   3            else
 1416   3            {//关灯
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 24  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 24  
 
 1417   4              PWM3init(XRBoffbrightvalue);
 1418   4              
@@ -1534,7 +1534,7 @@ line level    source
 1476   2          light1sflag=1;
 1477   2        }
 1478   1      
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 25  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 25  
 
 1479   1        
 1480   1      }
@@ -1598,7 +1598,7 @@ line level    source
 1538          {
 1539   1        while(1)
 1540   1        {
-C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/13/2020 14:51:02 PAGE 26  
+C51 COMPILER V9.52.0.0   HC_MCU_XBR                                                        10/14/2020 09:07:16 PAGE 26  
 
 1541   2          LVDC &=~ 0x08;         //清除LVD中断标志位
 1542   2          P0_0=0;   
