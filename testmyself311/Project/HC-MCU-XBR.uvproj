@@ -140,7 +140,7 @@
             <RestoreTracepoints>1</RestoreTracepoints>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>10</TargetSelection>
+          <TargetSelection>0</TargetSelection>
           <SimDlls>
             <CpuDll></CpuDll>
             <CpuDllArguments></CpuDllArguments>
@@ -166,7 +166,6 @@
             <Capability>1</Capability>
             <DriverSelection>4102</DriverSelection>
           </Flash1>
-          <bUseTDR>0</bUseTDR>
           <Flash2>Holychip\BIN\HC-LINK.dll</Flash2>
           <Flash3>"" ()</Flash3>
           <Flash4></Flash4>

@@ -56,8 +56,9 @@ volatile ulong Timer_Counter = 0;
 u8 xdata SUM1_counter = 0; //???
 u8 xdata SUM0_num = 12;	   //???
 u8 xdata SUM1_num = 64;	   //???
-ulong xdata SUM01, SUM2;
-ulong xdata SUM10 = 0;	   //SUM1值的几次平均值
+ulong xdata SUM01;
+//ulong xdata SUM2;		   //调试用
+ulong xdata SUM10 = 0;	   //SUM1值的几次平均值，时间上的滞后值
 ulong xdata SUM0 = 0;	   //
 ulong xdata SUM1 = 0;	   //平均绝对离差的累加合的瞬时值
 ulong xdata ALL_SUM1 = 0;  //SUM1的累加值
@@ -632,11 +633,8 @@ void set_var(void)
 
 void XBRHandle(void)
 {
-	//u8 i,j;
 	u16 k;
-	//		if(while_1flag==0)
-	//		send_data(0x55);
-	//while(1)
+
 	if (while_1flag == 0)
 	{
 		//send_data(0x66);
@@ -671,7 +669,7 @@ void XBRHandle(void)
 		}
 		SUM1 += k;
 
-		if ((times & 0x1ff) == 0) //每256次循环检查一次
+		if ((times & 0x1ff) == 0) //每256次循环检查一次光敏
 		{
 			if (LIGHT > 0) //正在伴亮的过程中
 			{
@@ -701,7 +699,7 @@ void XBRHandle(void)
 			}
 		}
 
-		if (times >= 8192) //250ms		//12800)	//330ms
+		if (times >= 8192) //每250ms迭代及判断一次
 		{
 
 			WDTC |= 0x10; //清看门狗
@@ -723,7 +721,7 @@ void XBRHandle(void)
 				SUM16 = 0;
 			}
 
-			if (check_light_times < 8) //2s	读取一次感光AD值，对比值每2s左右更新一次
+			if (check_light_times < 8) //2s	读取一次感光AD值，瞬时对比值每2s左右更新一次
 			{
 				check_light_times++;
 			}
@@ -855,50 +853,6 @@ void XBRHandle(void)
 				ALL_SUM1 = 0;
 			}
 
-			// 				//send_byte=0x35;
-			// 				check_sum=0xFa;
-			//send_data(0xFa);
-
-			// 				send_byte=TH>>15;
-			// 				check_sum+=send_byte;
-			// 				send_data(send_byte);
-
-			// 				//k=TH;
-			// 				send_byte=TH>>10;
-			// 				check_sum+=send_byte;
-			// 				send_data(send_byte);
-			//
-			// 				send_byte=LIGHT_TH;
-			// 				check_sum+=send_byte;
-			// 				send_data(send_byte);
-
-			// 				//send_byte=light_ad;
-			// 				check_sum+=light_ad;
-			// 				send_data(light_ad);
-
-			// 				send_byte=average>>4;
-			// 				check_sum+=send_byte;
-			// 				send_data(send_byte);
-
-			// 				send_byte=SUM0>>16;
-			// 				check_sum+=send_byte;
-			// 				send_data(send_byte);
-
-			// 				send_byte=SUM0>>8;
-			// 				check_sum+=send_byte;
-			// 				send_data(send_byte);
-
-			// 				send_byte=SUM1>>16;
-			// 				check_sum+=send_byte;
-			// 				send_data(send_byte);
-
-			// 				send_byte=SUM1>>8;
-			// 				check_sum+=send_byte;
-			// 				send_data(send_byte);
-
-			// 				check_sum+=1;
-			// 				send_data(check_sum);
-
 			if (stop_times > 0) //
 			{
 				stop_times--;
@@ -994,13 +948,14 @@ void XBRHandle(void)
 				}
 			}
 
-			SUM2 = SUM1;
-			send_data(average >> 4);
-			send_data(light_ad);
-			send_data(SUM0 >> 16);
-			send_data(SUM0 >> 8);
-			send_data(SUM2 >> 16);
-			send_data(SUM2 >> 8); //20200927	测试用
+			//SUM2 = SUM1;
+			
+			//send_data(average >> 4);
+			//send_data(light_ad);
+			//send_data(SUM0 >> 16);
+			//send_data(SUM0 >> 8);
+			//send_data(SUM2 >> 16);
+			//send_data(SUM2 >> 8); //20200927	测试用
 
 			SUM = 0;
 			SUM1 = 0;
