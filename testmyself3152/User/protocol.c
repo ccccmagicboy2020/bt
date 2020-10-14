@@ -70,7 +70,7 @@ void Delay_us_1(uint q1);
 
 void reset_bt_module(void)
 {
-	send_data(0x55);
+	send_data(0x55);//p15，重置模块
 	send_data(0xAA);
 	send_data(0x00);
 	send_data(0x04);
