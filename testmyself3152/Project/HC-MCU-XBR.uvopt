@@ -123,7 +123,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>HC-LINK</Key>
-          <Name>-S23 -B115200 -O15</Name>
+          <Name>-S16 -B115200 -O15</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
       <Breakpoint>

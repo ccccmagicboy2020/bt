@@ -66,7 +66,7 @@ ulong xdata SUM16 = 0;	   //2^16次的累计值变量
 ulong xdata SUM = 0;	   //an1的raw累加值
 u16 xdata start_times = 1; //???
 u16 xdata times = 0;	   //主循环次数
-ulong xdata TH;
+ulong xdata TH;			   //设置误差阈值，可由APP设置的感应强度转换
 ulong xdata MAX_DELTA; //最大偏差值
 u8 xdata alarm_times = 0;
 u8 xdata stop_times = 0; //???
@@ -1253,7 +1253,7 @@ void main()
 	SUM = 0;
 	while (1)
 	{
-		if (resetbtcnt >= 3)
+		if (resetbtcnt >= 3)	//行为是每三次上电会复位一次蓝牙模块
 		{
 			resetbtcnt = 0;
 			reset_bt_module();
