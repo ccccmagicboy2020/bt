@@ -303,7 +303,7 @@ static unsigned char dp_download_bright_value_handle(const unsigned char value[]
 	
     lightvalue = bright_value;
 
-	if(SWITCHfXBR==0)
+	//if(SWITCHfXBR==0)
 	{
 		XRBoffbrightvalue = bright_value;
 	}
