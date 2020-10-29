@@ -206,10 +206,10 @@
       <FileType>1</FileType>
       <tvExp>1</tvExp>
       <Focus>1</Focus>
-      <ColumnNumber>5182564</ColumnNumber>
+      <ColumnNumber>38</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>5</CurrentLine>
+      <TopLine>94</TopLine>
+      <CurrentLine>923</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\User\HC-MCU-XBR.c</PathWithFileName>
       <FilenameWithoutPath>HC-MCU-XBR.c</FilenameWithoutPath>
@@ -238,10 +238,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>1</Focus>
-      <ColumnNumber>8</ColumnNumber>
+      <ColumnNumber>67</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
-      <CurrentLine>31</CurrentLine>
+      <TopLine>214</TopLine>
+      <CurrentLine>227</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\User\protocol.c</PathWithFileName>
       <FilenameWithoutPath>protocol.c</FilenameWithoutPath>

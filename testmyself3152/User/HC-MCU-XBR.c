@@ -109,7 +109,8 @@ u8 idata Linkage_flag = 0;		//联动标志
 u8 idata Light_on_flag = 0;
 u8 idata Light_on_flagpre = 0;
 
-u8 xdata all_day_micro_light = 0;
+u8 xdata all_day_micro_light_enable = 0;
+u16 xdata radar_trig_times = 0;
 
 /*
 	 u8 idata groupaddr2 = 0;
@@ -924,6 +925,8 @@ void XBRHandle(void)
 							//									send_data(slowchcnt);
 							//									send_data(0xaa);
 							//send_data(0xdd);
+							radar_trig_times++;
+							mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times);
 
 							SUM1_num = 8;
 							LIGHT_off = 0;
@@ -1302,7 +1305,7 @@ void main()
 					if (LIGHT_off >= lowlightDELAY_NUM)
 					{
 						LIGHT_off = 0;
-						if (1 == all_day_micro_light)
+						if (1 == all_day_micro_light_enable)
 						{
 							//
 						}

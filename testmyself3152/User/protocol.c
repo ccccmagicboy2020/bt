@@ -59,6 +59,9 @@ unsigned char DPID_SENSE_STRESScount = 0;
 
 extern u16 idata groupaddr[8];
 
+extern u8 xdata all_day_micro_light_enable;
+extern u16 xdata radar_trig_times;
+
 //extern TYPE_BUFFER_S FlashBuffer;
 void send_data(u8 d);
 void reset_bt_module(void);
@@ -118,6 +121,8 @@ const DOWNLOAD_CMD_S xdata download_cmd[] =
   //{DPID_TEST_BN2, DP_TYPE_BOOL},
   {DPID_SWITCH_LED2, DP_TYPE_BOOL},
   {DPID_SWITCH_LINKAGE, DP_TYPE_BOOL},
+  {DPID_ALL_DAY_MICRO_LIGHT, DP_TYPE_BOOL},
+  {DPID_RADAR_TRIGGER_TIMES, DP_TYPE_VALUE},
 };
 
 
@@ -218,6 +223,8 @@ void all_data_update(void)
 	
 	mcu_dp_bool_update(DPID_SWITCH_LINKAGE,Linkage_flag); //BOOL型数据上报;
 
+    mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light_enable); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times); //VALUE型数据上报;
 
 
 }
@@ -925,7 +932,35 @@ static unsigned char dp_download_switch_linkage_handle(const unsigned char value
         return SUCCESS;
     else
         return ERROR;
+
 }
+/*****************************************************************************
+函数名称 : dp_download_all_day_micro_light_handle
+功能描述 : 针对DPID_ALL_DAY_MICRO_LIGHT的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_all_day_micro_light_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char all_day_micro_light;
+    
+    all_day_micro_light = mcu_get_dp_download_bool(value,length);
+
+		all_day_micro_light_enable = all_day_micro_light;
+  
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light_enable);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+
 
 /******************************************************************************
                                 WARNING!!!                     
@@ -1085,7 +1120,12 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
         case DPID_SWITCH_LINKAGE:
             //联动 处理函数
             ret = dp_download_switch_linkage_handle(value,length);
-            switchcnt = 0;
+			switchcnt = 0;
+        break;
+        case DPID_ALL_DAY_MICRO_LIGHT:
+            //全天伴亮处理函数
+            ret = dp_download_all_day_micro_light_handle(value,length);
+			switchcnt = 0;
         break;
 
   default:

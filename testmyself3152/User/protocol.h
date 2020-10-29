@@ -98,7 +98,7 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //感应延时(可下发可上报)
 //备注:如果雷达感应到人体，灯点亮延长时间
 #define DPID_PIR_DELAY 102
-//感应开关(可下发可上报)
+//雷达开关(可下发可上报)
 //备注:雷达感应开关
 #define DPID_SWITCH_XBR 103
 //伴亮延时(可下发可上报)
@@ -134,6 +134,12 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //联动 (可下发可上报)
 //备注:mesh联动开关
 #define DPID_SWITCH_LINKAGE 114
+//全天伴亮(可下发可上报)
+//备注:不进行微亮到灭的动作
+#define DPID_ALL_DAY_MICRO_LIGHT 115
+//雷达触发计数(只上报)
+//备注:
+#define DPID_RADAR_TRIGGER_TIMES 116
 
 
 
