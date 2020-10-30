@@ -1128,8 +1128,17 @@ unsigned char PWM3init(unsigned char ab)
 {
 	float i11;
 	unsigned char j11;
-	i11 = ab * 255 / 100;
-	j11 = i11;
+	
+	if (1 == ab)
+	{
+		j11 = 0;
+	}
+	else
+	{
+		i11 = ab * 255 / 100;
+		j11 = (unsigned char )(i11 + 0.5);
+	}
+	
 #ifdef V11
 	/************************************PWM3初始化****************************************/
 	//P0M3 = P0M3&0xF0|0x08;		//P06设置为推挽输出
