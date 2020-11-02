@@ -69,6 +69,14 @@ const DOWNLOAD_CMD_S download_cmd[] =
   {DPID_SWITCH_LINKAGE, DP_TYPE_BOOL},
   {DPID_ALL_DAY_MICRO_LIGHT, DP_TYPE_BOOL},
   {DPID_RADAR_TRIGGER_TIMES, DP_TYPE_VALUE},
+  {DPID_ADDR0, DP_TYPE_VALUE},
+  {DPID_ADDR1, DP_TYPE_VALUE},
+  {DPID_ADDR2, DP_TYPE_VALUE},
+  {DPID_ADDR3, DP_TYPE_VALUE},
+  {DPID_ADDR4, DP_TYPE_VALUE},
+  {DPID_ADDR5, DP_TYPE_VALUE},
+  {DPID_ADDR6, DP_TYPE_VALUE},
+  {DPID_ADDR7, DP_TYPE_VALUE},
 };
 
 
@@ -143,6 +151,14 @@ void all_data_update(void)
     mcu_dp_bool_update(DPID_SWITCH_LINKAGE,当前联动 ); //BOOL型数据上报;
     mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,当前全天伴亮); //BOOL型数据上报;
     mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,当前雷达触发计数); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR0,当前群组地址0); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR1,当前群组地址1); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR2,当前群组地址2); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR3,当前群组地址3); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR4,当前群组地址4); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR5,当前群组地址5); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR6,当前群组地址6); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR7,当前群组地址7); //VALUE型数据上报;
 
 
 
