@@ -53,8 +53,8 @@ MCU可调用mcu_api.c文件内的mcu_firm_update_query()函数获取当前MCU固
 #define BT_UART_QUEUE_LMT             16              //数据接收队列大小,如MCU的RAM不够,可缩小
 #define BT_UART_RECV_BUF_LMT          24              //根据用户DP数据大小量定,必须大于24
 #else
-#define BT_UART_QUEUE_LMT             24             //数据接收队列大小,如MCU的RAM不够,可缩小
-#define BT_UART_RECV_BUF_LMT          24             //固件升级缓冲区,需大缓存,必须大于260
+#define BT_UART_QUEUE_LMT             128             //数据接收队列大小,如MCU的RAM不够,可缩小
+#define BT_UART_RECV_BUF_LMT          300             //固件升级缓冲区,需大缓存,必须大于260
 #endif
 
 #define BT_UART_SEND_BUF_LMT         24              //根据用户DP数据大小量定,必须大于24
@@ -140,6 +140,30 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //雷达触发计数(只上报)
 //备注:
 #define DPID_RADAR_TRIGGER_TIMES 116
+//群组地址0(只上报)
+//备注:
+#define DPID_ADDR0 130
+//群组地址1(只上报)
+//备注:
+#define DPID_ADDR1 131
+//群组地址2(只上报)
+//备注:
+#define DPID_ADDR2 132
+//群组地址3(只上报)
+//备注:
+#define DPID_ADDR3 133
+//群组地址4(只上报)
+//备注:
+#define DPID_ADDR4 134
+//群组地址5(只上报)
+//备注:
+#define DPID_ADDR5 135
+//群组地址6(只上报)
+//备注:
+#define DPID_ADDR6 136
+//群组地址7(只上报)
+//备注:
+#define DPID_ADDR7 137
 
 
 

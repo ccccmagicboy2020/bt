@@ -62,6 +62,8 @@ extern u16 idata groupaddr[8];
 extern u8 xdata all_day_micro_light_enable;
 extern u16 xdata radar_trig_times;
 
+extern u16 idata groupaddr[8];
+
 //extern TYPE_BUFFER_S FlashBuffer;
 void send_data(u8 d);
 void reset_bt_module(void);
@@ -123,6 +125,14 @@ const DOWNLOAD_CMD_S xdata download_cmd[] =
   {DPID_SWITCH_LINKAGE, DP_TYPE_BOOL},
   {DPID_ALL_DAY_MICRO_LIGHT, DP_TYPE_BOOL},
   {DPID_RADAR_TRIGGER_TIMES, DP_TYPE_VALUE},
+  {DPID_ADDR0, DP_TYPE_VALUE},
+  {DPID_ADDR1, DP_TYPE_VALUE},
+  {DPID_ADDR2, DP_TYPE_VALUE},
+  {DPID_ADDR3, DP_TYPE_VALUE},
+  {DPID_ADDR4, DP_TYPE_VALUE},
+  {DPID_ADDR5, DP_TYPE_VALUE},
+  {DPID_ADDR6, DP_TYPE_VALUE},
+  {DPID_ADDR7, DP_TYPE_VALUE},
 };
 
 
@@ -226,7 +236,14 @@ void all_data_update(void)
     mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light_enable); //BOOL型数据上报;
     mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times); //VALUE型数据上报;
 
-
+    mcu_dp_value_update(DPID_ADDR0,groupaddr[0]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR1,groupaddr[1]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR2,groupaddr[2]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR3,groupaddr[3]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR4,groupaddr[4]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR5,groupaddr[5]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR6,groupaddr[6]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR7,groupaddr[7]); //VALUE型数据上报;
 }
 
 
@@ -571,12 +588,12 @@ static unsigned char dp_download_standby_time_handle(const unsigned char value[]
 	{
 		DPID_STANDBY_TIMEcount=0;
 		for(i=0;i<8;i++)
+		{
+			if(groupaddr[i] != 0)
 			{
-				if(groupaddr[i] != 0)
-				{
-					mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
-				}
+				mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
 			}
+		}
 	
 	}
 	
@@ -948,10 +965,27 @@ static unsigned char dp_download_all_day_micro_light_handle(const unsigned char 
     unsigned char ret;
     //0:关/1:开
     unsigned char all_day_micro_light;
+		u8 i;
     
     all_day_micro_light = mcu_get_dp_download_bool(value,length);
+	
+    if(all_day_micro_light_enable == all_day_micro_light)
+    {
+		//
+    }
+    else
+    {
+    	for(i=0;i<8;i++)
+    	{
+    		if(groupaddr[i] != 0)
+    		{
+    			mcu_dp_bool_mesh_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light,groupaddr[i]);
+    		}
+    	}   
 
-		all_day_micro_light_enable = all_day_micro_light;
+    }
+	
+	all_day_micro_light_enable = all_day_micro_light;
   
     //处理完DP数据后应有反馈
     ret = mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light_enable);
@@ -1068,7 +1102,7 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
             switchcnt = 0;
         break;
         case DPID_SWITCH_XBR:
-            //感应开关处理函数
+            //雷达开关处理函数
             ret = dp_download_switch_xbr_handle(value,length);
             switchcnt = 0;
         break;
@@ -1113,7 +1147,7 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
             switchcnt = 0;
         break; */
         case DPID_SWITCH_LED2:
-            //灯开关处理函数
+            //开关灯处理函数
             ret = dp_download_switch_led2_handle(value,length);
             switchcnt = 0;
         break;

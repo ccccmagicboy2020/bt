@@ -371,6 +371,14 @@ void data_handle(unsigned short offset)
 	groupaddr[7] = bt_uart_rx_buf[offset + 21] * 0x100;
 	groupaddr[7] += bt_uart_rx_buf[offset + 22] ;
 
+    mcu_dp_value_update(DPID_ADDR0,groupaddr[0]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR1,groupaddr[1]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR2,groupaddr[2]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR3,groupaddr[3]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR4,groupaddr[4]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR5,groupaddr[5]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR6,groupaddr[6]); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_ADDR7,groupaddr[7]); //VALUE型数据上报;	
 	
 
     break;

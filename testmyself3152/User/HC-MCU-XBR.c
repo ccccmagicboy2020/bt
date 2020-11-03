@@ -106,7 +106,7 @@ u16 idata groupaddr[8] = {0};
 u8 idata check_group_flag = 0;	//检查群组标志
 u8 idata check_group_count = 0; //检查群组计数器
 u8 idata Linkage_flag = 0;		//联动标志
-u8 idata Light_on_flag = 0;
+u8 idata Light_on_flag = 0;		//雷达与灯同时打开时为1；当雷达感应到时也为1；
 u8 idata Light_on_flagpre = 0;
 
 u8 xdata all_day_micro_light_enable = 0;
@@ -1013,7 +1013,7 @@ void XBRHandle(void)
 		//		send_data(0xdd);
 	}
 }
-
+//可变时长
 void wait1(void)
 {
 	u8 i, j;
@@ -1079,10 +1079,11 @@ void wait1(void)
 
 		j++;
 
-		if (j > 80)
+		if (j > 80)//起时，可能是雷达芯片的焊接问题
 			break; //??35????????????1.1V???????
 	}
 }
+//固定时长取一个平均值
 void wait2(void)
 {
 	u8 i;
@@ -1238,7 +1239,7 @@ void main()
 
 	EA = 1;
 
-	wait1();
+	wait1();//可变时长
 
 	slowchcnt = lightvalue;
 	//Delay_ms(200);
@@ -1346,7 +1347,7 @@ void main()
 					for (i = 0; i < 8; i++)
 					{
 						if (groupaddr[i] != 0)
-						{	//灯开关
+						{	//灯开关，这里联动了所有的群组Light_on_flag = 1
 							mcu_dp_bool_mesh_update(DPID_SWITCH_LED2, SWITCHflag2, groupaddr[i]);
 						}
 					}
