@@ -69,6 +69,8 @@ const DOWNLOAD_CMD_S download_cmd[] =
   {DPID_SWITCH_LINKAGE, DP_TYPE_BOOL},
   {DPID_ALL_DAY_MICRO_LIGHT, DP_TYPE_BOOL},
   {DPID_RADAR_TRIGGER_TIMES, DP_TYPE_VALUE},
+  {DPID_CLEAR_TRIGGER_NUMBER, DP_TYPE_BOOL},
+  {DPID_LIGHT_STATUS, DP_TYPE_ENUM},
   {DPID_ADDR0, DP_TYPE_VALUE},
   {DPID_ADDR1, DP_TYPE_VALUE},
   {DPID_ADDR2, DP_TYPE_VALUE},
@@ -77,6 +79,8 @@ const DOWNLOAD_CMD_S download_cmd[] =
   {DPID_ADDR5, DP_TYPE_VALUE},
   {DPID_ADDR6, DP_TYPE_VALUE},
   {DPID_ADDR7, DP_TYPE_VALUE},
+  {DPID_LUX_ENABLE, DP_TYPE_BOOL},
+  {DPID_LUX_DELAY_HOUR, DP_TYPE_VALUE},
 };
 
 
@@ -151,6 +155,7 @@ void all_data_update(void)
     mcu_dp_bool_update(DPID_SWITCH_LINKAGE,当前联动 ); //BOOL型数据上报;
     mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,当前全天伴亮); //BOOL型数据上报;
     mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,当前雷达触发计数); //VALUE型数据上报;
+    mcu_dp_enum_update(DPID_LIGHT_STATUS,当前灯状态); //枚举型数据上报;
     mcu_dp_value_update(DPID_ADDR0,当前群组地址0); //VALUE型数据上报;
     mcu_dp_value_update(DPID_ADDR1,当前群组地址1); //VALUE型数据上报;
     mcu_dp_value_update(DPID_ADDR2,当前群组地址2); //VALUE型数据上报;
@@ -159,6 +164,8 @@ void all_data_update(void)
     mcu_dp_value_update(DPID_ADDR5,当前群组地址5); //VALUE型数据上报;
     mcu_dp_value_update(DPID_ADDR6,当前群组地址6); //VALUE型数据上报;
     mcu_dp_value_update(DPID_ADDR7,当前群组地址7); //VALUE型数据上报;
+    mcu_dp_bool_update(DPID_LUX_ENABLE,当前光敏控制); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_LUX_DELAY_HOUR,当前光敏延时); //VALUE型数据上报;
 
 
 
@@ -638,6 +645,91 @@ static unsigned char dp_download_all_day_micro_light_handle(const unsigned char 
     else
         return ERROR;
 }
+/*****************************************************************************
+函数名称 : dp_download_clear_trigger_number_handle
+功能描述 : 针对DPID_CLEAR_TRIGGER_NUMBER的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 只下发类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_clear_trigger_number_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char clear_trigger_number;
+    
+    clear_trigger_number = mcu_get_dp_download_bool(value,length);
+    if(clear_trigger_number == 0) {
+        //开关关
+    }else {
+        //开关开
+    }
+  
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_CLEAR_TRIGGER_NUMBER,clear_trigger_number);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+/*****************************************************************************
+函数名称 : dp_download_lux_enable_handle
+功能描述 : 针对DPID_LUX_ENABLE的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_lux_enable_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为BOOL
+    unsigned char ret;
+    //0:关/1:开
+    unsigned char lux_enable;
+    
+    lux_enable = mcu_get_dp_download_bool(value,length);
+    if(lux_enable == 0) {
+        //开关关
+    }else {
+        //开关开
+    }
+  
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_bool_update(DPID_LUX_ENABLE,lux_enable);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
+/*****************************************************************************
+函数名称 : dp_download_lux_delay_hour_handle
+功能描述 : 针对DPID_LUX_DELAY_HOUR的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_lux_delay_hour_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为VALUE
+    unsigned char ret;
+    unsigned long lux_delay_hour;
+    
+    lux_delay_hour = mcu_get_dp_download_value(value,length);
+    /*
+    //VALUE类型数据处理
+    
+    */
+    
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_value_update(DPID_LUX_DELAY_HOUR,lux_delay_hour);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
 
 
 /******************************************************************************
@@ -780,6 +872,18 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
         case DPID_ALL_DAY_MICRO_LIGHT:
             //全天伴亮处理函数
             ret = dp_download_all_day_micro_light_handle(value,length);
+        break;
+        case DPID_CLEAR_TRIGGER_NUMBER:
+            //计数清零处理函数
+            ret = dp_download_clear_trigger_number_handle(value,length);
+        break;
+        case DPID_LUX_ENABLE:
+            //光敏控制处理函数
+            ret = dp_download_lux_enable_handle(value,length);
+        break;
+        case DPID_LUX_DELAY_HOUR:
+            //光敏延时处理函数
+            ret = dp_download_lux_delay_hour_handle(value,length);
         break;
 
 
