@@ -67,6 +67,8 @@ extern u16 idata groupaddr[8];
 extern u8 xdata lux_en;
 extern u16 xdata lux_delay_hour;
 
+extern u8 idata work_mode;
+
 //extern TYPE_BUFFER_S FlashBuffer;
 void send_data(u8 d);
 void reset_bt_module(void);
@@ -111,25 +113,20 @@ void reset_bt_module(void)
 const DOWNLOAD_CMD_S xdata download_cmd[] =
 {
   {DPID_SWITCH_LED, DP_TYPE_BOOL},
+  {DPID_WORK_MODE, DP_TYPE_ENUM},
   {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
   {DPID_CDS, DP_TYPE_ENUM},
   {DPID_PIR_DELAY, DP_TYPE_VALUE},
   {DPID_SWITCH_XBR, DP_TYPE_BOOL},
   {DPID_STANDBY_TIME, DP_TYPE_VALUE},
   {DPID_SENSE_STRESS, DP_TYPE_VALUE},
-  {DPID_ADDR, DP_TYPE_VALUE},
-  {DPID_ADDREND, DP_TYPE_VALUE},
-  {DPID_GROUP, DP_TYPE_VALUE},
-  {DPID_DEBUG, DP_TYPE_STRING},
-  //{DPID_TEST_BN0, DP_TYPE_BOOL},
-  //{DPID_TEST_BN1, DP_TYPE_BOOL},
-  //{DPID_TEST_BN2, DP_TYPE_BOOL},
   {DPID_SWITCH_LED2, DP_TYPE_BOOL},
   {DPID_SWITCH_LINKAGE, DP_TYPE_BOOL},
   {DPID_ALL_DAY_MICRO_LIGHT, DP_TYPE_BOOL},
   {DPID_RADAR_TRIGGER_TIMES, DP_TYPE_VALUE},
   {DPID_CLEAR_TRIGGER_NUMBER, DP_TYPE_BOOL},
   {DPID_LIGHT_STATUS, DP_TYPE_ENUM},
+  {DPID_LUX_STATUS, DP_TYPE_VALUE},
   {DPID_ADDR0, DP_TYPE_VALUE},
   {DPID_ADDR1, DP_TYPE_VALUE},
   {DPID_ADDR2, DP_TYPE_VALUE},
@@ -226,19 +223,7 @@ void all_data_update(void)
 
     mcu_dp_value_update(DPID_SENSE_STRESS, radius); //VALUE型数据上报;
 
-    mcu_dp_value_update(DPID_ADDR, 10); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDREND, 11); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_GROUP, 12); //VALUE型数据上报;
-
-
-    mcu_dp_string_update(DPID_DEBUG, "1012", 4); //STRING型数据上报;
-
-
-    //mcu_dp_bool_update(DPID_TEST_BN0,当前测试开关0); //BOOL型数据上报;
-    //mcu_dp_bool_update(DPID_TEST_BN1,当前测试开关1); //BOOL型数据上报;
-    //mcu_dp_bool_update(DPID_TEST_BN2,当前测试开关2); //BOOL型数据上报;
-	
-	mcu_dp_bool_update(DPID_SWITCH_LINKAGE,Linkage_flag); //BOOL型数据上报;
+		mcu_dp_bool_update(DPID_SWITCH_LINKAGE,Linkage_flag); //BOOL型数据上报;
 
     mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light_enable); //BOOL型数据上报;
     mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times); //VALUE型数据上报;
@@ -256,6 +241,8 @@ void all_data_update(void)
     mcu_dp_value_update(DPID_LUX_DELAY_HOUR, lux_delay_hour); //VALUE型数据上报;
     mcu_dp_enum_update(DPID_LIGHT_STATUS, light_status_xxx); //枚举型数据上报;
 	
+		mcu_dp_enum_update(DPID_WORK_MODE, work_mode); //枚举型数据上报;
+		mcu_dp_value_update(DPID_LUX_STATUS, light_ad); //VALUE型数据上报;
 }
 
 
@@ -287,6 +274,58 @@ static unsigned char dp_download_switch_led_handle(const unsigned char value[], 
     
     //处理完DP数据后应有反馈
     ret = mcu_dp_bool_update(DPID_SWITCH_LED, reset_bt_bn);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+
+}
+
+/*****************************************************************************
+函数名称 : dp_download_work_mode_handle
+功能描述 : 针对DPID_WORK_MODE的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_work_mode_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为ENUM
+    unsigned char ret;
+    
+    work_mode = mcu_get_dp_download_enum(value,length);
+    switch(work_mode) {
+        case 0:		//雷达
+			SWITCHfXBR = 1;
+			SWITCHflag2 = 1;
+			lux_en = 0;
+					//
+        break;
+        
+        case 1:		//光敏
+			SWITCHfXBR = 0;
+			SWITCHflag2 = 0;
+			lux_en = 1;
+					//
+        break;
+        
+        case 2:		//手动
+			SWITCHfXBR = 0;
+			SWITCHflag2 = 1;
+			lux_en = 0;
+					//
+					//
+        break;
+        
+        default:
+    
+        break;
+    }
+    
+	savevar();
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_enum_update(DPID_WORK_MODE, work_mode);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -683,174 +722,6 @@ static unsigned char dp_download_sense_stress_handle(const unsigned char value[]
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_addr_handle
-功能描述 : 针对DPID_ADDR的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_addr_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    unsigned long addr;
-    
-    addr = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    
-    */
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_ADDR,addr);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_addrend_handle
-功能描述 : 针对DPID_ADDREND的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_addrend_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    unsigned long addrend;
-    
-    addrend = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    
-    */
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_ADDREND,addrend);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_group_handle
-功能描述 : 针对DPID_GROUP的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_group_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    unsigned long group;
-    
-    group = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    
-    */
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_GROUP,group);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_test_bn0_handle
-功能描述 : 针对DPID_TEST_BN0的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-/* static unsigned char dp_download_test_bn0_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char test_bn0;
-    
-    test_bn0 = mcu_get_dp_download_bool(value,length);
-    if(test_bn0 == 0) {
-        //开关关
-    }else {
-        //开关开
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_TEST_BN0,test_bn0);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-} */
-/*****************************************************************************
-函数名称 : dp_download_test_bn1_handle
-功能描述 : 针对DPID_TEST_BN1的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-/* static unsigned char dp_download_test_bn1_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char test_bn1;
-    
-    test_bn1 = mcu_get_dp_download_bool(value,length);
-    if(test_bn1 == 0) {
-        //开关关
-    }else {
-        //开关开
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_TEST_BN1,test_bn1);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-} */
-/*****************************************************************************
-函数名称 : dp_download_test_bn2_handle
-功能描述 : 针对DPID_TEST_BN2的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-/* static unsigned char dp_download_test_bn2_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char test_bn2;
-    
-    test_bn2 = mcu_get_dp_download_bool(value,length);
-    if(test_bn2 == 0) {
-        //开关关
-    }else {
-        //开关开
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_TEST_BN2,test_bn2);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-} */
-/*****************************************************************************
 函数名称 : dp_download_switch_led2_handle
 功能描述 : 针对DPID_SWITCH_LED2的处理函数
 输入参数 : value:数据源数据
@@ -1052,16 +923,6 @@ static unsigned char dp_download_lux_enable_handle(const unsigned char value[], 
     
     lux_en = mcu_get_dp_download_bool(value,length);
 
-	if (lux_en == 0)
-	{
-		SWITCHfXBR = 1;
-	}
-	else
-	{
-		SWITCHfXBR = 0;
-	}
-  
-	savevar();
     //处理完DP数据后应有反馈
 
     ret = mcu_dp_bool_update(DPID_LUX_ENABLE, lux_en);
@@ -1188,6 +1049,11 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
 				}
 			}
         break;
+        case DPID_WORK_MODE:
+            //模式处理函数
+            ret = dp_download_work_mode_handle(value,length);
+			switchcnt = 0;
+        break;
         case DPID_BRIGHT_VALUE:
             //亮度值处理函数
             ret = dp_download_bright_value_handle(value,length);
@@ -1218,36 +1084,6 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
             ret = dp_download_sense_stress_handle(value,length);
             switchcnt = 0;
         break;
-        case DPID_ADDR:
-            //设备地址处理函数
-            ret = dp_download_addr_handle(value,length);
-            switchcnt = 0;
-        break;
-        case DPID_ADDREND:
-            //设备地址结束值处理函数
-            ret = dp_download_addrend_handle(value,length);
-            switchcnt = 0;
-        break;
-        case DPID_GROUP:
-            //设备群组处理函数
-            ret = dp_download_group_handle(value,length);
-            switchcnt = 0;
-        break;
-/*         case DPID_TEST_BN0:
-            //测试开关0处理函数
-            ret = dp_download_test_bn0_handle(value,length);
-            switchcnt = 0;
-        break;
-        case DPID_TEST_BN1:
-            //测试开关1处理函数
-            ret = dp_download_test_bn1_handle(value,length);
-            switchcnt = 0;
-        break;
-        case DPID_TEST_BN2:
-            //测试开关2处理函数
-            ret = dp_download_test_bn2_handle(value,length);
-            switchcnt = 0;
-        break; */
         case DPID_SWITCH_LED2:
             //开关灯处理函数
             ret = dp_download_switch_led2_handle(value,length);
@@ -1330,7 +1166,8 @@ void savevar(void)
 	FLASH_WriteData(i,0x2F00+6);
 	Delay_us_1(100);
 	
-	i=~SWITCHfXBR;//&0xff;
+	//i=~SWITCHfXBR;//&0xff;
+	i = work_mode;
 	FLASH_WriteData(i,0x2F00+7);
 	Delay_us_1(100);
 	

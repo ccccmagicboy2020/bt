@@ -112,6 +112,23 @@ u8 idata Light_on_flagpre = 0;
 u8 xdata all_day_micro_light_enable = 0;
 u16 xdata radar_trig_times = 0;
 
+u8 xdata light_status_xxx = 0;
+
+u16 xdata radar_number_count = 0;
+u8 xdata radar_number_send_flag = 0;
+u8 xdata radar_number_send_flag2 = 0;
+
+u8 xdata lux_en = 0;
+u16 xdata lux_delay_hour = 1;
+u32 xdata lux_10ms_number_count = 0;
+u16 xdata lux_1000ms_number_count = 0;
+u8 xdata lux_hour_flag = 0;
+u8 xdata lux_en_flag = 0;
+u16 idata lux_hour_number_count = 0;
+u8 idata lux_1000ms_flag = 0;
+
+u8 idata work_mode = 0;
+
 /*
 	 u8 idata groupaddr2 = 0;
 	 u8 idata groupaddr3 = 0;
@@ -228,7 +245,7 @@ void Timer_Init()
 	TL1 = 0xCB;	  //T1定时1ms
 	IE |= 0x08;	  //打开T1中断
 	TCON |= 0x40; //使能T1
-
+///////////////////////////////////////////////
 	TH0 = 0xCB;
 	TL0 = 0xEB; //T0定时时间10ms
 
@@ -623,7 +640,8 @@ void set_var(void)
 	if (lowlightDELAY_NUM == 0 || lowlightDELAY_NUM > 255)
 		lowlightDELAY_NUM = 1;
 
-	SWITCHfXBR = (~guc_Read_a[7]) & 0x01;
+	//SWITCHfXBR = (~guc_Read_a[7]) & 0x01;
+	work_mode = guc_Read_a[7];
 	//	addr = guc_Read_a[7];
 	//
 	//	devgroup = guc_Read_a[8];
@@ -926,7 +944,8 @@ void XBRHandle(void)
 							//									send_data(0xaa);
 							//send_data(0xdd);
 							radar_trig_times++;
-							mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times);
+							//mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times);
+							radar_number_send_flag2 = 1;
 
 							SUM1_num = 8;
 							LIGHT_off = 0;
@@ -1129,6 +1148,19 @@ unsigned char PWM3init(unsigned char ab)
 {
 	float i11;
 	unsigned char j11;
+
+	if (0 == ab)
+	{
+		light_status_xxx = 1;
+	}
+	else if (100 == ab)
+	{
+		light_status_xxx = 0;
+	}
+	else
+	{
+		light_status_xxx = 2;
+	}
 	
 	if (1 == ab)
 	{
@@ -1251,12 +1283,70 @@ void main()
 	wait2();
 
 	SUM = 0;
+	
 	while (1)
 	{
+		
+	if (lux_10ms_number_count >= 3600000)		// 1 hour
+	{
+		lux_10ms_number_count = 0;
+		lux_hour_flag = 1;
+		//
+		//
+	}		
+		if (lux_hour_flag)
+		{
+			lux_hour_flag = 0;
+			lux_hour_number_count++;
+			
+			if (lux_hour_number_count >= lux_delay_hour)
+			{
+				PWM3init(0);	//全灭
+				lux_hour_number_count = 0;
+			}
+		}
+		
+		if(lux_en == 1) {
+			//LIGHT_TH is from app
+			if (lux_1000ms_flag)
+			{
+				lux_1000ms_flag = 0; //clear
+				
+				if (light_ad < LIGHT_TH)
+				{
+					PWM3init(100);	//全亮
+					lux_en_flag = 1;//使用计数器
+				}
+				else
+				{
+					PWM3init(0);	//全灭
+				}			
+			}
+		}		
+		
 		if (resetbtcnt >= 3)	//行为是每三次上电会复位一次蓝牙模块(无任何APP操作)
 		{
 			resetbtcnt = 0;
 			reset_bt_module();
+		}
+		
+		if (1 == check_group_flag)
+		{
+			check_group_flag = 0;
+			mcu_dp_enum_update(DPID_LIGHT_STATUS,light_status_xxx);
+			
+			light_ad = read_ad(10); //切换到an10
+			mcu_dp_value_update(DPID_LUX_STATUS, light_ad);
+		}
+		
+		if (1 == radar_number_send_flag)
+		{
+			if (1 == radar_number_send_flag2)
+			{
+				radar_number_send_flag = 0;
+				radar_number_send_flag2 = 0;
+				mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times);
+			}
 		}
 
 		if (check_group_count <= 2) //一上电间隔一秒获取3次群组地址
@@ -1357,31 +1447,51 @@ void main()
 		else
 		{ //雷达天关关控制
 			while_2flag = 0;
-			if (SWITCHflag2 == 0) //关灯
+			
+			//
+			//
+			if (lux_en)
 			{
-				PWM3init(0);
+				//do nothing
 			}
 			else
-			{ //开灯
-				PWM3init(XRBoffbrightvalue);
+			{
+				if (SWITCHflag2 == 0) //关灯
+				{
+					PWM3init(0);
+				}
+				else
+				{ //开灯
+					PWM3init(XRBoffbrightvalue);
 
-				while_1flag = 0;
+					while_1flag = 0;
 
-				slowchcnt = lightvalue;
+					slowchcnt = lightvalue;
 
-				SUM16 = 0;
-				calc_average_times = 0;
-				SUM1_num = 64;
+					SUM16 = 0;
+					calc_average_times = 0;
+					SUM1_num = 64;
 
-				stop_times = 2;
+					stop_times = 2;
 
-				check_light_times = 6;
+					check_light_times = 6;
 
-				SUM1_counter = 0;
-				ALL_SUM1 = 0;
+					SUM1_counter = 0;
+					ALL_SUM1 = 0;
+				}			
 			}
 		}
 	}
+}
+
+void TIMER0_Rpt(void) interrupt TIMER0_VECTOR		//10ms
+{
+	//
+
+	
+
+	//
+
 }
 
 /***************************************************************************************
@@ -1408,6 +1518,24 @@ void TIMER1_Rpt(void) interrupt TIMER1_VECTOR
 		light1scount = 0;
 		light1sflag = 1;
 	}
+	radar_number_count++;
+	if (radar_number_count >= 1100)
+	{
+		radar_number_count = 0;
+		radar_number_send_flag = 1;
+	}	
+	
+	if (lux_en_flag)
+	{
+		lux_10ms_number_count++;
+	}	
+	
+	lux_1000ms_number_count++;
+	if (lux_1000ms_number_count >= 1000)
+	{
+		lux_1000ms_flag = 1;
+		lux_1000ms_number_count = 0;
+	}	
 }
 
 /***************************************************************************************

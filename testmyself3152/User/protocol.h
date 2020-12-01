@@ -89,6 +89,9 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //开关(可下发可上报)
 //备注:上电/掉电
 #define DPID_SWITCH_LED 1
+//模式(可下发可上报)
+//备注:
+#define DPID_WORK_MODE 2
 //亮度值(可下发可上报)
 //备注:灯的亮度值
 #define DPID_BRIGHT_VALUE 3
@@ -107,28 +110,7 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //感应强度(可下发可上报)
 //备注:雷达模组感应强度值
 #define DPID_SENSE_STRESS 105
-//设备地址(可下发可上报)
-//备注:mesh设备地址
-#define DPID_ADDR 106
-//设备地址结束值(可下发可上报)
-//备注:设备地址结束值
-#define DPID_ADDREND 107
-//设备群组(可下发可上报)
-//备注:mesh群组
-#define DPID_GROUP 108
-//调试字串(只上报)
-//备注:调试用字串
-#define DPID_DEBUG 109
-//测试开关0(可下发可上报)
-//备注:
-//#define DPID_TEST_BN0 110
-//测试开关1(可下发可上报)
-//备注:
-//#define DPID_TEST_BN1 111
-//测试开关2(可下发可上报)
-//备注:
-//#define DPID_TEST_BN2 112
-//灯开关(可下发可上报)
+//开关灯(可下发可上报)
 //备注:灯开关，默认的为模块复位触发开关
 #define DPID_SWITCH_LED2 113
 //联动 (可下发可上报)
@@ -146,6 +128,9 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
 //灯状态(只上报)
 //备注:
 #define DPID_LIGHT_STATUS 118
+//光敏状态(只上报)
+//备注:
+#define DPID_LUX_STATUS 119
 //群组地址0(只上报)
 //备注:
 #define DPID_ADDR0 130
