@@ -642,6 +642,34 @@ void set_var(void)
 
 	//SWITCHfXBR = (~guc_Read_a[7]) & 0x01;
 	work_mode = guc_Read_a[7];
+	
+    switch(work_mode) {
+        case 0:		//雷达
+			SWITCHfXBR = 1;
+			SWITCHflag2 = 1;
+			lux_en = 0;
+					//
+        break;
+        
+        case 1:		//光敏
+			SWITCHfXBR = 0;
+			SWITCHflag2 = 0;
+			lux_en = 1;
+					//
+        break;
+        
+        case 2:		//手动
+			SWITCHfXBR = 0;
+			SWITCHflag2 = 1;
+			lux_en = 0;
+					//
+					//
+        break;
+        
+        default:
+    
+        break;
+    }	
 	//	addr = guc_Read_a[7];
 	//
 	//	devgroup = guc_Read_a[8];
