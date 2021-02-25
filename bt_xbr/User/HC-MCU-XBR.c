@@ -1672,3 +1672,61 @@ void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address)
   * @返回值 无
   * @注		  无
   */
+
+void savevar(void)
+{
+	unsigned char i;
+	Flash_EraseBlock(0x2F00);
+	Delay_us_1(10000);
+
+	i=(TH/1000)>>8;
+	FLASH_WriteData(i,0x2F00+0);
+	Delay_us_1(100);
+	
+    i=(TH/1000)&0xff;
+	FLASH_WriteData(i,0x2F00+1);
+	Delay_us_1(100);
+	
+    i=LIGHT_TH;
+	FLASH_WriteData(i,0x2F00+2);
+	Delay_us_1(100);
+	
+	i=DELAY_NUM>>8;
+	FLASH_WriteData(i,0x2F00+3);
+	Delay_us_1(100);
+	i=DELAY_NUM&0xff;//&0xff;
+	FLASH_WriteData(i,0x2F00+4);
+	Delay_us_1(100);
+	
+	i=lightvalue;
+	FLASH_WriteData(i,0x2F00+5);
+	Delay_us_1(100);
+	
+	i=lowlightDELAY_NUM;
+	FLASH_WriteData(i,0x2F00+6);
+	Delay_us_1(100);
+	
+	//i=~SWITCHfXBR;//&0xff;
+	i = work_mode;
+	FLASH_WriteData(i,0x2F00+7);
+	Delay_us_1(100);
+	
+//	i=addr;//&0xff;
+//	FLASH_WriteData(i,0X2F00+7);
+//	Delay_us_1(100);
+//	
+//	i=devgroup;//&0xff;
+//	FLASH_WriteData(i,0X2F00+8);
+//	Delay_us_1(100);
+
+//	i=addrend;
+//	FLASH_WriteData(i,0X2F00+9);
+//	Delay_us_1(100);
+	
+	Flash_EraseBlock(0x2F80);
+	Delay_us_1(10000);
+	FLASH_WriteData(0,0x2F80+0);
+	
+	EA=1;				//-20200927
+
+}

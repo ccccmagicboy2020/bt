@@ -1,5 +1,5 @@
-/****************************************Copyright (c)*************************
-**                               版权所有 (C), 2015-2017, 涂鸦科技
+/*************************************    ***Copyright (c)*************************
+**                               版权所有 (C), 2015-2020, 涂鸦科技
 **
 **                                 http://www.tuya.com
 **
@@ -14,14 +14,33 @@
 ** 2、DP的ID/TYPE及数据处理函数都需要用户按照实际定义实现
 ** 3、当开始某些宏定义后需要用户实现代码的函数内部有#err提示,完成函数后请删除该#err
 **
-**--------------当前版本修订---------------------------------------------------
-** 版  本: v1.0
-** 日　期: 2017年5月3日
-** 描　述: 1:创建涂鸦bluetooth对接MCU_SDK
-**
-**-----------------------------------------------------------------------------
+**--------------版本修订记录---------------------------------------------------
+
+** 版  本:v2.0
+** 日　期: 2020年3月23日
+** 描　述: 
+1.	增加cmd 0x09模块解绑接口支持
+2.	增加cmd 0x0e rf射频测试接口支持
+3.	增加cmd 0xe0 记录型数据上报接口支持
+4.	增加cmd 0xE1 获取实时时间接口支持
+5.	增加 cmd 0xe2 修改休眠模式状态广播间隔支持
+6.	增加 cmd 0xe4 关闭系统时钟功能支持
+7.	增加 cmd 0xe5 低功耗使能支持
+8.	增加 cmd 0xe6 获取一次性动态密码支持
+9.	增加 cmd 0xe7断开蓝牙连接支持
+10.	增加 cmd 0xe8 查询MCU版本号支持
+11.	增加 cmd 0xe9 MCU主动发送版本号支持
+12.	增加 cmd 0xea OTA升级请求支持
+13.	增加 cmd 0xeb OTA升级文件信息支持
+14.	增加 cmd 0xec OTA升级文件偏移请求支持
+15.	增加 cmd 0xed OTA升级数据支持
+16.	增加 cmd 0xee OTA升级结束支持
+17.	增加 cmd 0xa0 MCU 获取模块版本信息支持
+18.	增加 cmd 0xa1 恢复出厂设置通知支持
+19.  增加MCU OTA demo
+20. 优化串口解析器
+
 ******************************************************************************/
-//#include "include.h"
 
 #include "bluetooth.h"
 #include "string.h"
@@ -43,19 +62,6 @@ u8 xdata cdsvalue = 0;              //感光选择值
 ulong xdata sensing_th = 0;     //雷达感应阈值，数值越大越灵敏
 extern  u8 idata Linkage_flag;	//联动的开关的全局
 extern  u8 idata Light_on_flag;	//
-
-//const char xdata led_bn_on[]={"led on"};
-//const char xdata led_bn_off[]={"led off"};
-//const char xdata radar_bn_on[]={"radar on"};
-//const char xdata radar_bn_off[]={"radar off"};
-
-unsigned char DPID_SWITCH_LED2count = 0;
-unsigned char DPID_SWITCH_XBRcount = 0;
-unsigned char DPID_BRIGHT_VALUEcount = 0;
-unsigned char DPID_CDScount = 0;
-unsigned char DPID_PIR_DELAYcount = 0;
-unsigned char DPID_STANDBY_TIMEcount = 0;
-unsigned char DPID_SENSE_STRESScount = 0;
 
 extern u16 idata groupaddr[8];
 
@@ -112,31 +118,12 @@ void reset_bt_module(void)
 ******************************************************************************/
 const DOWNLOAD_CMD_S xdata download_cmd[] =
 {
-  {DPID_SWITCH_LED, DP_TYPE_BOOL},
-  {DPID_WORK_MODE, DP_TYPE_ENUM},
-  {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
-  {DPID_CDS, DP_TYPE_ENUM},
-  {DPID_PIR_DELAY, DP_TYPE_VALUE},
   {DPID_SWITCH_XBR, DP_TYPE_BOOL},
-  {DPID_STANDBY_TIME, DP_TYPE_VALUE},
-  {DPID_SENSE_STRESS, DP_TYPE_VALUE},
-  {DPID_SWITCH_LED2, DP_TYPE_BOOL},
-  {DPID_SWITCH_LINKAGE, DP_TYPE_BOOL},
-  {DPID_ALL_DAY_MICRO_LIGHT, DP_TYPE_BOOL},
-  {DPID_RADAR_TRIGGER_TIMES, DP_TYPE_VALUE},
-  {DPID_CLEAR_TRIGGER_NUMBER, DP_TYPE_BOOL},
-  {DPID_LIGHT_STATUS, DP_TYPE_ENUM},
-  {DPID_LUX_STATUS, DP_TYPE_VALUE},
-  {DPID_ADDR0, DP_TYPE_VALUE},
-  {DPID_ADDR1, DP_TYPE_VALUE},
-  {DPID_ADDR2, DP_TYPE_VALUE},
-  {DPID_ADDR3, DP_TYPE_VALUE},
-  {DPID_ADDR4, DP_TYPE_VALUE},
-  {DPID_ADDR5, DP_TYPE_VALUE},
-  {DPID_ADDR6, DP_TYPE_VALUE},
-  {DPID_ADDR7, DP_TYPE_VALUE},
-  {DPID_LUX_ENABLE, DP_TYPE_BOOL},
-  {DPID_LUX_DELAY_HOUR, DP_TYPE_VALUE},
+  {DPID_IF_SUM, DP_TYPE_VALUE},
+  {DPID_NOISE_SUM, DP_TYPE_VALUE},
+  {DPID_FACTORY_OP, DP_TYPE_ENUM},
+  {DPID_OTA_RESULT, DP_TYPE_ENUM},
+  {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
 };
 
 
@@ -193,56 +180,17 @@ void uart_transmit_output(unsigned char value)
 *****************************************************************************/
 void all_data_update(void)
 {
-    u8 light;
-    u8 radius;
-  //#error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
+  #error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
   //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报函数
-	
-    mcu_dp_bool_update(DPID_SWITCH_LED, reset_bt_bn); //复位模块
-    mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2); //灯的开关
-    mcu_dp_value_update(DPID_BRIGHT_VALUE, lightvalue); //VALUE型数据上报;
+    mcu_dp_bool_update(DPID_SWITCH_XBR,当前雷达开关); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_IF_SUM,当前雷达回波统计值); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_NOISE_SUM,当前雷达环境噪音统计值); //VALUE型数据上报;
+    mcu_dp_enum_update(DPID_FACTORY_OP,当前工厂操作); //枚举型数据上报;
+    mcu_dp_enum_update(DPID_OTA_RESULT,当前OTA结果); //枚举型数据上报;
+    mcu_dp_value_update(DPID_BRIGHT_VALUE,当前亮度值); //VALUE型数据上报;
 
-	if(LIGHT_TH==255)
-		light=0;
-	else if(LIGHT_TH==200)
-		light=2;
-	else if(LIGHT_TH==40)
-		light=3;		
-	else if(LIGHT_TH==20)
-		light=4;
-	else //if(LIGHT_TH==200)
-		light=5;
 
-    mcu_dp_enum_update(DPID_CDS, light); //枚举型数据上报;
-    mcu_dp_value_update(DPID_PIR_DELAY, DELAY_NUM); //VALUE型数据上报;
-    mcu_dp_bool_update(DPID_SWITCH_XBR, SWITCHfXBR); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_STANDBY_TIME, lowlightDELAY_NUM); //VALUE型数据上报;
 
-	radius=TH/10000;
-	radius=50-radius;
-
-    mcu_dp_value_update(DPID_SENSE_STRESS, radius); //VALUE型数据上报;
-
-		mcu_dp_bool_update(DPID_SWITCH_LINKAGE,Linkage_flag); //BOOL型数据上报;
-
-    mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light_enable); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times); //VALUE型数据上报;
-
-    mcu_dp_value_update(DPID_ADDR0,groupaddr[0]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR1,groupaddr[1]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR2,groupaddr[2]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR3,groupaddr[3]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR4,groupaddr[4]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR5,groupaddr[5]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR6,groupaddr[6]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR7,groupaddr[7]); //VALUE型数据上报;
-	
-    mcu_dp_bool_update(DPID_LUX_ENABLE, lux_en); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_LUX_DELAY_HOUR, lux_delay_hour); //VALUE型数据上报;
-    mcu_dp_enum_update(DPID_LIGHT_STATUS, light_status_xxx); //枚举型数据上报;
-	
-		mcu_dp_enum_update(DPID_WORK_MODE, work_mode); //枚举型数据上报;
-		mcu_dp_value_update(DPID_LUX_STATUS, light_ad); //VALUE型数据上报;
 }
 
 
@@ -252,292 +200,6 @@ void all_data_update(void)
 自动化代码模板函数,具体请用户自行实现数据处理
 ******************************************************************************/
 
-/*****************************************************************************
-函数名称 : dp_download_switch_led_handle
-功能描述 : 针对DPID_SWITCH_LED的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_switch_led_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char switch_led;
-    
-    switch_led = mcu_get_dp_download_bool(value,length);
-
-    reset_bt_bn = switch_led;
-  
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_SWITCH_LED, reset_bt_bn);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-
-}
-
-/*****************************************************************************
-函数名称 : dp_download_work_mode_handle
-功能描述 : 针对DPID_WORK_MODE的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_work_mode_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为ENUM
-    unsigned char ret;
-    
-    work_mode = mcu_get_dp_download_enum(value,length);
-    switch(work_mode) {
-        case 0:		//雷达
-			SWITCHfXBR = 1;
-			SWITCHflag2 = 1;
-			lux_en = 0;
-					//
-        break;
-        
-        case 1:		//光敏
-			SWITCHfXBR = 0;
-			SWITCHflag2 = 0;
-			lux_en = 1;
-					//
-        break;
-        
-        case 2:		//手动
-			SWITCHfXBR = 0;
-			SWITCHflag2 = 1;
-			lux_en = 0;
-					//
-					//
-        break;
-        
-        default:
-    
-        break;
-    }
-    
-	savevar();
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_enum_update(DPID_WORK_MODE, work_mode);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_bright_value_handle
-功能描述 : 针对DPID_BRIGHT_VALUE的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_bright_value_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    unsigned long bright_value;
-    unsigned char i;
-    
-    bright_value = mcu_get_dp_download_value(value,length);
-	
-	DPID_BRIGHT_VALUEcount++;
-	if(bright_value==lightvalue)
-	{
-/* 		if(DPID_BRIGHT_VALUEcount<2)
-		{
-			//DPID_BRIGHT_VALUEcount = 0;
-			
-			for(i=0;i<8;i++)
-			{
-				if(groupaddr[i] != 0)
-				{
-					mcu_dp_value_mesh_update(DPID_BRIGHT_VALUE,bright_value,groupaddr[i]);
-				}
-			}
-		} */
-	}
-	else
-	{
-		DPID_BRIGHT_VALUEcount=0;
-		for(i=0;i<8;i++)
-		{
-			if(groupaddr[i] != 0)
-			{
-				mcu_dp_value_mesh_update(DPID_BRIGHT_VALUE,bright_value,groupaddr[i]);
-			}
-		}
-	}	
-	
-    lightvalue = bright_value;
-
-	//if(SWITCHfXBR==0)
-	{
-		XRBoffbrightvalue = bright_value;
-	}
-	
-	savevar();
-		
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_BRIGHT_VALUE, lightvalue);
-
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_cds_handle
-功能描述 : 针对DPID_CDS的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_cds_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为ENUM
-    unsigned char ret;
-    unsigned char cds;
-    unsigned char i;
-    
-    cds = mcu_get_dp_download_enum(value,length);
-	
-	DPID_CDScount++;
-	if(cds==cdsvalue)
-	{
-		if(DPID_CDScount<2)
-		{
-/* 			for(i=0;i<8;i++)
-			{
-				if(groupaddr[i] != 0)
-				{
-					mcu_dp_enum_mesh_update(DPID_CDS,cds,groupaddr[i]);
-				}
-			} */
-		}
-		if((cds==5)&&(light_ad!=LIGHT_TH))
-		{
-			DPID_CDScount=0;
-		}
-	}
-	else
-	{
-		DPID_CDScount=0;
-		for(i=0;i<8;i++)
-		{
-			if(groupaddr[i] != 0)
-			{
-				mcu_dp_enum_mesh_update(DPID_CDS,cds,groupaddr[i]);
-			}
-		}
-	}	
-	
-    switch(cds) {
-        case 0:		//2000LUS
-			LIGHT_TH=255;//cds*4;
-        break;
-        
-        case 1:		//300LUX
-			LIGHT_TH=255;//cds*4;
-        break;
-        
-        case 2:		//50LUX
-			LIGHT_TH=200;
-        break;
-        
-        case 3:	//10LUX
-			LIGHT_TH=40;
-        break;
-        
-        case 4:	//5LUX
-			LIGHT_TH=20;
-        break;
-        
-		case 5:
-			LIGHT_TH = light_ad;
-		break;
-				
-        default:
-    
-        break;
-    }
-
-    cdsvalue = cds;
-
-    savevar();
-    //sprintf(temp_str, "%3d", LIGHT_TH);
-    //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_enum_update(DPID_CDS, cdsvalue);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_pir_delay_handle
-功能描述 : 针对DPID_PIR_DELAY的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_pir_delay_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    unsigned long pir_delay;
-    unsigned char i;
-    
-    pir_delay = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    */
-	
-	DPID_PIR_DELAYcount++;
-	if(pir_delay==DELAY_NUM)
-	{
-/* 		if(DPID_PIR_DELAYcount<2)
-		{
-			for(i=0;i<8;i++)
-			{
-				if(groupaddr[i] != 0)
-				{
-					mcu_dp_value_mesh_update(DPID_PIR_DELAY,pir_delay,groupaddr[i]);
-				}
-			}
-		} */
-	}
-	else
-	{
-		DPID_PIR_DELAYcount=0;
-		for(i=0;i<8;i++)
-		{
-			if(groupaddr[i] != 0)
-			{
-				mcu_dp_value_mesh_update(DPID_PIR_DELAY,pir_delay,groupaddr[i]);
-			}
-		}
-	}
-	
-    DELAY_NUM = pir_delay;
-	savevar();
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_PIR_DELAY, DELAY_NUM);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
 /*****************************************************************************
 函数名称 : dp_download_switch_xbr_handle
 功能描述 : 针对DPID_SWITCH_XBR的处理函数
@@ -605,353 +267,107 @@ static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], 
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_standby_time_handle
-功能描述 : 针对DPID_STANDBY_TIME的处理函数
+函数名称 : dp_download_factory_op_handle
+功能描述 : 针对DPID_FACTORY_OP的处理函数
 输入参数 : value:数据源数据
         : length:数据长度
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_standby_time_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_factory_op_handle(const unsigned char value[], unsigned short length)
 {
-    //示例:当前DP类型为VALUE
+    //示例:当前DP类型为ENUM
     unsigned char ret;
-    unsigned long standby_time;
-    unsigned char i;
+    unsigned char factory_op;
     
-    standby_time = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
+    factory_op = mcu_get_dp_download_enum(value,length);
+    switch(factory_op) {
+        case 0:
+        break;
+        
+        case 1:
+        break;
+        
+        case 2:
+        break;
+        
+        case 3:
+        break;
+        
+        case 4:
+        break;
+        
+        case 5:
+        break;
+        
+        case 6:
+        break;
+        
+        case 7:
+        break;
+        
+        default:
     
-    */
-	DPID_STANDBY_TIMEcount++;
-	if(standby_time==lowlightDELAY_NUM)
-	{
-/* 		if(DPID_STANDBY_TIMEcount<2)
-		{
-			for(i=0;i<8;i++)
-			{
-				if(groupaddr[i] != 0)
-				{
-					mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
-				}
-			}
-		} */
-	}
-	else
-	{
-		DPID_STANDBY_TIMEcount=0;
-		for(i=0;i<8;i++)
-		{
-			if(groupaddr[i] != 0)
-			{
-				mcu_dp_value_mesh_update(DPID_STANDBY_TIME,standby_time,groupaddr[i]);
-			}
-		}
-	
-	}
-	
-    lowlightDELAY_NUM=standby_time;
+        break;
+    }
     
-    savevar();
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_STANDBY_TIME, lowlightDELAY_NUM);
+    ret = mcu_dp_enum_update(DPID_FACTORY_OP, factory_op);
     if(ret == SUCCESS)
         return SUCCESS;
     else
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_sense_stress_handle
-功能描述 : 针对DPID_SENSE_STRESS的处理函数
+函数名称 : dp_download_ota_result_handle
+功能描述 : 针对DPID_OTA_RESULT的处理函数
 输入参数 : value:数据源数据
         : length:数据长度
 返回参数 : 成功返回:SUCCESS/失败返回:ERROR
 使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
 *****************************************************************************/
-static unsigned char dp_download_sense_stress_handle(const unsigned char value[], unsigned short length)
+static unsigned char dp_download_ota_result_handle(const unsigned char value[], unsigned short length)
 {
-    //示例:当前DP类型为VALUE
+    //示例:当前DP类型为ENUM
     unsigned char ret;
-    unsigned long sense_stress;
-    unsigned char i;
+    unsigned char ota_result;
     
-    sense_stress = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
+    ota_result = mcu_get_dp_download_enum(value,length);
+    switch(ota_result) {
+        case 0:
+        break;
+        
+        case 1:
+        break;
+        
+        case 2:
+        break;
+        
+        case 3:
+        break;
+        
+        case 4:
+        break;
+        
+        case 5:
+        break;
+        
+        case 6:
+        break;
+        
+        case 7:
+        break;
+        
+        case 8:
+        break;
+        
+        default:
     
-    */
-	DPID_SENSE_STRESScount++;
-	if(sense_stress==sensing_th)
-	{
-/* 		if(DPID_SENSE_STRESScount<2)
-		{
-			for(i=0;i<8;i++)
-			{
-				if(groupaddr[i] != 0)
-				{
-					mcu_dp_value_mesh_update(DPID_SENSE_STRESS,sense_stress,groupaddr[i]);
-				}
-			}
-		} */
-	}
-	else
-	{
-		DPID_SENSE_STRESScount=0;
-		for(i=0;i<8;i++)
-		{
-			if(groupaddr[i] != 0)
-			{
-				mcu_dp_value_mesh_update(DPID_SENSE_STRESS,sense_stress,groupaddr[i]);
-			}
-		}
-	}	
-	
-	sensing_th = sense_stress;
-	TH=(50-sense_stress)*10000;
-		
-	savevar();
-    
-    //sprintf(temp_str, "%6d", TH);
-    //mcu_dp_string_update(DPID_DEBUG, temp_str, strlen(temp_str));    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_SENSE_STRESS, sensing_th);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_switch_led2_handle
-功能描述 : 针对DPID_SWITCH_LED2的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_switch_led2_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char switch_led2;
-    unsigned char i;
-    
-    switch_led2 = mcu_get_dp_download_bool(value,length);
-
-    DPID_SWITCH_LED2count++;
-    if(switch_led2==SWITCHflag2)
-    {
-/*     	if(DPID_SWITCH_LED2count<2)
-    	{
-    		for(i=0;i<8;i++)
-    		{
-    			if(groupaddr[i] != 0)
-    			{
-    				mcu_dp_bool_mesh_update(DPID_SWITCH_LED2,switch_led2,groupaddr[i]);
-    			}
-    		}
-    	} */
+        break;
     }
-    else
-    {
-    	DPID_SWITCH_LED2count=0;
-    	for(i=0;i<8;i++)
-    	{
-    		if(groupaddr[i] != 0)
-    		{
-    			mcu_dp_bool_mesh_update(DPID_SWITCH_LED2,switch_led2,groupaddr[i]);
-    		}
-    	}   
-
-    }
-
-    if(switch_led2 == 0) {
-        //灯开关关
-        SWITCHflag2=0;
-    }else {
-        //灯开关开
-        //mcu_dp_string_update(DPID_DEBUG, led_bn_on, strlen(led_bn_on));
-        if(SWITCHfXBR==1)
-		{
-			Light_on_flag=1;
-		}
-        SWITCHflag2=1;
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_SWITCH_LED2, SWITCHflag2);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_switch_linkage_handle
-功能描述 : 针对DPID_SWITCH_LINKAGE的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_switch_linkage_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char switch_Linkage;
-    unsigned char i;
-    switch_Linkage = mcu_get_dp_download_bool(value,length);
-		
-	if(switch_Linkage==Linkage_flag)
-	{
-		//
-	}
-	else
-	{
-		for(i=0;i<8;i++)
-		{
-			if(groupaddr[i] != 0)
-			{
-				mcu_dp_bool_mesh_update(DPID_SWITCH_LINKAGE,switch_Linkage,groupaddr[i]);
-			}
-		}
-	}
-    if(switch_Linkage == 0) {
-        //雷达开关关
-        //LIGHT_OFF;
-        //PWM3init(0);
-        Linkage_flag=0;
-    }else {
-        //雷达开关开
-        //LIGHT_ON;
-        //PWM3init(100);
-        Linkage_flag=1;
-    }
-  	
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_SWITCH_LINKAGE,switch_Linkage);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-
-}
-/*****************************************************************************
-函数名称 : dp_download_all_day_micro_light_handle
-功能描述 : 针对DPID_ALL_DAY_MICRO_LIGHT的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_all_day_micro_light_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char all_day_micro_light;
-		u8 i;
-    
-    all_day_micro_light = mcu_get_dp_download_bool(value,length);
-	
-    if(all_day_micro_light_enable == all_day_micro_light)
-    {
-		//
-    }
-    else
-    {
-    	for(i=0;i<8;i++)
-    	{
-    		if(groupaddr[i] != 0)
-    		{
-    			mcu_dp_bool_mesh_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light,groupaddr[i]);
-    		}
-    	}   
-
-    }
-	
-	all_day_micro_light_enable = all_day_micro_light;
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_ALL_DAY_MICRO_LIGHT,all_day_micro_light_enable);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-
-}
-/*****************************************************************************
-函数名称 : dp_download_clear_trigger_number_handle
-功能描述 : 针对DPID_CLEAR_TRIGGER_NUMBER的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 只下发类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_clear_trigger_number_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    //unsigned char ret;
-    //0:关/1:开
-    unsigned char clear_trigger_number;
-    
-    clear_trigger_number = mcu_get_dp_download_bool(value,length);
-    if(clear_trigger_number == 0) {
-        //开关关
-    }else {
-        //开关开
-		radar_trig_times = 0;
-		mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times); //VALUE型数据上报;
-    }
-  
-  	return SUCCESS;
-}
-/*****************************************************************************
-函数名称 : dp_download_lux_enable_handle
-功能描述 : 针对DPID_LUX_ENABLE的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_lux_enable_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    
-    lux_en = mcu_get_dp_download_bool(value,length);
-
-    //处理完DP数据后应有反馈
-
-    ret = mcu_dp_bool_update(DPID_LUX_ENABLE, lux_en);
-	
-    if(ret == SUCCESS)
-				return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_lux_delay_hour_handle
-功能描述 : 针对DPID_LUX_DELAY_HOUR的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_lux_delay_hour_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    
-    lux_delay_hour = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    */
     
     //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_LUX_DELAY_HOUR,lux_delay_hour);
+    ret = mcu_dp_enum_update(DPID_OTA_RESULT, ota_result);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -963,55 +379,7 @@ static unsigned char dp_download_lux_delay_hour_handle(const unsigned char value
                                 WARNING!!!                     
 此代码为SDK内部调用,请按照实际dp数据实现函数内部数据
 ******************************************************************************/
-#ifdef SUPPORT_MCU_FIRM_UPDATE
-/*****************************************************************************
-函数名称 : mcu_firm_update_handle
-功能描述 : MCU进入固件升级模式
-输入参数 : value:固件缓冲区
-           position:当前数据包在于固件位置
-           length:当前固件包长度(固件包长度为0时,表示固件包发送完成)
-返回参数 : 无
-使用说明 : MCU需要自行实现该功能
-*****************************************************************************/
-unsigned char mcu_firm_update_handle(const unsigned char value[],unsigned long position,unsigned short length)
-{
-  #error "请自行完成MCU固件升级代码,完成后请删除该行"
-  unsigned long addr;
- 
-  if(length == 0)
-  {
-#ifdef ENABLE_BOOT
-    //固件数据发送完成
-    FlashBuffer.magic_code = FIREWARE_UPDATE_FLAG;
-    
-    if(Earse_Flash(PARA_ADDR) == ERROR)
-      return ERROR;
-    
-    //写入升级标志
-    if(Write_Flash(PARA_ADDR,(unsigned char *)&FlashBuffer,sizeof(FlashBuffer)) == ERROR)
-      return ERROR;
-    
-    Reset();
-#endif
-  }
-  else
-  {
-    //固件数据处理
-    addr = FIREWARE_ADDR_H;
-     
-    if(position % 1024 == 0)
-    {
-      if(Earse_Flash(addr + position) == ERROR)
-        return ERROR;
-    }
-    
-    if(Write_Flash(addr + position,(unsigned char *)value,length) == ERROR)
-      return ERROR;
-  }
 
-  return SUCCESS;
-}
-#endif
 /******************************************************************************
                                 WARNING!!!                     
 以下函数用户请勿修改!!
@@ -1036,83 +404,17 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
   unsigned char ret;
   switch(dpid)
   {
-        case DPID_SWITCH_LED:
-            //开关处理函数
-            ret = dp_download_switch_led_handle(value,length);
-			if(ret==1)
-			{
-				switchcnt ++;
-				if(switchcnt>=5)
-				{
-					switchcnt = 0;
-                    reset_bt_module();
-				}
-			}
-        break;
-        case DPID_WORK_MODE:
-            //模式处理函数
-            ret = dp_download_work_mode_handle(value,length);
-			switchcnt = 0;
-        break;
-        case DPID_BRIGHT_VALUE:
-            //亮度值处理函数
-            ret = dp_download_bright_value_handle(value,length);
-            switchcnt = 0;
-        break;
-        case DPID_CDS:
-            //光敏参数处理函数
-            ret = dp_download_cds_handle(value,length);
-            switchcnt = 0;
-        break;
-        case DPID_PIR_DELAY:
-            //感应延时处理函数
-            ret = dp_download_pir_delay_handle(value,length);
-            switchcnt = 0;
-        break;
         case DPID_SWITCH_XBR:
             //雷达开关处理函数
             ret = dp_download_switch_xbr_handle(value,length);
-            switchcnt = 0;
         break;
-        case DPID_STANDBY_TIME:
-            //伴亮延时处理函数
-            ret = dp_download_standby_time_handle(value,length);
-            switchcnt = 0;
+        case DPID_FACTORY_OP:
+            //工厂操作处理函数
+            ret = dp_download_factory_op_handle(value,length);
         break;
-        case DPID_SENSE_STRESS:
-            //感应强度处理函数
-            ret = dp_download_sense_stress_handle(value,length);
-            switchcnt = 0;
-        break;
-        case DPID_SWITCH_LED2:
-            //开关灯处理函数
-            ret = dp_download_switch_led2_handle(value,length);
-            switchcnt = 0;
-        break;
-        case DPID_SWITCH_LINKAGE:
-            //联动 处理函数
-            ret = dp_download_switch_linkage_handle(value,length);
-			switchcnt = 0;
-        break;
-        case DPID_ALL_DAY_MICRO_LIGHT:
-            //全天伴亮处理函数
-            ret = dp_download_all_day_micro_light_handle(value,length);
-			switchcnt = 0;
-        break;
-        case DPID_CLEAR_TRIGGER_NUMBER:
-            //计数清零处理函数
-            ret = dp_download_clear_trigger_number_handle(value,length);
-			switchcnt = 0;
-        break;
-        case DPID_LUX_ENABLE:
-            //光敏控制处理函数
-            ret = dp_download_lux_enable_handle(value,length);
-			switchcnt = 0;
-        break;
-        case DPID_LUX_DELAY_HOUR:
-            //光敏延时处理函数
-            ret = dp_download_lux_delay_hour_handle(value,length);
-			switchcnt = 0;
+        case DPID_OTA_RESULT:
+            //OTA结果处理函数
+            ret = dp_download_ota_result_handle(value,length);
         break;
 
 
@@ -1133,62 +435,377 @@ unsigned char get_download_cmd_total(void)
   return(sizeof(download_cmd) / sizeof(download_cmd[0]));
 }
 
-void savevar(void)
+//////////////////////////////////当前MCU SDK版本较上一版本新增支持协议接口////////////////////
+#ifdef TUYA_BCI_UART_COMMON_UNBOUND_REQ 
+/*****************************************************************************
+函数名称 :  bt_unbound_req
+功能描述 : 向模块发送解绑请求，模块收到该指令后会解除蓝牙绑定关系
+输入参数 : 无
+返回参数 : 无
+使用说明 : MCU主动解绑调用
+*****************************************************************************/
+void bt_unbound_req(void)
 {
-	unsigned char i;
-	Flash_EraseBlock(0x2F00);
-	Delay_us_1(10000);
-
-	i=(TH/1000)>>8;
-	FLASH_WriteData(i,0x2F00+0);
-	Delay_us_1(100);
-	
-    i=(TH/1000)&0xff;
-	FLASH_WriteData(i,0x2F00+1);
-	Delay_us_1(100);
-	
-    i=LIGHT_TH;
-	FLASH_WriteData(i,0x2F00+2);
-	Delay_us_1(100);
-	
-	i=DELAY_NUM>>8;
-	FLASH_WriteData(i,0x2F00+3);
-	Delay_us_1(100);
-	i=DELAY_NUM&0xff;//&0xff;
-	FLASH_WriteData(i,0x2F00+4);
-	Delay_us_1(100);
-	
-	i=lightvalue;
-	FLASH_WriteData(i,0x2F00+5);
-	Delay_us_1(100);
-	
-	i=lowlightDELAY_NUM;
-	FLASH_WriteData(i,0x2F00+6);
-	Delay_us_1(100);
-	
-	//i=~SWITCHfXBR;//&0xff;
-	i = work_mode;
-	FLASH_WriteData(i,0x2F00+7);
-	Delay_us_1(100);
-	
-//	i=addr;//&0xff;
-//	FLASH_WriteData(i,0X2F00+7);
-//	Delay_us_1(100);
-//	
-//	i=devgroup;//&0xff;
-//	FLASH_WriteData(i,0X2F00+8);
-//	Delay_us_1(100);
-
-//	i=addrend;
-//	FLASH_WriteData(i,0X2F00+9);
-//	Delay_us_1(100);
-	
-	Flash_EraseBlock(0x2F80);
-	Delay_us_1(10000);
-	FLASH_WriteData(0,0x2F80+0);
-	
-	EA=1;				//-20200927
-
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_UNBOUND_REQ,0);
 }
+#endif
 
+#ifdef TUYA_BCI_UART_COMMON_RF_TEST 
+/*****************************************************************************
+函数名称 :  bt_rf_test_req
+功能描述 : 向模块发射频测试请求
+输入参数 : 无
+返回参数 : 无
+使用说明 : 
+*****************************************************************************/
+void bt_rf_test_req(void)
+{
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_RF_TEST,0);
+}
+/*****************************************************************************
+函数名称 : bt_rf_test_result
+功能描述 : 蓝牙rf测试反馈
+输入参数 : result:蓝牙rf测试结果;0:失败/1:成功
+           rssi:测试成功表示蓝牙信号强度/测试失败值无意义
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+*****************************************************************************/
+void bt_rf_test_result(unsigned char result,signed char rssi)
+{
+  #error "请自行完善该功能,完成后请删除该行"
+  if(result == 0)
+  {
+    //测试失败
+  }
+  else
+  {
+    //测试成功
+    //rssi为信号强度，一般大于-70dbm 蓝牙信号都在正常范围内
+  }
+  
+}
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_SEND_STORAGE_TYPE 
+/*****************************************************************************
+函数名称 : bt_send_recordable_dp_data
+功能描述 : 记录型数据上报
+输入参数 : type -1： 蓝牙模块自带时间上报 -2： 只上报原始数据，无时间-3： MCU自带时间上报
+		dpid:  datapoint 序号
+		dptype:对应开放平台上某datapoint 具体的数据类型
+		value:具体数据
+		len:数据的长度
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+	建议使用缓存队列，将要发给模块的所有数据放到MCU缓存队列中，上报成功一条后再上报下一条，记录型数据要确保每条数据都上报成功
+*****************************************************************************/
+void bt_send_recordable_dp_data(unsigned char snedType,unsigned char dpid,unsigned char dpType, unsigned char value[],unsigned short len)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+	if(snedType==0x01)//格式1，蓝牙模块自带时间上报
+	{
+
+	}
+	else if(snedType==0x02)//格式2，只上报原始数据，无时间  （备注:telink对接平台不支持该格式）
+	{
+
+	}
+	else if(snedType==0x03)//格式3，MCU自带时间上报
+	{
+
+	}
+}
+/*****************************************************************************
+函数名称 : bt_send_recordable_dp_data_result
+功能描述 : 记录型数据上报
+输入参数 : result ：0存储成功，1存储失败
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+*****************************************************************************/
+void bt_send_recordable_dp_data_result(unsigned char result)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+}
+#ifdef TUYA_BCI_UART_COMMON_SEND_TIME_SYNC_TYPE 
+/*****************************************************************************
+函数名称 : bt_send_time_sync_type
+功能描述 : 向模块发送时间同步请求
+输入参数 :sync_time_type
+0x00- 获取7字节时间时间类型+2
+字节时区信息
+0x01- 获取13字节ms级unix时间
++2字节时区信息
+0x02- 获取7字节时间时间类型+2
+字节时区信息
+
+返回参数 : 无
+使用说明 :
+*****************************************************************************/
+void bt_send_time_sync_req(unsigned char sync_time_type)
+{
+	unsigned short length = 0;
+  
+  	length = set_bt_uart_byte(length,sync_time_type);
+  	
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_SEND_TIME_SYNC_TYPE,length);
+}
+/*****************************************************************************
+函数名称 : bt_time_sync_result
+功能描述 : 向模块发送时间同步的结果
+输入参数 :result同步结果 0成功，其他失败
+		sync_time_type时间格式
+		bt_time自定义时间（如果是时间格式0或者1该值有效）
+		time_zone_100 时区
+		time_stamp_ms 时间戳（如果是时间格式1，该值有效）
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+*****************************************************************************/
+void bt_time_sync_result(unsigned char result,unsigned char sync_time_type,bt_time_struct_data_t bt_time,unsigned short time_zone_100,long long time_stamp_ms)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+	if(result == 0x00)
+	{
+		//同步时间成功
+		if(sync_time_type==0x00||sync_time_type==0x02)
+		{
+			//将bt_time中的自定义时间格式的数据填充到mcu时钟系统中
+			//time_zone_100时区
+		}
+		else if(sync_time_type==0x01)
+		{
+			//将time_stamp_ms中的时间戳填充到mcu时钟系统中
+			//time_zone_100时区
+		}
+	}
+	else
+	{
+		//同步时间失败
+	}
+}
+#endif
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_MODIFY_ADV_INTERVAL
+/*****************************************************************************
+函数名称 : bt_modify_adv_interval_req
+功能描述 : 向模块发送修改低功耗下模块广播间隔的请求
+输入参数 :value * 100ms等于要修改的广播间隔，value（0-20）
+返回参数 : 无
+使用说明 : 
+*****************************************************************************/
+void bt_modify_adv_interval_req(unsigned char value)
+{
+	unsigned short length = 0;
+  
+  	length = set_bt_uart_byte(length,value);
+  	
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_MODIFY_ADV_INTERVAL,length);
+}
+/*****************************************************************************
+函数名称 : bt_modify_adv_interval_result
+功能描述 :向模块发送修改低功耗下模块广播间隔的结果
+输入参数 :result同步结果 0成功，其他失败
+
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+*****************************************************************************/
+void bt_modify_adv_interval_result(unsigned char result)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+	if(result == 0x00)
+	{
+		//成功
+
+	}
+	else
+	{
+		//失败
+	}
+}
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_TURNOFF_SYSTEM_TIME
+/*****************************************************************************
+函数名称 : bt_close_timer_req
+功能描述 : 向模块发送关闭系统时钟的请求（目前仅适用telink平台）
+输入参数 :value 0关闭，1打开
+返回参数 : 无
+使用说明 : 
+*****************************************************************************/
+void bt_close_timer_req(unsigned char value)
+{
+	unsigned short length = 0;
+  
+  	length = set_bt_uart_byte(length,value);
+  	
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_TURNOFF_SYSTEM_TIME,length);
+}
+/*****************************************************************************
+函数名称 : bt_close_timer_result
+功能描述 :向模块发送关闭系统时钟的结果
+输入参数 :result同步结果 0成功，其他失败
+
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+*****************************************************************************/
+void bt_close_timer_result(unsigned char result)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+	if(result == 0x00)
+	{
+		//成功
+
+	}
+	else
+	{
+		//失败
+	}
+}
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_ENANBLE_LOWER_POWER
+/*****************************************************************************
+函数名称 : bt_enable_lowpoer_req
+功能描述 : 向模块发送使能低功耗的请求（目前仅适用telink平台）
+输入参数 :value 0关闭，1打开
+返回参数 : 无
+使用说明 :
+*****************************************************************************/
+void bt_enable_lowpoer_req(unsigned char value)
+{
+	unsigned short length = 0;
+  
+  	length = set_bt_uart_byte(length,value);
+  	
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_ENANBLE_LOWER_POWER,length);
+}
+/*****************************************************************************
+函数名称 : bt_enable_lowpoer_result
+功能描述 :向模块发送使能低功耗的结果
+输入参数 :result同步结果 0成功，其他失败
+
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+*****************************************************************************/
+void bt_enable_lowpoer_result(unsigned char result)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+	if(result == 0x00)
+	{
+		//成功
+
+	}
+	else
+	{
+		//失败
+	}
+}
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_SEND_ONE_TIME_PASSWORD_TOKEN
+/*****************************************************************************
+函数名称 : bt_send_one_time_password_token
+功能描述 : 向模块发送获取一次性动态密码匹配结果的请求
+输入参数 :value cmcu端输入的动态密码，len 8
+返回参数 : 无
+使用说明 :用于锁通用串口对接动态密码功能
+*****************************************************************************/
+unsigned char bt_send_one_time_password_token(unsigned char value[],unsigned char len)
+{
+	unsigned short length = 0;
+ 	if(len!=8)return 0;
+ 	
+  	length = set_bt_uart_buffer(length,value,8);
+  	
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_SEND_ONE_TIME_PASSWORD_TOKEN,length);
+}
+/*****************************************************************************
+函数名称 : bt_send_one_time_password_token_result
+功能描述 :向模块获取一次性动态密码匹配的结果
+输入参数 :result同步结果 0x00密码核对通过，0x01密码核对失败
+
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+*****************************************************************************/
+void bt_send_one_time_password_token_result(unsigned char result)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+	if(result == 0x00)
+	{
+		//密码核对通过
+
+	}
+	else
+	{
+		//密码核对失败
+	}
+}
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_ACTIVE_DISCONNECT
+/*****************************************************************************
+函数名称 : bt_enable_lowpoer_req
+功能描述 : 向模块发送断开蓝牙连接的请求
+输入参数 :value 0关闭，1打开
+返回参数 : 无
+使用说明 :
+*****************************************************************************/
+void bt_disconnect_req(void)
+{
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_ACTIVE_DISCONNECT,0);
+}
+/*****************************************************************************
+函数名称 : bt_enable_lowpoer_result
+功能描述 :向模块发送断开蓝牙连接的结果
+输入参数 :result结果 0成功，其他失败
+
+返回参数 : 无
+使用说明 : MCU需要自行完善该函数功能
+*****************************************************************************/
+void bt_disconnect_result(unsigned char result)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+	if(result == 0x00)
+	{
+		//成功
+
+	}
+	else
+	{
+		//失败
+	}
+}
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_MCU_SEND_VERSION
+/*****************************************************************************
+函数名称 : bt_send_mcu_ver
+功能描述 :向模块主动发送MCU版本号，主要是为了模块能更及时获取到MCU的版本信息
+输入参数 :
+
+返回参数 : 无
+使用说明 : MCU可以在串口初始化后调用一次
+*****************************************************************************/
+void bt_send_mcu_ver(void)
+{
+	unsigned short length = 0;
+	length = set_bt_uart_buffer(length,(unsigned char *)MCU_APP_VER_NUM,3);
+	length = set_bt_uart_buffer(length,(unsigned char *)MCU_HARD_VER_NUM,3);
+	bt_uart_write_frame(TUYA_BCI_UART_COMMON_MCU_SEND_VERSION,length);
+}
+#endif
+#ifdef TUYA_BCI_UART_COMMON_FACTOR_RESET_NOTIFY
+/*****************************************************************************
+函数名称 : bt_factor_reset_notify
+功能描述 :模块恢复出厂设置后向mcu发送的通知
+输入参数 :
+
+返回参数 : 无
+使用说明 : MCU可以在此处完成MCU恢复出厂设置的操作
+*****************************************************************************/
+void bt_factor_reset_notify(void)
+{
+	#error "请自行完善该功能,完成后请删除该行"
+}
+#endif
 

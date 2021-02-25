@@ -1,18 +1,38 @@
 /****************************************Copyright (c)*************************
-**                               版权所有 (C), 2015-2017, 涂鸦科技
+**                               版权所有 (C), 2015-2020, 涂鸦科技
 **
 **                                 http://www.tuya.com
 **
-**--------------文件信息-------------------------------------------------------
-**文   件   名: mcu_api.c
-**描        述: 下发/上报数据处理函数
-**使 用 说 明 : 此文件下函数无须用户修改,用户需要调用的文件都在该文件内
-**
-**
-**--------------当前版本修订---------------------------------------------------
+
+**--------------版本修订记录---------------------------------------------------
 ** 版  本: v1.0
 ** 日　期: 2017年5月3日
 ** 描　述: 1:创建涂鸦bluetooth对接MCU_SDK
+**
+
+** 版  本:v2.0
+** 日　期: 2020年3月23日
+** 描　述: 
+1.	增加cmd 0x09模块解绑接口支持
+2.	增加cmd 0x0e rf射频测试接口支持
+3.	增加cmd 0xe0 记录型数据上报接口支持
+4.	增加cmd 0xE1 获取实时时间接口支持
+5.	增加 cmd 0xe2 修改休眠模式状态广播间隔支持
+6.	增加 cmd 0xe4 关闭系统时钟功能支持
+7.	增加 cmd 0xe5 低功耗使能支持
+8.	增加 cmd 0xe6 获取一次性动态密码支持
+9.	增加 cmd 0xe7断开蓝牙连接支持
+10.	增加 cmd 0xe8 查询MCU版本号支持
+11.	增加 cmd 0xe9 MCU主动发送版本号支持
+12.	增加 cmd 0xea OTA升级请求支持
+13.	增加 cmd 0xeb OTA升级文件信息支持
+14.	增加 cmd 0xec OTA升级文件偏移请求支持
+15.	增加 cmd 0xed OTA升级数据支持
+16.	增加 cmd 0xee OTA升级结束支持
+17.	增加 cmd 0xa0 MCU 获取模块版本信息支持
+18.	增加 cmd 0xa1 恢复出厂设置通知支持
+19.  增加MCU OTA demo
+20. 优化串口解析器
 **
 **-----------------------------------------------------------------------------
 ******************************************************************************/
@@ -26,9 +46,6 @@
   #define MCU_API_EXTERN   extern
 #endif
 
-
-#define LIGHT_ON {}
-#define LIGHT_OFF {}
 /*****************************************************************************
 函数名称 : hex_to_bcd
 功能描述 : hex转bcd
@@ -59,6 +76,22 @@ void *my_memset(void *src,unsigned char ch,unsigned short count);
 返回参数 :
 *****************************************************************************/
 void *my_memcpy(void *dest, const void *src, unsigned short count);
+/*****************************************************************************
+函数名称 : memcmp
+功能描述 : 内存比较
+输入参数 : buffer1:内存1
+           buffer2:内存2
+           	count:比较长度
+返回参数 : 大小比较值，0:buffer1=buffer2; -1:buffer1<buffer2; 1:buffer1>buffer2
+*****************************************************************************/
+int my_memcmp(const void *buffer1,const void *buffer2,int count);
+/*****************************************************************************
+函数名称 : atoll
+功能描述 : 字符串转整数
+输入参数 : p 字符串
+返回参数 : 整数
+*****************************************************************************/
+long long my_atoll(const char *p);
 /*****************************************************************************
 
 函数名称 : int_to_byte
@@ -127,8 +160,7 @@ unsigned char mcu_dp_raw_update(unsigned char dpid,const unsigned char value[],u
 返回参数 : 无
 *****************************************************************************/
 unsigned char mcu_dp_bool_update(unsigned char dpid,unsigned char value);
-unsigned char mcu_dp_bool_mesh_update(unsigned char dpid,unsigned char value,unsigned int groupa);
-unsigned char mcu_dp_enum_mesh_update(unsigned char dpid,unsigned char value,unsigned int groupa);
+
 /*****************************************************************************
 函数名称 : mcu_dp_value_update
 功能描述 : value型dp数据上传
@@ -137,7 +169,7 @@ unsigned char mcu_dp_enum_mesh_update(unsigned char dpid,unsigned char value,uns
 返回参数 : 无
 *****************************************************************************/
 unsigned char mcu_dp_value_update(unsigned char dpid,unsigned long value);
-unsigned char mcu_dp_value_mesh_update(unsigned char dpid,unsigned long value,unsigned int groupa);
+
 /*****************************************************************************
 函数名称 : mcu_dp_string_update
 功能描述 : rstring型dp数据上传
@@ -227,5 +259,9 @@ void bt_protocol_init(void);
 使用说明 : 请将MCU串口发送函数填入该函数内,并将接收到的数据作为参数传入串口发送函数
 *****************************************************************************/
 void uart_transmit_output(unsigned char value);
+
+
+
+
 
 #endif

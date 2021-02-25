@@ -11,8 +11,10 @@
 
 
 文件概览：
-此MCU_SDK包括7个文件：
+此MCU_SDK包括9个文件：
 	（1）protocol.h和protocol.c是需要你修改的。protocol.h 和protocol.c文件内有详细修改说明，请仔细阅读。
 	（2）bluetooth.h文件为总的.h文件，如需要调用bluetooth内部功能，请#include "bluetooth.h"。
 	（3）system.c和system.h是bluetooth功能实现代码，用户无需修改。
 	（4）mcu_api.c和mcu_api.h内实现全部此用户需调用函数，用户无需修改。
+	（5）mcu_ota_handler.h 和 mcu_ota_handler.c 
+	是你需要修改的。ota和芯片强相关，需要用户自行调试修改适用自己的芯片平台，这两个文件仅作为一个参考

@@ -1,5 +1,5 @@
 /****************************************Copyright (c)*************************
-**                               版权所有 (C), 2015-2017, 涂鸦科技
+**                               版权所有 (C), 2015-2020, 涂鸦科技
 **
 **                                 http://www.tuya.com
 **
@@ -9,31 +9,43 @@
 **使 用 说 明 : 用户无需关心该文件实现内容
 **
 **
-**--------------当前版本修订---------------------------------------------------
+**--------------历史版本修订---------------------------------------------------
 ** 版  本: v1.0
 ** 日　期: 2017年5月3日
 ** 描　述: 1:创建涂鸦bluetooth对接MCU_SDK
 **
-**-----------------------------------------------------------------------------
+**--------------版本修订记录---------------------------------------------------
+
+** 版  本:v2.0
+** 日　期: 2020年3月23日
+** 描　述: 
+1.	增加cmd 0x09模块解绑接口支持
+2.	增加cmd 0x0e rf射频测试接口支持
+3.	增加cmd 0xe0 记录型数据上报接口支持
+4.	增加cmd 0xE1 获取实时时间接口支持
+5.	增加 cmd 0xe2 修改休眠模式状态广播间隔支持
+6.	增加 cmd 0xe4 关闭系统时钟功能支持
+7.	增加 cmd 0xe5 低功耗使能支持
+8.	增加 cmd 0xe6 获取一次性动态密码支持
+9.	增加 cmd 0xe7断开蓝牙连接支持
+10.	增加 cmd 0xe8 查询MCU版本号支持
+11.	增加 cmd 0xe9 MCU主动发送版本号支持
+12.	增加 cmd 0xea OTA升级请求支持
+13.	增加 cmd 0xeb OTA升级文件信息支持
+14.	增加 cmd 0xec OTA升级文件偏移请求支持
+15.	增加 cmd 0xed OTA升级数据支持
+16.	增加 cmd 0xee OTA升级结束支持
+17.	增加 cmd 0xa0 MCU 获取模块版本信息支持
+18.	增加 cmd 0xa1 恢复出厂设置通知支持
+19.  增加MCU OTA demo
+20. 优化串口解析器
+
 ******************************************************************************/
 #define SYSTEM_GLOBAL
 
 #include "bluetooth.h"
 //
 //
-/*
-extern u8 idata groupaddr1 ;
-extern u8 idata groupaddr2 ;
-extern u8 idata groupaddr3 ;
-extern u8 idata groupaddr4 ;
-extern u8 idata groupaddr5 ;
-extern u8 idata groupaddr6 ;
-extern u8 idata groupaddr7 ;
-extern u8 idata groupaddr8 ;
-*/
-
-extern u16 idata groupaddr[8];
-
 void savevar(void);
 extern const DOWNLOAD_CMD_S xdata download_cmd[];
 
@@ -83,7 +95,6 @@ static void bt_uart_write_data(unsigned char *in, unsigned short len)
   {
     return;
   }
-  
   while(len --)
   {
     uart_transmit_output(*in);
@@ -133,34 +144,6 @@ void bt_uart_write_frame(unsigned char fr_type, unsigned short len)
   //
   bt_uart_write_data((unsigned char *)bt_uart_tx_buf, len);
 }
-
-
-void bt_uart_mesh_write_frame(unsigned char fr_type, unsigned short len)
-{
-  unsigned char check_sum = 0;
-
-len = len+2;
-
-bt_uart_tx_buf[0] = 0x55;
-bt_uart_tx_buf[1] = 0xaa;
-bt_uart_tx_buf[2] = 0x00;
-bt_uart_tx_buf[3] = fr_type;
-
-bt_uart_tx_buf[4] = len >> 8;
-bt_uart_tx_buf[5] = len & 0xff;
-bt_uart_tx_buf[6] = 0XFF;
-bt_uart_tx_buf[7] = 0xff;
-
-
-len += PROTOCOL_HEAD;
-check_sum = get_check_sum((unsigned char *)bt_uart_tx_buf, len - 1);
-bt_uart_tx_buf[len - 1] = check_sum;
-//
-bt_uart_write_data((unsigned char *)bt_uart_tx_buf, len);
-
-
-}
-
 /*****************************************************************************
 函数名称 : heat_beat_check
 功能描述 : 心跳包检测
@@ -287,11 +270,22 @@ void data_handle(unsigned short offset)
 #else
   unsigned short dp_len;
 #endif
+  unsigned char length = 0;
   
   unsigned char ret;
   unsigned short i,total_len;
   unsigned char cmd_type = bt_uart_rx_buf[offset + FRAME_TYPE];
-  
+
+
+  signed char bt_rssi;
+
+#ifdef TUYA_BCI_UART_COMMON_SEND_TIME_SYNC_TYPE 
+  bt_time_struct_data_t bt_time;
+  unsigned short time_zone_100;
+  char current_timems_string[14] = "000000000000";
+  long long time_stamp_ms;
+#endif
+
   switch(cmd_type)
   {
   case HEAT_BEAT_CMD:                                   //心跳包
@@ -309,6 +303,11 @@ void data_handle(unsigned short offset)
 #ifndef BT_CONTROL_SELF_MODE
   case BT_STATE_CMD:                                  //bt工作状态	
     bt_work_state = bt_uart_rx_buf[offset + DATA_START];
+    if(bt_work_state==0x01||bt_work_state==0x00)
+    {
+    	mcu_ota_init_disconnect();
+
+    }
     bt_uart_write_frame(BT_STATE_CMD,0);
     break;
 
@@ -342,108 +341,123 @@ void data_handle(unsigned short offset)
     }
     
     break;
-  case BT_Check_meshgroup:                                  //查询群组
-    total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
-    total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
-
-
-	groupaddr[0] = bt_uart_rx_buf[offset + 7] * 0x100;
-	groupaddr[0] += bt_uart_rx_buf[offset + 8] ;
-
-	groupaddr[1] = bt_uart_rx_buf[offset + 9] * 0x100;
-	groupaddr[1] += bt_uart_rx_buf[offset + 10] ;
-
-	groupaddr[2] = bt_uart_rx_buf[offset + 11] * 0x100;
-	groupaddr[2] += bt_uart_rx_buf[offset + 12] ;
-
-	groupaddr[3] = bt_uart_rx_buf[offset + 13] * 0x100;
-	groupaddr[3] += bt_uart_rx_buf[offset + 14] ;
-
-	groupaddr[4] = bt_uart_rx_buf[offset + 15] * 0x100;
-	groupaddr[4] += bt_uart_rx_buf[offset + 16] ;
-
-	groupaddr[5] = bt_uart_rx_buf[offset + 17] * 0x100;
-	groupaddr[5] += bt_uart_rx_buf[offset + 18] ;
-
-	groupaddr[6] = bt_uart_rx_buf[offset + 19] * 0x100;
-	groupaddr[6] += bt_uart_rx_buf[offset + 20] ;
-
-	groupaddr[7] = bt_uart_rx_buf[offset + 21] * 0x100;
-	groupaddr[7] += bt_uart_rx_buf[offset + 22] ;
-
-    mcu_dp_value_update(DPID_ADDR0,groupaddr[0]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR1,groupaddr[1]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR2,groupaddr[2]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR3,groupaddr[3]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR4,groupaddr[4]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR5,groupaddr[5]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR6,groupaddr[6]); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_ADDR7,groupaddr[7]); //VALUE型数据上报;	
-	
-
-    break;
+    
   case STATE_QUERY_CMD:                                 //状态查询
     all_data_update();                               
     break;
     
+#ifdef TUYA_BCI_UART_COMMON_RF_TEST 
+	case TUYA_BCI_UART_COMMON_RF_TEST:
+		if(my_memcmp((unsigned char *)bt_uart_rx_buf + offset + DATA_START+7,"true",4)==0)
+		{
+			bt_rssi = (bt_uart_rx_buf[offset + DATA_START+21]-'0')*10 + (bt_uart_rx_buf[offset + DATA_START+22]-'0');
+			bt_rssi = -bt_rssi;
+			bt_rf_test_result(1,bt_rssi);
+		}
+		else
+		{
+			bt_rf_test_result(0,0);
+		}
+		break;
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_SEND_STORAGE_TYPE 
+	case TUYA_BCI_UART_COMMON_SEND_STORAGE_TYPE:
+		bt_send_recordable_dp_data_result(bt_uart_rx_buf[offset + DATA_START]);
+		break;
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_SEND_TIME_SYNC_TYPE 
+	case TUYA_BCI_UART_COMMON_SEND_TIME_SYNC_TYPE:
+		ret = bt_uart_rx_buf[offset + DATA_START];
+		if(ret==0)//获取时间成功
+		{
+			if(bt_uart_rx_buf[offset + DATA_START+1]==0x00)//时间格式0   	获取7字节时间时间类型+2字节时区信息
+			{
+				bt_time.nYear = bt_uart_rx_buf[offset + DATA_START+2] + 2018;
+
+				bt_time.nMonth = bt_uart_rx_buf[offset + DATA_START+3];
+				bt_time.nDay = bt_uart_rx_buf[offset + DATA_START+4];
+				bt_time.nHour = bt_uart_rx_buf[offset + DATA_START+5];
+				bt_time.nMin = bt_uart_rx_buf[offset + DATA_START+6];
+				bt_time.nSec = bt_uart_rx_buf[offset + DATA_START+7];
+				bt_time.DayIndex = bt_uart_rx_buf[offset + DATA_START+8];
+				time_zone_100 = ((unsigned short)bt_uart_rx_buf[offset + DATA_START+9]<<8)+bt_uart_rx_buf[offset + DATA_START+10];
+			}
+			else if(bt_uart_rx_buf[offset + DATA_START+1]==0x01)//时间格式1	获取13字节ms级unix时间+2字节时区信息
+			{
+				my_memcpy(current_timems_string,&bt_uart_rx_buf[offset + DATA_START+2],13);
+				time_stamp_ms = my_atoll(current_timems_string);
+				time_zone_100 = ((unsigned short)bt_uart_rx_buf[offset + DATA_START+15]<8)+bt_uart_rx_buf[offset + DATA_START+16];
+			}
+			else if(bt_uart_rx_buf[offset + DATA_START+1]==0x02)//时间格式2	获取7字节时间时间类型+2字节时区信息
+			{
+				bt_time.nYear = bt_uart_rx_buf[offset + DATA_START+2] + 2000;
+				bt_time.nMonth = bt_uart_rx_buf[offset + DATA_START+3];
+				bt_time.nDay = bt_uart_rx_buf[offset + DATA_START+4];
+				bt_time.nHour = bt_uart_rx_buf[offset + DATA_START+5];
+				bt_time.nMin = bt_uart_rx_buf[offset + DATA_START+6];
+				bt_time.nSec = bt_uart_rx_buf[offset + DATA_START+7];
+				bt_time.DayIndex = bt_uart_rx_buf[offset + DATA_START+8];
+				time_zone_100 = ((unsigned short)bt_uart_rx_buf[offset + DATA_START+9]<<8)+bt_uart_rx_buf[offset + DATA_START+10];
+			}
+			bt_time_sync_result(0,bt_uart_rx_buf[offset + DATA_START+1],bt_time,time_zone_100,time_stamp_ms);
+		}
+		else//获取时间失败
+		{
+			bt_time_sync_result(1,bt_uart_rx_buf[offset + DATA_START+1],bt_time,time_zone_100,time_stamp_ms);
+		}
+		break;
+#endif
+
+#ifdef TUYA_BCI_UART_COMMON_MODIFY_ADV_INTERVAL
+	case TUYA_BCI_UART_COMMON_MODIFY_ADV_INTERVAL:
+		bt_modify_adv_interval_result(bt_uart_rx_buf[offset + DATA_START]);
+		break;
+#endif
+#ifdef TUYA_BCI_UART_COMMON_TURNOFF_SYSTEM_TIME
+	case TUYA_BCI_UART_COMMON_TURNOFF_SYSTEM_TIME:
+	  bt_close_timer_result(bt_uart_rx_buf[offset + DATA_START]);
+	  break;
+#endif
+#ifdef TUYA_BCI_UART_COMMON_ENANBLE_LOWER_POWER
+	case TUYA_BCI_UART_COMMON_ENANBLE_LOWER_POWER:
+		bt_enable_lowpoer_result(bt_uart_rx_buf[offset + DATA_START]);
+		break;
+#endif
+#ifdef TUYA_BCI_UART_COMMON_SEND_ONE_TIME_PASSWORD_TOKEN
+	case TUYA_BCI_UART_COMMON_SEND_ONE_TIME_PASSWORD_TOKEN:
+	  bt_send_one_time_password_token_result(bt_uart_rx_buf[offset + DATA_START]);
+	  break;
+#endif
+#ifdef TUYA_BCI_UART_COMMON_ACTIVE_DISCONNECT
+	case TUYA_BCI_UART_COMMON_ACTIVE_DISCONNECT:
+		bt_disconnect_result(bt_uart_rx_buf[offset + DATA_START]);
+		break;
+#endif
+#ifdef TUYA_BCI_UART_COMMON_QUERY_MCU_VERSION
+	case TUYA_BCI_UART_COMMON_QUERY_MCU_VERSION:  
+	  length = set_bt_uart_buffer(length,(unsigned char *)MCU_APP_VER_NUM,3);
+	  length = set_bt_uart_buffer(length,(unsigned char *)MCU_HARD_VER_NUM,3);
+	  bt_uart_write_frame(TUYA_BCI_UART_COMMON_QUERY_MCU_VERSION,length);
+	  break;
+#endif
+#ifdef TUYA_BCI_UART_COMMON_FACTOR_RESET_NOTIFY
+	case TUYA_BCI_UART_COMMON_FACTOR_RESET_NOTIFY:	
+		bt_factor_reset_notify();
+		break;
+#endif
 #ifdef SUPPORT_MCU_FIRM_UPDATE
-  case UPDATE_START_CMD:                                //升级开始
-    firm_length = bt_uart_rx_buf[offset + DATA_START];
-    firm_length <<= 8;
-    firm_length |= bt_uart_rx_buf[offset + DATA_START + 1];
-    firm_length <<= 8;
-    firm_length |= bt_uart_rx_buf[offset + DATA_START + 2];
-    firm_length <<= 8;
-    firm_length |= bt_uart_rx_buf[offset + DATA_START + 3];
-    //
-    bt_uart_write_frame(UPDATE_START_CMD,0);
-    firm_update_flag = UPDATE_START_CMD;
-     break;
-    
-  case UPDATE_TRANS_CMD:                                //升级传输
-    if(firm_update_flag == UPDATE_START_CMD)
-    {
-      //停止一切数据上报
-      stop_update_flag = ENABLE;                                                 
-      
-      total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
-      total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
-      
-      dp_len = bt_uart_rx_buf[offset + DATA_START];
-      dp_len <<= 8;
-      dp_len |= bt_uart_rx_buf[offset + DATA_START + 1];
-      dp_len <<= 8;
-      dp_len |= bt_uart_rx_buf[offset + DATA_START + 2];
-      dp_len <<= 8;
-      dp_len |= bt_uart_rx_buf[offset + DATA_START + 3];
-      
-      firmware_addr = bt_uart_rx_buf + offset + DATA_START + 4;
-      if((total_len == 4) && (dp_len == firm_length))
-      {
-        //最后一包
-        ret = mcu_firm_update_handle(firmware_addr,dp_len,0);
-        
-        firm_update_flag = 0;
-      }
-      else if((total_len - 4) <= FIRM_UPDATA_SIZE)
-      {
-        ret = mcu_firm_update_handle(firmware_addr,dp_len,total_len - 4);
-      }
-      else
-      {
-        firm_update_flag = 0;
-        ret = ERROR;
-      }
-      
-      if(ret == SUCCESS)
-      {
-        bt_uart_write_frame(UPDATE_TRANS_CMD,0);
-      }
-      //恢复一切数据上报
-      stop_update_flag = DISABLE;    
-    }
-    break;
-#endif      
+	  case TUYA_BCI_UART_COMMON_MCU_OTA_REQUEST:
+	  case TUYA_BCI_UART_COMMON_MCU_OTA_FILE_INFO:
+	  case TUYA_BCI_UART_COMMON_MCU_OTA_FILE_OFFSET:
+	  case TUYA_BCI_UART_COMMON_MCU_OTA_DATA:
+	  case TUYA_BCI_UART_COMMON_MCU_OTA_END:
+		total_len = bt_uart_rx_buf[offset + LENGTH_HIGH] * 0x100;
+		total_len += bt_uart_rx_buf[offset + LENGTH_LOW];
+		mcu_ota_proc(cmd_type,&bt_uart_rx_buf[offset + DATA_START],total_len);
+	  	break;
+#endif   
 
   default:
     break;
