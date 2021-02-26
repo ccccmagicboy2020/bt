@@ -91,7 +91,7 @@ int my_memcmp(const void *buffer1,const void *buffer2,int count);
 输入参数 : p 字符串
 返回参数 : 整数
 *****************************************************************************/
-long long my_atoll(const char *p);
+long my_atoll(const char *p);
 /*****************************************************************************
 
 函数名称 : int_to_byte
@@ -99,7 +99,7 @@ long long my_atoll(const char *p);
 输入参数 : number:4字节原数据;value:处理完成后4字节数据
 返回参数 :无
 ****************************************************************************/
-void int_to_byte(unsigned long number,unsigned char value[4]);
+//void int_to_byte(unsigned long number,unsigned char value[4]);
 
 /*****************************************************************************
 函数名称 : byte_to_int
@@ -150,7 +150,7 @@ unsigned char mcu_get_bt_work_state(void);
            len:数据长度
 返回参数 : 无
 *****************************************************************************/
-unsigned char mcu_dp_raw_update(unsigned char dpid,const unsigned char value[],unsigned short len);
+//unsigned char mcu_dp_raw_update(unsigned char dpid,const unsigned char value[],unsigned short len);
 
 /*****************************************************************************
 函数名称 : mcu_dp_bool_update
@@ -178,7 +178,7 @@ unsigned char mcu_dp_value_update(unsigned char dpid,unsigned long value);
            len:数据长度
 返回参数 : 无
 *****************************************************************************/
-unsigned char mcu_dp_string_update(unsigned char dpid,const unsigned char value[],unsigned short len);
+//unsigned char mcu_dp_string_update(unsigned char dpid,const unsigned char value[],unsigned short len);
 
 /*****************************************************************************
 函数名称 : mcu_dp_enum_update

@@ -178,30 +178,31 @@ int my_memcmp(const void *buffer1,const void *buffer2,int count)
 输入参数 : p 字符串
 返回参数 : 整数
 *****************************************************************************/
-long long my_atoll(const char *p)
+long my_atoll(const char *p)
 {
-	long long n;
-	int c, neg = 0;
+	long n;
+	//int c; 
+	int neg = 0;
 	unsigned char   *up = (unsigned char *)p;
 
-	if (!isdigit(c = *up)) {
-		while (isspace(c))
-			c = *++up;
-		switch (c) {
-		case '-':
-			neg++;
-			/* FALLTHROUGH */
-		case '+':
-			c = *++up;
-		}
-		if (!isdigit(c))
-			return (0);
-	}
+//	if (!isdigit(c = *up)) {
+//		while (isspace(c))
+//			c = *++up;
+//		switch (c) {
+//		case '-':
+//			neg++;
+//			/* FALLTHROUGH */
+//		case '+':
+//			c = *++up;
+//		}
+//		if (!isdigit(c))
+//			return (0);
+//	}
 
-	for (n = '0' - c; isdigit(c = *++up); ) {
-		n *= 10; /* two steps to avoid unnecessary overflow */
-		n += '0' - c; /* accum neg to avoid surprises at MAX */
-	}
+//	for (n = '0' - c; isdigit(c = *++up); ) {
+//		n *= 10; /* two steps to avoid unnecessary overflow */
+//		n += '0' - c; /* accum neg to avoid surprises at MAX */
+//	}
 
 	return (neg ? n : -n);
 }
@@ -213,13 +214,13 @@ long long my_atoll(const char *p)
 输入参数 : number:4字节原数据;value:处理完成后4字节数据
 返回参数 :无
 ****************************************************************************/
-void int_to_byte(unsigned long number,unsigned char value[4])
-{
-  value[0] = number >> 24;
-  value[1] = number >> 16;
-  value[2] = number >> 8;
-  value[3] = number & 0xff;
-}
+//void int_to_byte(unsigned long number,unsigned char value[4])
+//{
+//  value[0] = number >> 24;
+//  value[1] = number >> 16;
+//  value[2] = number >> 8;
+//  value[3] = number & 0xff;
+//}
 /*****************************************************************************
 函数名称 : byte_to_int
 功能描述 : 将4字节合并为1个32bit变量
@@ -291,25 +292,25 @@ unsigned char mcu_get_bt_work_state(void)
            len:数据长度
 返回参数 : 无
 *****************************************************************************/
-unsigned char mcu_dp_raw_update(unsigned char dpid,const unsigned char value[],unsigned short len)
-{
-  unsigned short length = 0;
-  
-  if(stop_update_flag == ENABLE)
-    return SUCCESS;
-  //
-  length = set_bt_uart_byte(length,dpid);
-  length = set_bt_uart_byte(length,DP_TYPE_RAW);
-  //
-  length = set_bt_uart_byte(length,len / 0x100);
-  length = set_bt_uart_byte(length,len % 0x100);
-  //
-  length = set_bt_uart_buffer(length,(unsigned char *)value,len);
-  
-  bt_uart_write_frame(STATE_UPLOAD_CMD,length);
-  
-  return SUCCESS;
-}
+//unsigned char mcu_dp_raw_update(unsigned char dpid,const unsigned char value[],unsigned short len)
+//{
+//  unsigned short length = 0;
+//  
+//  if(stop_update_flag == ENABLE)
+//    return SUCCESS;
+//  //
+//  length = set_bt_uart_byte(length,dpid);
+//  length = set_bt_uart_byte(length,DP_TYPE_RAW);
+//  //
+//  length = set_bt_uart_byte(length,len / 0x100);
+//  length = set_bt_uart_byte(length,len % 0x100);
+//  //
+//  length = set_bt_uart_buffer(length,(unsigned char *)value,len);
+//  
+//  bt_uart_write_frame(STATE_UPLOAD_CMD,length);
+//  
+//  return SUCCESS;
+//}
 /*****************************************************************************
 函数名称 : mcu_dp_bool_update
 功能描述 : bool型dp数据上传
@@ -380,25 +381,25 @@ unsigned char mcu_dp_value_update(unsigned char dpid,unsigned long value)
            len:数据长度
 返回参数 : 无
 *****************************************************************************/
-unsigned char mcu_dp_string_update(unsigned char dpid,const unsigned char value[],unsigned short len)
-{
-  unsigned short length = 0;
-  
-  if(stop_update_flag == ENABLE)
-    return SUCCESS;
-  //
-  length = set_bt_uart_byte(length,dpid);
-  length = set_bt_uart_byte(length,DP_TYPE_STRING);
-  //
-  length = set_bt_uart_byte(length,len / 0x100);
-  length = set_bt_uart_byte(length,len % 0x100);
-  //
-  length = set_bt_uart_buffer(length,(unsigned char *)value,len);
-  
-  bt_uart_write_frame(STATE_UPLOAD_CMD,length);
-  
-  return SUCCESS;
-}
+//unsigned char mcu_dp_string_update(unsigned char dpid,const unsigned char value[],unsigned short len)
+//{
+//  unsigned short length = 0;
+//  
+//  if(stop_update_flag == ENABLE)
+//    return SUCCESS;
+//  //
+//  length = set_bt_uart_byte(length,dpid);
+//  length = set_bt_uart_byte(length,DP_TYPE_STRING);
+//  //
+//  length = set_bt_uart_byte(length,len / 0x100);
+//  length = set_bt_uart_byte(length,len % 0x100);
+//  //
+//  length = set_bt_uart_buffer(length,(unsigned char *)value,len);
+//  
+//  bt_uart_write_frame(STATE_UPLOAD_CMD,length);
+//  
+//  return SUCCESS;
+//}
 /*****************************************************************************
 函数名称 : mcu_dp_enum_update
 功能描述 : enum型dp数据上传
@@ -556,18 +557,18 @@ typedef enum {
 #define UART_RX_BUFFER_MAX   (PROTOCOL_HEAD + BT_UART_RECV_BUF_LMT)
 #define UART_RX_DATA_LEN_MAX (PROTOCOL_HEAD + BT_UART_RECV_BUF_LMT)
 static volatile mcu_uart_rev_state_type_t current_uart_rev_state_type = MCU_UART_REV_STATE_FOUND_NULL;
-static uint8_t bt_uart_rx_buf_temp[3] = {0};
-static uint16_t uart_data_len =  0;
-static volatile uint16_t UART_RX_Count = 0;
+static u8 xdata bt_uart_rx_buf_temp[3] = {0};
+static u16 xdata uart_data_len =  0;
+static volatile u16 xdata UART_RX_Count = 0;
 
 
-static bool mcu_common_uart_data_unpack(uint8_t data)
+static bool mcu_common_uart_data_unpack(u8 data0)
 {
-    bool ret = false;
+    bool ret = FALSE;
 
     bt_uart_rx_buf_temp[0] = bt_uart_rx_buf_temp[1];
     bt_uart_rx_buf_temp[1] = bt_uart_rx_buf_temp[2];
-    bt_uart_rx_buf_temp[2] = data;
+    bt_uart_rx_buf_temp[2] = data0;
 
     if((bt_uart_rx_buf_temp[0]==0x55)&&(bt_uart_rx_buf_temp[1]==0xAA)&&(bt_uart_rx_buf_temp[2]==0x00))
     {
@@ -584,15 +585,15 @@ static bool mcu_common_uart_data_unpack(uint8_t data)
     case MCU_UART_REV_STATE_FOUND_NULL:
         break;
     case MCU_UART_REV_STATE_FOUND_HEAD:
-        bt_uart_rx_buf[UART_RX_Count++] = data;
+        bt_uart_rx_buf[UART_RX_Count++] = data0;
         current_uart_rev_state_type = MCU_UART_REV_STATE_FOUND_CMD;
         break;
     case MCU_UART_REV_STATE_FOUND_CMD:
-        bt_uart_rx_buf[UART_RX_Count++] = data;
+        bt_uart_rx_buf[UART_RX_Count++] = data0;
         current_uart_rev_state_type = MCU_UART_REV_STATE_FOUND_LEN_H;
         break;
     case MCU_UART_REV_STATE_FOUND_LEN_H:
-        bt_uart_rx_buf[UART_RX_Count++] = data;
+        bt_uart_rx_buf[UART_RX_Count++] = data0;
         uart_data_len = (bt_uart_rx_buf[UART_RX_Count-2]<<8)|bt_uart_rx_buf[UART_RX_Count-1];
         if(uart_data_len>UART_RX_DATA_LEN_MAX)
         {
@@ -612,7 +613,7 @@ static bool mcu_common_uart_data_unpack(uint8_t data)
         }
         break;
     case MCU_UART_REV_STATE_FOUND_LEN_L:
-        bt_uart_rx_buf[UART_RX_Count++] = data;   //DATA
+        bt_uart_rx_buf[UART_RX_Count++] = data0;   //DATA
         uart_data_len--;
         if(uart_data_len==0)
         {
@@ -620,8 +621,8 @@ static bool mcu_common_uart_data_unpack(uint8_t data)
         }
         break;
     case MCU_UART_REV_STATE_FOUND_DATA:
-        bt_uart_rx_buf[UART_RX_Count++] = data;  //sum data
-        ret = true;
+        bt_uart_rx_buf[UART_RX_Count++] = data0;  //sum data
+        ret = TRUE;
         break;
     default:
         my_memset(bt_uart_rx_buf_temp,0,3);

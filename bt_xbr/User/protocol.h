@@ -117,81 +117,27 @@ mcu在bt模块正确联网后可调用mcu_get_system_time()函数发起校时功
                         1:dp数据点序列号重新定义
           **此为自动生成代码,如在开发平台有相关修改请重新下载MCU_SDK**         
 ******************************************************************************/
-//开关(可下发可上报)
-//备注:上电/掉电
-#define DPID_SWITCH_LED 1
-//模式(可下发可上报)
-//备注:
-#define DPID_WORK_MODE 2
-//亮度值(可下发可上报)
-//备注:灯的亮度值
-#define DPID_BRIGHT_VALUE 3
-//光敏参数(可下发可上报)
-//备注:红外对光的敏感度
-#define DPID_CDS 101
-//感应延时(可下发可上报)
-//备注:如果雷达感应到人体，灯点亮延长时间
-#define DPID_PIR_DELAY 102
 //雷达开关(可下发可上报)
-//备注:雷达感应开关
+//备注:开关雷达的控制
 #define DPID_SWITCH_XBR 103
-//伴亮延时(可下发可上报)
-//备注:到完全关闭的时间
-#define DPID_STANDBY_TIME 104
-//感应强度(可下发可上报)
-//备注:雷达模组感应强度值
-#define DPID_SENSE_STRESS 105
-//开关灯(可下发可上报)
-//备注:灯开关，默认的为模块复位触发开关
-#define DPID_SWITCH_LED2 113
-//联动 (可下发可上报)
-//备注:mesh联动开关
-#define DPID_SWITCH_LINKAGE 114
-//全天伴亮(可下发可上报)
-//备注:不进行微亮到灭的动作
-#define DPID_ALL_DAY_MICRO_LIGHT 115
-//雷达触发计数(只上报)
-//备注:
-#define DPID_RADAR_TRIGGER_TIMES 116
-//计数清零(只下发)
-//备注:
-#define DPID_CLEAR_TRIGGER_NUMBER 117
-//灯状态(只上报)
-//备注:
-#define DPID_LIGHT_STATUS 118
-//光敏状态(只上报)
-//备注:
-#define DPID_LUX_STATUS 119
-//群组地址0(只上报)
-//备注:
-#define DPID_ADDR0 130
-//群组地址1(只上报)
-//备注:
-#define DPID_ADDR1 131
-//群组地址2(只上报)
-//备注:
-#define DPID_ADDR2 132
-//群组地址3(只上报)
-//备注:
-#define DPID_ADDR3 133
-//群组地址4(只上报)
-//备注:
-#define DPID_ADDR4 134
-//群组地址5(只上报)
-//备注:
-#define DPID_ADDR5 135
-//群组地址6(只上报)
-//备注:
-#define DPID_ADDR6 136
-//群组地址7(只上报)
-//备注:
-#define DPID_ADDR7 137
-//光敏控制(可下发可上报)
-//备注:
-#define DPID_LUX_ENABLE 150
-//光敏延时(可下发可上报)
-//备注:
-#define DPID_LUX_DELAY_HOUR 151
+//雷达回波统计值(只上报)
+//备注:中频回波累加值
+#define DPID_IF_SUM 120
+//雷达环境噪音统计值(只上报)
+//备注:无目标时环境累加值
+#define DPID_NOISE_SUM 121
+//工厂操作(可下发可上报)
+//备注:工厂调试用
+#define DPID_FACTORY_OP 150
+//OTA结果(可下发可上报)
+//备注:枚举范围：ok,fail,fail_status,fail_pid,fail_ver,fail_sum,fail_offset,start,not_include
+//
+#define DPID_OTA_RESULT 154
+//亮度值(只上报)
+//备注:MCU设定的灯的亮度值
+#define DPID_BRIGHT_VALUE 160
+
+
 
 
 
@@ -367,6 +313,8 @@ void bt_disconnect_result(unsigned char result);
 使用说明 : MCU可以在此处完成MCU恢复出厂设置的操作
 *****************************************************************************/
 void bt_factor_reset_notify(void);
+
+void go_bootloader_ota(void);
 
 #endif
 

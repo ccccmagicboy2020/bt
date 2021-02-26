@@ -283,7 +283,7 @@ void data_handle(unsigned short offset)
   bt_time_struct_data_t bt_time;
   unsigned short time_zone_100;
   char current_timems_string[14] = "000000000000";
-  long long time_stamp_ms;
+  long time_stamp_ms;
 #endif
 
   switch(cmd_type)
@@ -401,11 +401,11 @@ void data_handle(unsigned short offset)
 				bt_time.DayIndex = bt_uart_rx_buf[offset + DATA_START+8];
 				time_zone_100 = ((unsigned short)bt_uart_rx_buf[offset + DATA_START+9]<<8)+bt_uart_rx_buf[offset + DATA_START+10];
 			}
-			bt_time_sync_result(0,bt_uart_rx_buf[offset + DATA_START+1],bt_time,time_zone_100,time_stamp_ms);
+			//bt_time_sync_result(0,bt_uart_rx_buf[offset + DATA_START+1],bt_time,time_zone_100,time_stamp_ms);
 		}
 		else//获取时间失败
 		{
-			bt_time_sync_result(1,bt_uart_rx_buf[offset + DATA_START+1],bt_time,time_zone_100,time_stamp_ms);
+			//bt_time_sync_result(1,bt_uart_rx_buf[offset + DATA_START+1],bt_time,time_zone_100,time_stamp_ms);
 		}
 		break;
 #endif

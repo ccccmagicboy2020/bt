@@ -82,7 +82,7 @@ unsigned char PWM3init(unsigned char ab);
 void savevar(void);
 void Flash_EraseBlock(unsigned int fui_Address);//flash扇区擦除
 void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address);//flash写入
-void Delay_us_1(uint q1);
+void Delay_us(uint q1);
 
 void reset_bt_module(void)
 {
@@ -180,14 +180,15 @@ void uart_transmit_output(unsigned char value)
 *****************************************************************************/
 void all_data_update(void)
 {
-  #error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
+  //#error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
   //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报函数
-    mcu_dp_bool_update(DPID_SWITCH_XBR,当前雷达开关); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_IF_SUM,当前雷达回波统计值); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_NOISE_SUM,当前雷达环境噪音统计值); //VALUE型数据上报;
-    mcu_dp_enum_update(DPID_FACTORY_OP,当前工厂操作); //枚举型数据上报;
-    mcu_dp_enum_update(DPID_OTA_RESULT,当前OTA结果); //枚举型数据上报;
-    mcu_dp_value_update(DPID_BRIGHT_VALUE,当前亮度值); //VALUE型数据上报;
+	
+    mcu_dp_bool_update(DPID_SWITCH_XBR, 0); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_IF_SUM, 0); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_NOISE_SUM, 0); //VALUE型数据上报;
+    mcu_dp_enum_update(DPID_FACTORY_OP, 0); //枚举型数据上报;
+    mcu_dp_enum_update(DPID_OTA_RESULT, 0); //枚举型数据上报;
+    mcu_dp_value_update(DPID_BRIGHT_VALUE, 0); //VALUE型数据上报;
 
 
 
@@ -218,7 +219,6 @@ static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], 
     
     switch_xbr = mcu_get_dp_download_bool(value,length);
 	
-	DPID_SWITCH_XBRcount++;
 	if(switch_xbr==SWITCHfXBR)
 	{
 /* 		if(DPID_SWITCH_XBRcount<2)
@@ -234,12 +234,12 @@ static unsigned char dp_download_switch_xbr_handle(const unsigned char value[], 
 	}
 	else
 	{
-		DPID_SWITCH_XBRcount=0;
+//		DPID_SWITCH_XBRcount=0;
 		for(i=0;i<8;i++)
 		{
 			if(groupaddr[i] != 0)
 			{
-				mcu_dp_bool_mesh_update(DPID_SWITCH_XBR,switch_xbr,groupaddr[i]);
+//				mcu_dp_bool_mesh_update(DPID_SWITCH_XBR,switch_xbr,groupaddr[i]);
 			}
 		}
 	
@@ -472,7 +472,11 @@ void bt_rf_test_req(void)
 *****************************************************************************/
 void bt_rf_test_result(unsigned char result,signed char rssi)
 {
-  #error "请自行完善该功能,完成后请删除该行"
+	signed char rssi0;
+	
+	rssi0 = rssi;
+	
+  //#error "请自行完善该功能,完成后请删除该行"
   if(result == 0)
   {
     //测试失败
@@ -501,7 +505,16 @@ void bt_rf_test_result(unsigned char result,signed char rssi)
 *****************************************************************************/
 void bt_send_recordable_dp_data(unsigned char snedType,unsigned char dpid,unsigned char dpType, unsigned char value[],unsigned short len)
 {
-	#error "请自行完善该功能,完成后请删除该行"
+//	#error "请自行完善该功能,完成后请删除该行"
+	unsigned char dpid_clone = 0;
+	unsigned char dpType_clone = 0;
+	unsigned char * value_clone = NULL;
+	unsigned short len_clone = len;
+	
+	dpid_clone = dpid;
+	dpType_clone = dpType;
+	value_clone = value;
+	
 	if(snedType==0x01)//格式1，蓝牙模块自带时间上报
 	{
 
@@ -524,7 +537,10 @@ void bt_send_recordable_dp_data(unsigned char snedType,unsigned char dpid,unsign
 *****************************************************************************/
 void bt_send_recordable_dp_data_result(unsigned char result)
 {
-	#error "请自行完善该功能,完成后请删除该行"
+//	#error "请自行完善该功能,完成后请删除该行"
+	
+	unsigned char result_clone = 0;
+	result_clone = result;
 }
 #ifdef TUYA_BCI_UART_COMMON_SEND_TIME_SYNC_TYPE 
 /*****************************************************************************
@@ -560,28 +576,36 @@ void bt_send_time_sync_req(unsigned char sync_time_type)
 返回参数 : 无
 使用说明 : MCU需要自行完善该函数功能
 *****************************************************************************/
-void bt_time_sync_result(unsigned char result,unsigned char sync_time_type,bt_time_struct_data_t bt_time,unsigned short time_zone_100,long long time_stamp_ms)
-{
-	#error "请自行完善该功能,完成后请删除该行"
-	if(result == 0x00)
-	{
-		//同步时间成功
-		if(sync_time_type==0x00||sync_time_type==0x02)
-		{
-			//将bt_time中的自定义时间格式的数据填充到mcu时钟系统中
-			//time_zone_100时区
-		}
-		else if(sync_time_type==0x01)
-		{
-			//将time_stamp_ms中的时间戳填充到mcu时钟系统中
-			//time_zone_100时区
-		}
-	}
-	else
-	{
-		//同步时间失败
-	}
-}
+//void bt_time_sync_result(unsigned char result,unsigned char sync_time_type,bt_time_struct_data_t bt_time,unsigned short time_zone_100,long time_stamp_ms)
+//{
+////	#error "请自行完善该功能,完成后请删除该行"
+//	unsigned short time_zone_100_clone = 0;
+//	bt_time_struct_data_t bt_time_clone;
+//	long time_stamp_ms_clone = 0;
+//	
+//	time_zone_100_clone = time_zone_100;
+//	bt_time_clone = bt_time;
+//	time_stamp_ms_clone = time_stamp_ms;
+//	
+//	if(result == 0x00)
+//	{
+//		//同步时间成功
+//		if(sync_time_type==0x00||sync_time_type==0x02)
+//		{
+//			//将bt_time中的自定义时间格式的数据填充到mcu时钟系统中
+//			//time_zone_100时区
+//		}
+//		else if(sync_time_type==0x01)
+//		{
+//			//将time_stamp_ms中的时间戳填充到mcu时钟系统中
+//			//time_zone_100时区
+//		}
+//	}
+//	else
+//	{
+//		//同步时间失败
+//	}
+//}
 #endif
 #endif
 
@@ -611,7 +635,7 @@ void bt_modify_adv_interval_req(unsigned char value)
 *****************************************************************************/
 void bt_modify_adv_interval_result(unsigned char result)
 {
-	#error "请自行完善该功能,完成后请删除该行"
+//	#error "请自行完善该功能,完成后请删除该行"
 	if(result == 0x00)
 	{
 		//成功
@@ -650,7 +674,7 @@ void bt_close_timer_req(unsigned char value)
 *****************************************************************************/
 void bt_close_timer_result(unsigned char result)
 {
-	#error "请自行完善该功能,完成后请删除该行"
+//	#error "请自行完善该功能,完成后请删除该行"
 	if(result == 0x00)
 	{
 		//成功
@@ -689,7 +713,7 @@ void bt_enable_lowpoer_req(unsigned char value)
 *****************************************************************************/
 void bt_enable_lowpoer_result(unsigned char result)
 {
-	#error "请自行完善该功能,完成后请删除该行"
+//	#error "请自行完善该功能,完成后请删除该行"
 	if(result == 0x00)
 	{
 		//成功
@@ -718,6 +742,8 @@ unsigned char bt_send_one_time_password_token(unsigned char value[],unsigned cha
   	length = set_bt_uart_buffer(length,value,8);
   	
 	bt_uart_write_frame(TUYA_BCI_UART_COMMON_SEND_ONE_TIME_PASSWORD_TOKEN,length);
+	
+	return 0;
 }
 /*****************************************************************************
 函数名称 : bt_send_one_time_password_token_result
@@ -729,7 +755,7 @@ unsigned char bt_send_one_time_password_token(unsigned char value[],unsigned cha
 *****************************************************************************/
 void bt_send_one_time_password_token_result(unsigned char result)
 {
-	#error "请自行完善该功能,完成后请删除该行"
+//	#error "请自行完善该功能,完成后请删除该行"
 	if(result == 0x00)
 	{
 		//密码核对通过
@@ -764,7 +790,7 @@ void bt_disconnect_req(void)
 *****************************************************************************/
 void bt_disconnect_result(unsigned char result)
 {
-	#error "请自行完善该功能,完成后请删除该行"
+//	#error "请自行完善该功能,完成后请删除该行"
 	if(result == 0x00)
 	{
 		//成功
@@ -805,7 +831,48 @@ void bt_send_mcu_ver(void)
 *****************************************************************************/
 void bt_factor_reset_notify(void)
 {
-	#error "请自行完善该功能,完成后请删除该行"
+//	#error "请自行完善该功能,完成后请删除该行"
 }
 #endif
+
+void go_bootloader_ota(void)
+{
+	unsigned char i = 0;
+	
+	//write flash flag
+	Flash_EraseBlock(MAGIC_SECTOR_ADDRESS0);
+	Delay_us(10000);
+	FLASH_WriteData(0x01, MAGIC_SECTOR_ADDRESS0);
+	Delay_us(100);
+	//save ota struct
+	i = 0;
+	while(i<8){
+		//FLASH_WriteData(ota_fw_info.mcu_ota_pid[i], MAGIC_SECTOR_ADDRESS0 + 0x01 + i);	//ota fw PID
+		Delay_us(100);
+		i++;
+	}
+//	FLASH_WriteData(ota_fw_info.mcu_ota_ver, MAGIC_SECTOR_ADDRESS0 + 9);
+	Delay_us(100);
+//	FLASH_WriteData(ota_fw_info.mcu_ota_fw_size >> 24, MAGIC_SECTOR_ADDRESS0 + 10);
+	Delay_us(100);
+//	FLASH_WriteData(ota_fw_info.mcu_ota_fw_size >> 16, MAGIC_SECTOR_ADDRESS0 + 11);
+	Delay_us(100);
+//	FLASH_WriteData(ota_fw_info.mcu_ota_fw_size >> 8, MAGIC_SECTOR_ADDRESS0 + 12);
+	Delay_us(100);
+//	FLASH_WriteData(ota_fw_info.mcu_ota_fw_size >> 0, MAGIC_SECTOR_ADDRESS0 + 13);
+	Delay_us(100);
+
+//	FLASH_WriteData(ota_fw_info.mcu_ota_checksum >> 24, MAGIC_SECTOR_ADDRESS0 + 14);
+	Delay_us(100);
+//	FLASH_WriteData(ota_fw_info.mcu_ota_checksum >> 16, MAGIC_SECTOR_ADDRESS0 + 15);
+	Delay_us(100);
+//	FLASH_WriteData(ota_fw_info.mcu_ota_checksum >> 8, MAGIC_SECTOR_ADDRESS0 + 16);
+	Delay_us(100);
+//	FLASH_WriteData(ota_fw_info.mcu_ota_checksum >> 0, MAGIC_SECTOR_ADDRESS0 + 17);
+	Delay_us(100);
+	
+	//goto bootloader
+	//IAR_Soft_Rst_Option();
+}
+
 

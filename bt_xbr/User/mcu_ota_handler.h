@@ -42,9 +42,10 @@ MCU OTA的方式和芯片强相关，该MCU OTA程序demo不一定适用所有�
 #ifndef  TUYA_OTA_HANDLER_H_
 #define  TUYA_OTA_HANDLER_H_
 
-#include <stdint.h>
+//#include <stdint.h>
 
 #include "bluetooth.h"
+#include "HC89S003F4.h"
 /******************************************************************************
                           1:配置升级         
 MCU_OTA_VERSION MCU软件的版本
@@ -63,8 +64,8 @@ MCU_OTA_TYPE    0//0x00-允许升级， 0x01-拒绝升级
 
 ******************************************************************************/
 
-#define TUYA_OTA_LOG(...)
-#define  TUYA_OTA_HEXDUMP(...)
+//#define TUYA_OTA_LOG(...)
+//#define  TUYA_OTA_HEXDUMP(...)
 
 
 
@@ -87,65 +88,65 @@ APP_NEW_FW_SETTING_ADR  	固件升级配置信息存储地址
 #define	    APP_NEW_FW_MAX_SIZE                (APP_NEW_FW_END_ADR - APP_NEW_FW_START_ADR)//116K
 
 
-#pragma anon_unions
+//#pragma anon_unions
 typedef struct
 {
-    uint32_t command_size;              /**< The size of the current init command stored in the DFU settings. */
-    uint32_t command_offset;            /**< The offset of the currently received init command data. The offset will increase as the init command is received. */
-    uint32_t command_crc;               /**< The calculated CRC of the init command (calculated after the transfer is completed). */
-    uint32_t data_object_size;          /**< The size of the last object created. Note that this size is not the size of the whole firmware image.*/
-    struct
-    {
-        uint32_t firmware_file_version;
-        uint32_t firmware_file_length;
-        uint32_t firmware_file_crc;
-        uint8_t  firmware_file_md5[16];        
-    };
-    union
-    {
-        struct
-        {
-            uint32_t firmware_image_crc;        /**< CRC value of the current firmware (continuously calculated as data is received). */
-            uint32_t firmware_image_crc_last;   /**< The CRC of the last executed object. */
-            uint32_t firmware_image_offset;     /**< The offset of the current firmware image being transferred. Note that this offset is the offset in the entire firmware image and not only the current object. */
-            uint32_t firmware_image_offset_last;/**< The offset of the last executed object from the start of the firmware image. */
-        };
-        struct
-        {
-            uint32_t update_start_address;      /**< Value indicating the start address of the new firmware (before copy). It's always used, but it's most important for an SD/SD+BL update where the SD changes size or if the DFU process had a power loss when updating a SD with changed size. */
-        };
-    };
+    u32 command_size;              /**< The size of the current init command stored in the DFU settings. */
+    u32 command_offset;            /**< The offset of the currently received init command data. The offset will increase as the init command is received. */
+    u32 command_crc;               /**< The calculated CRC of the init command (calculated after the transfer is completed). */
+    u32 data_object_size;          /**< The size of the last object created. Note that this size is not the size of the whole firmware image.*/
+//    struct
+//    {
+//        u32 firmware_file_version;
+//        u32 firmware_file_length;
+//        u32 firmware_file_crc;
+//        u8  firmware_file_md5[16];        
+//    };
+//    union
+//    {
+//        struct
+//        {
+//            u32 firmware_image_crc;        /**< CRC value of the current firmware (continuously calculated as data is received). */
+//            u32 firmware_image_crc_last;   /**< The CRC of the last executed object. */
+//            u32 firmware_image_offset;     /**< The offset of the current firmware image being transferred. Note that this offset is the offset in the entire firmware image and not only the current object. */
+//            u32 firmware_image_offset_last;/**< The offset of the last executed object from the start of the firmware image. */
+//        };
+//        struct
+//        {
+//            u32 update_start_address;      /**< Value indicating the start address of the new firmware (before copy). It's always used, but it's most important for an SD/SD+BL update where the SD changes size or if the DFU process had a power loss when updating a SD with changed size. */
+//        };
+//    };
 } dfu_progress_t;
 
 /** @brief Description of a single bank. */
-#pragma pack(4)
+//#pragma pack(4)
 typedef struct
 {
-    uint32_t                image_size;         /**< Size of the image in the bank. */
-    uint32_t                image_crc;          /**< CRC of the image. If set to 0, the CRC is ignored. */
-    uint32_t                bank_code;          /**< Identifier code for the bank. */
+    u32                image_size;         /**< Size of the image in the bank. */
+    u32                image_crc;          /**< CRC of the image. If set to 0, the CRC is ignored. */
+    u32                bank_code;          /**< Identifier code for the bank. */
 } dfu_bank_t;
 
 typedef struct
 {
-    uint32_t            crc;                /**< CRC for the stored DFU settings, not including the CRC itself. If 0xFFFFFFF, the CRC has never been calculated. */
-    uint32_t            settings_version;   /**< Version of the current DFU settings struct layout. */
-    uint32_t            app_version;        /**< Version of the last stored application. */
-    uint32_t            bootloader_version; /**< Version of the last stored bootloader. */
+    u32            crc;                /**< CRC for the stored DFU settings, not including the CRC itself. If 0xFFFFFFF, the CRC has never been calculated. */
+    u32            settings_version;   /**< Version of the current DFU settings struct layout. */
+    u32            app_version;        /**< Version of the last stored application. */
+    u32            bootloader_version; /**< Version of the last stored bootloader. */
 
-    uint32_t            bank_layout;        /**< Bank layout: single bank or dual bank. This value can change. */
-    uint32_t            bank_current;       /**< The bank that is currently used. */
+    u32            bank_layout;        /**< Bank layout: single bank or dual bank. This value can change. */
+    u32            bank_current;       /**< The bank that is currently used. */
 
     dfu_bank_t      bank_0;             /**< Bank 0. */
     dfu_bank_t      bank_1;             /**< Bank 1. */
 
-    uint32_t            write_offset;       /**< Write offset for the current operation. */
-    uint32_t            sd_size;            /**< Size of the SoftDevice. */
+    u32            write_offset;       /**< Write offset for the current operation. */
+    u32            sd_size;            /**< Size of the SoftDevice. */
 
     dfu_progress_t      progress;           /**< Current DFU progress. */
 
-    uint32_t            enter_buttonless_dfu;
-    uint8_t             init_command[256];  /**< Buffer for storing the init command. */
+    u32            enter_buttonless_dfu;
+    u8             init_command[256];  /**< Buffer for storing the init command. */
 } dfu_settings_t;
 
 
@@ -178,7 +179,7 @@ typedef enum
 使用说明 : 
 *****************************************************************************/
 
-void mcu_ota_proc(uint16_t cmd,uint8_t *recv_data,uint32_t recv_len);
+void mcu_ota_proc(u16 cmd,u8 *recv_data,u32 recv_len);
 /*****************************************************************************
 函数名称 : mcu_ota_init
 功能描述 :mcu ota初始化函数
@@ -188,7 +189,7 @@ void mcu_ota_proc(uint16_t cmd,uint8_t *recv_data,uint32_t recv_len);
 使用说明 : 用户需要将flash初始化函数在此完善，如果在其他处有flash初始化操作，该函数可以不被调用
 *****************************************************************************/
 
-uint32_t mcu_ota_init(void);
+u32 mcu_ota_init(void);
 /*****************************************************************************
 函数名称 : mcu_ota_init_disconnect
 功能描述 :ota 状态初始化函数
@@ -198,7 +199,7 @@ uint32_t mcu_ota_init(void);
 使用说明 : 重启\模块掉线\ota失败后需要主动调用
 *****************************************************************************/
 
-uint8_t mcu_ota_init_disconnect(void);
+u8 mcu_ota_init_disconnect(void);
 
 
 
