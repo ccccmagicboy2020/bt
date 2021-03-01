@@ -1,29 +1,5 @@
 #define ALLOCATE_EXTERN
-#include "HC89S003F4.h"
 #include "bluetooth.h"
-
-#define V12 //硬件板卡的版本
-
-#define USER_PARAMETER_START_SECTOR_ADDRESS0 0x2F00
-#define USER_PARAMETER_START_SECTOR_ADDRESS1 0x2F80
-
-//#define RELAY
-
-#define TH_LOW 30000
-#define TH_HIGH 4000000
-
-#define TH_DEF 40000
-
-//允许噪声值偏差范围
-#define MAX_DELTA0 20000 //最大偏差低值
-#define MAX_DELTA1 60000 //最大偏差高值
-
-#define MAX_DELAY 1800
-//最大延时秒数
-
-//感光门限-30对应8LUX左右的AD值,设置为255表示不检测感光
-#define LIGHT_TH0 255
-//30
 
 volatile ulong Timer_Counter = 0;
 
@@ -80,6 +56,7 @@ u8 xdata bt_join_cnt = 0;
 
 u16 xdata radar_number_count = 0;
 u8 xdata radar_number_send_flag = 0;
+u8 xdata radar_number_send_flag2 = 0;
 unsigned char xdata upload_disable = 0;
 unsigned char PWM3init(unsigned char ab);
 void Flash_EraseBlock(unsigned int fui_Address); //扇区擦除
@@ -385,43 +362,28 @@ uchar read_ad(uchar ch)
 
 void set_var(void)
 {
-
 	Flash_ReadArr(USER_PARAMETER_START_SECTOR_ADDRESS0, 16, guc_Read_a); //读取地址所在扇区
 
+	//读取感应门限
 	TH = guc_Read_a[0];
 	TH <<= 8;
 	TH += guc_Read_a[1];
 	TH *= 1000;
 	if (TH < TH_LOW || TH > TH_HIGH)
+	{
 		TH = TH_DEF;
+	}
 
+	//读取光敏门限
 	LIGHT_TH = guc_Read_a[2];
 
 	if (LIGHT_TH == 0)
+	{
 		LIGHT_TH = LIGHT_TH0;
-	else if (LIGHT_TH == 0XFE)
-		LIGHT_TH = 255;
+	}
 
-	DELAY_NUM = guc_Read_a[3];
-	DELAY_NUM <<= 8;
-	DELAY_NUM += guc_Read_a[4];
-	if (DELAY_NUM == 0 || DELAY_NUM > MAX_DELAY)
-		DELAY_NUM = 5;
-
-	//DELAY_NUM<<=2;
-	lightvalue = guc_Read_a[5];
-	//if(lightvalue>100)lightvalue=10;
-	XRBoffbrightvalue = lightvalue;
-
-	lowlightDELAY_NUM = guc_Read_a[6];
-	if (lowlightDELAY_NUM == 0 || lowlightDELAY_NUM > 255)
-		lowlightDELAY_NUM = 1;
-
+	//雷达的开关，默认是打开的
 	SWITCHfXBR = (~guc_Read_a[7]) & 0x01;
-	
-	
-	SWITCHflag2 = (guc_Read_a[9]) & 0x01;
-	
 	
 	//
 	Flash_ReadArr(USER_PARAMETER_START_SECTOR_ADDRESS1, 2, guc_Read_a1); //
@@ -477,18 +439,15 @@ void XBRHandle(void)
 		{
 			if (LIGHT > 0) //正在伴亮的过程中
 			{
-
-				//LIGHT++;
-
 #ifndef RELAY
-			if (slowchcnt < 100)
-			{
-				slowchcnt = slowchcnt + 2; //
-				if (slowchcnt > 100)
+				if (slowchcnt < 100)
 				{
-					slowchcnt = 100;
+					slowchcnt = slowchcnt + 2; //
+					if (slowchcnt > 100)
+					{
+						slowchcnt = 100;
+					}
 				}
-			}
 #else
 				slowchcnt = 100;
 #endif
@@ -497,13 +456,13 @@ void XBRHandle(void)
 			else if (LIGHT_off == 1) //else if((SWITCHflag2==0)&&(LIGHT_off ==1))
 			{
 #ifndef RELAY			
-			if (slowchcnt > lightvalue)
-			{
-				if (slowchcnt >= 2)
-					slowchcnt -= 2;
-				if (slowchcnt < lightvalue)
-					slowchcnt = lightvalue;
-			}
+				if (slowchcnt > lightvalue)
+				{
+					if (slowchcnt >= 2)
+						slowchcnt -= 2;
+					if (slowchcnt < lightvalue)
+						slowchcnt = lightvalue;
+				}
 #else
 				slowchcnt = lightvalue;
 #endif
@@ -573,8 +532,7 @@ void XBRHandle(void)
 			if (SUM1_counter == 0)
 			{
 				SUM10 = SUM1;
-				MAX_DELTA = 1; //SUM10>>3;
-							   //if(MAX_DELTA<MAX_DELTA0)MAX_DELTA=MAX_DELTA0;
+				MAX_DELTA = 1;
 			}
 
 			if ((SUM10 < (SUM1 + MAX_DELTA)) && (SUM1 < (SUM10 + MAX_DELTA))) //???????????
@@ -605,7 +563,7 @@ void XBRHandle(void)
 
 				if ((SUM1_counter >= SUM0_num) && (SUM10 < SUM0))
 				{
-					if (SUM1_num > 16) //???????????????
+					if (SUM1_num > 16) //
 					{
 						if (SUM0_num <= 9)
 							SUM0 = SUM10;
@@ -621,21 +579,13 @@ void XBRHandle(void)
 
 				else if (SUM1_counter >= SUM1_num)
 				{
-
-					// 							if(SUM0>SUM10)
-					// 							{
-					// 								if(SUM1_num>16)SUM0=SUM10;	//???????????????
-					// 							}
-					// 							else
-
 					if (SUM10 > (SUM0 + 4000))
 					{
 						SUM = SUM10 - SUM0;
 
 						if ((SUM10 < 8000000) && (SUM < 400000))
-						//????????????,???????????????100000?,???????
 						{
-							if (SUM1_num > 16) //????????????
+							if (SUM1_num > 16)
 							{
 								SUM0 += SUM10;
 								SUM0 /= 2;
@@ -656,12 +606,6 @@ void XBRHandle(void)
 							}
 						}
 					}
-					// 							else if((LIGHT>0)&&(TH==TH_LOW))
-					// 							{
-					// 								SUM=SUM10-SUM0;
-					// 								TH+=SUM;		//?????????????
-					// 							}
-
 					if (SUM1_counter >= SUM1_num)
 					{
 						SUM1_counter = 0;
@@ -688,15 +632,8 @@ void XBRHandle(void)
 				{
 					start_times--;
 
-					if (start_times > 0) //???????????,???????250*88ms=22S?????????
+					if (start_times > 0)
 					{
-						//start_times++;
-						/*
-							if(SUM0>600000)
-							{
-								TH=10000;
-							}
-							else */
 						if (SUM0 > 8000000)
 						{
 							TH = 800000;
@@ -708,25 +645,16 @@ void XBRHandle(void)
 							{
 								TH = 9000000 - SUM0;
 							}
-							//if(TH<30000)TH=30000;
 						}
 					}
 					else
 					{
-						//TH=TH_LOW;
-						//start_times=0;
-						//							EA=0;
-						//							set_var();
-						//							EA=1;
+						//
 					}
 				}
 
 				if (SUM1 > (SUM0 + TH))	//正式判断
 				{
-					//SUM=SUM1-SUM0;
-
-					//	if(SUM>TH)
-					//	{
 					if ((light_ad <= LIGHT_TH) || (start_times > 0))	//在一定亮度之下才运行
 					{
 						{
@@ -734,13 +662,14 @@ void XBRHandle(void)
 								SUM01 = SUM0;
 							LIGHT = 1;
 							//////////////////////////////////
-							//////////////////////////////////
+							////////这里增加输出动作////////////
+							radar_number_send_flag2 = 1;
+							SUM2 = SUM1;
 							//////////////////////////////////
 							SUM1_num = 8;
 							LIGHT_off = 0;
 							light1scount = 0;
 							light1sflag = 0;
-							//								send_data(0xaa);
 						}
 					}
 				}
@@ -753,26 +682,16 @@ void XBRHandle(void)
 //			send_data(light_ad);
 //			send_data(SUM0 >> 16);
 //			send_data(SUM0 >> 8);
-//			send_data(SUM1 >> 16);
-//			send_data(SUM1 >> 8); //20200927	测试用
+//			send_data(SUM2 >> 16);
+//			send_data(SUM2 >> 8); //20200927	测试用
 //			send_data(TH >> 16);
 //			send_data(TH >> 8);
 ////////////////////////////////////////////////////
 			SUM = 0;
 			SUM1 = 0;
 
-			if (LIGHT > 0) //????
+			if (LIGHT > 0)
 			{
-
-				//LIGHT++;
-
-				// 					slowchcnt = slowchcnt+5;//
-				// 					if(slowchcnt>=100)
-				// 					{
-				// 						slowchcnt = 100;
-				// 					}
-				// 					PWM3init(slowchcnt);
-
 				if (LIGHT > DELAY_NUM)
 				{
 					LIGHT = 0;
@@ -785,153 +704,20 @@ void XBRHandle(void)
 	{
 		LIGHT_off = 1;
 		while_1flag = 0;
-		//if(while_2flag==0)
-		//{
-		//	while_2flag = 1;
-		//					send_data(0x55);
-		//}
-		//PC3=1;
-		//LIGHT_OFF;
-		//slowchcnt = lightvalue;
-		//PWM3init(lightvalue);
 		lowlight1mincount = 0;
 		lowlight1minflag = 0;
-
-		//P0_6=1;
-		//send_data(0x55);
 		Delay_ms(250);
-
-		// 		SUM=0;
-		// 		SUM1=0;
-		// 		times=0;
 
 		SUM16 = 0;
 		calc_average_times = 0;
 		SUM1_num = 64;
 
 		stop_times = 2;
-		//if(start_times==0)TH=TH_LOW;
 		check_light_times = 6;
 
 		SUM1_counter = 0;
 		ALL_SUM1 = 0;
-
-		//		send_data(0xdd);
-		//		send_data(0xdd);
 	}
-}
-
-//积累一定的值
-void wait1(void)
-{
-	u8 i, j;
-
-	//等待直流电压稳定
-	j = 0;
-	while (1)
-	{
-		SUM = 0;
-
-		// 	  for(i=0;i<4;i++)	//0.52s
-		// 	  {
-		// 	  	for(t=0;t<8192;t++)	//0.13s
-		// 	  	{
-
-		// 				ADCC0 |= 0x40;					//启动ADC转换
-		// 				while(!(ADCC0&0x20));		//等待ADC转换结束
-		// 				ADCC0 &=~ 0x20;					//清除标志位
-		// 				k = ADCR;				//获取ADC的值
-		//
-		// 				SUM+=k;
-		//
-		// 	  	}
-		//
-		// 			WDTC |= 0x10;		//清看门狗
-
-		for (i = 0; i < 128; i++) //
-		{
-
-			ADCC0 |= 0x40; //启动ADC转换
-			while (!(ADCC0 & 0x20))
-				;			//等待ADC转换结束
-			ADCC0 &= ~0x20; //清除标志位
-			//k = ADCR;				//获取ADC的值
-
-			SUM += ADCR;
-		}
-
-		//发送感光AD值
-		// 				send_byte=0xFA;
-		// 				check_sum=send_byte;
-		// 				send_data(send_byte);
-
-		// 				//send_byte=light_ad;
-		// 				check_sum+=light_ad;
-		// 				send_data(light_ad);
-
-		// 				check_sum+=light_ad;
-		// 				send_data(light_ad);
-		//
-		// 				check_sum+=1;
-		// 				send_data(check_sum);
-
-		//}
-
-		Delay_ms(400);
-
-		//WDTC |= 0x10;		//清看门狗
-
-		i = SUM >> 11;
-		if ((i > 12) && (i < 141) && (j > 20))
-			break;
-
-		j++;
-
-		if (j > 80)
-			break; //??35????????????1.1V???????
-	}
-}
-
-//积累一个2^16次的平均值
-void wait2(void)
-{
-	u8 i;
-	//u8 j;
-	u16 k, t;
-
-	SUM = 0;
-
-	for (i = 0; i < 8; i++)
-	{
-		for (t = 0; t < 8192; t++)
-		{
-			// 				ADC_TG;
-			// 				while(ADC_IF==0){};
-			// 				//adc_data = ADC_DATA_RD();
-			//
-			// 				k = ADC_DH<<8;
-			// 				//adc_data =adc_data <<8;
-			// 				k+= ADC_DL;
-			//
-			// 				ADC_INT_IF_CLR; //清中断标志位
-
-			ADCC0 |= 0x40; //启动ADC转换
-			while (!(ADCC0 & 0x20))
-				;			//等待ADC转换结束
-			ADCC0 &= ~0x20; //清除标志位
-			k = ADCR;		//获取ADC的值
-
-			SUM += k;
-		}
-		WDTC |= 0x10; //清看门狗
-	}
-
-	average = SUM >> 16;
-
-	// 	light_ad=read_ad(10);
-	// 	light_ad0=light_ad;
-
-	// 	Delay_ms(4);	//4ms
 }
 
 unsigned char PWM3init(unsigned char ab)
@@ -1006,8 +792,15 @@ unsigned char PWM3init(unsigned char ab)
 	return 0;
 }
 
-void reset_bt_module(void);
-
+void lv_Init(void)
+{
+	LVDC = 0xAA; //LVD设置2.4V,禁止中断
+	//	消抖时间 = 	(0xFF + 2) * 1/Fcpu
+	//			 =	(0xFF + 2) / 16000000	（当前的CPU时钟）
+	//			 =	16.0625us
+	LVDDBC = 0xFF; //设置消抖时间
+	LVDC &= ~0x08; //清除LVD中断标志位
+}
 /***************************************************************************************
   * @说明  	主函数
   *	@参数	  无
@@ -1017,66 +810,27 @@ void reset_bt_module(void);
 void main()
 {
 	bt_protocol_init(); //mcu_sdk
-	InitSYS();
-	GPIO_Init();
-	//LIGHT_ON;
-	//P0_6=0;
-//	PWM3init(100);
-	Timer_Init();
-	UART1_Init();
-	ADC_Init();
+	InitSYS();			//clock init
+	GPIO_Init();		//gpio init
+	Timer_Init();		//timer1 init
+	UART1_Init();		//uart1 init
+	ADC_Init();			//adc init
+	lv_Init();			//lv init
+	PWM3init(0);		//先灭灯
 
-	LVDC = 0xAA; //LVD设置2.4V,禁止中断
-	//	消抖时间 = 	(0xFF + 2) * 1/Fcpu
-	//			 =	(0xFF + 2) / 16000000	（当前的CPU时钟）
-	//			 =	16.0625us
-	LVDDBC = 0xFF; //设置消抖时间
-	LVDC &= ~0x08; //清除LVD中断标志位
-				   //
 	EA = 1;
-
-	Delay_ms(200);
-
-	//LIGHT_ON;
-	//PWM3init(100);
-	//SWITCHflag = 1;
-	
-	
-	#ifdef XBR403_03_2
-		light_ad = read_ad(7); //切换到an7
-	#endif
-	
-	#ifdef XBR403
-		light_ad = read_ad(10); //切换到an10
-	#endif
-	
-	#ifdef V12
-		light_ad = read_ad(10); //切换到an10
-	#endif
-	
-	light_ad0 = light_ad;
-
+	Delay_ms(500);		//test timer delay
 	EA = 0;
-	set_var(); //从flash读取出变量
-	
-	PWM3init(100);
+
+	set_var();			//从flash读取出变量的初值
+	PWM3init(100);		//读取完成后把灯打开
 
 	EA = 1;
-
-	wait1();
-
-	slowchcnt = lightvalue;
-	//Delay_ms(200);
-	PWM3init(lightvalue);
-	//LIGHT_OFF;
-	//P0_6=1;
-	Delay_ms(300);
-
-	wait2();
+	Delay_ms(500);	
+	PWM3init(0);		//500ms后灭灯
 
 	SUM = 0;
-	
-	upload_disable = 0;	
+	upload_disable = 0;
 	
 	if (resetbtcnt > 3)
 	{
@@ -1103,16 +857,12 @@ void main()
 			
 			if (1 == radar_number_send_flag)
 			{
-//				if (1 == radar_number_send_flag2)
+				radar_number_send_flag = 0;
+				if (1 == radar_number_send_flag2)
 				{
-					radar_number_send_flag = 0;
-//					radar_number_send_flag2 = 0;
-					//if (radar_trig_times_last != radar_trig_times)
-					{
-//						mcu_dp_value_update(DPID_RADAR_TRIGGER_TIMES,radar_trig_times);
-						mcu_dp_value_update(DPID_IF_SUM, SUM2);
-//						radar_trig_times_last = radar_trig_times;
-					}
+					radar_number_send_flag2 = 0;
+					mcu_dp_value_update(DPID_IF_SUM, SUM2);
+					mcu_dp_value_update(DPID_NOISE_SUM, SUM0);
 				}
 			}	
 		}
@@ -1122,7 +872,9 @@ void main()
 		if (while_1flag == 0)//侦测状态
 		{
 			if ((times & 0x1f) == 0)
-				bt_uart_service();	//串口解包异步处理
+			{
+				bt_uart_service();	//串口解包异步处理			
+			}
 		}
 
 		if (SWITCHfXBR == 1) //雷达开, app控制
@@ -1139,7 +891,6 @@ void main()
 				SUM1_num = 64;
 
 				stop_times = 2;
-				//if(start_times==0)TH=TH_LOW;
 				check_light_times = 6;
 
 				SUM1_counter = 0;
@@ -1157,14 +908,7 @@ void main()
 					if (LIGHT_off >= lowlightDELAY_NUM)
 					{
 						LIGHT_off = 0;
-//						if (1 == all_day_micro_light_enable)
-						{
-							//
-						}
-//						else
-						{
-							PWM3init(0);
-						}
+						PWM3init(0);
 					}
 				}
 			}
@@ -1303,41 +1047,7 @@ void FLASH_WriteData(unsigned char fuc_SaveData, unsigned int fui_Address)
 	IAP_ADDR = fui_Address;
 	IAP_CMD = 0xB44B; //字节编程
 	IAP_CMD = 0xE11E; //触发一次操作
-					  //EA=1;
 }
-
-/**
-  * @说明  	写入任意长度的数据到FLASH里面
-  *         该函数需绝对地址编译，详情请查阅IAP操作应用手册
-  * @参数  	fui_Address ：FLASH起始地址
-  *	@参数	  fuc_Length ： 写入数据长度
-  *			    取值范围：0x00-0xFF
-  *	@参数  *fucp_SaveArr：写入的数据存放区域的首地址
-  * @返回值 无
-  * @注		  写之前必须先对操作的扇区进行擦除
-  */
-
-// void Flash_WriteArr(unsigned int fui_Address,unsigned char fuc_Length,unsigned char *fucp_SaveArr)
-// {
-// 	unsigned char fui_i = 0;
-// 	EA=0;
-// 	for(fui_i=0;fui_i<fuc_Length;fui_i++)
-// 	{
-// 		FLASH_WriteData(*(fucp_SaveArr++), fui_Address++);
-// 	}
-// 	EA=1;
-// }
-
-/**
-  * @说明  	从FLASH里面读取任意长度的数据
-  * @参数  	fui_Address ：FLASH起始地址
-  *	@参数	  fuc_Length ：读取数据长度
-  *			    取值范围：0x00-0xFF
-  *	@参数	 *fucp_SaveArr：读取数据存放的区域首地址
-  * @返回值 无
-  * @注		  无
-  */
-
 
 void savevar(void)
 {
@@ -1357,36 +1067,9 @@ void savevar(void)
 	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+2);
 	Delay_us(100);
 	
-	i=DELAY_NUM>>8;
-	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+3);
-	Delay_us(100);
-	i=DELAY_NUM&0xff;//&0xff;
-	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+4);
-	Delay_us(100);
-	
-	i=lightvalue;
-	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+5);
-	Delay_us(100);
-	
-	i=lowlightDELAY_NUM;
-	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+6);
-	Delay_us(100);
-	
-	i=~SWITCHfXBR;//&0xff;
+	i=~SWITCHfXBR;
 	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+7);
 	Delay_us(100);
-	
-//	i=Linkage_flag;
-//	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+8);
-//	Delay_us(100);	
-	
-	i=SWITCHflag2;
-	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+9);
-	Delay_us(100);	
-	
-//	i=all_day_micro_light_enable;
-//	FLASH_WriteData(i,USER_PARAMETER_START_SECTOR_ADDRESS0+10);
-//	Delay_us(100);
 	
 	Flash_EraseBlock(USER_PARAMETER_START_SECTOR_ADDRESS1);
 	Delay_us(10000);
@@ -1395,7 +1078,5 @@ void savevar(void)
 	FLASH_WriteData(1, USER_PARAMETER_START_SECTOR_ADDRESS1+1);//clear join count
 	Delay_us(100);
 	
-	EA=1;				//-20200927
-
+	EA=1;
 }
-

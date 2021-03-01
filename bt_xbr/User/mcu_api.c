@@ -676,11 +676,4 @@ void bt_protocol_init(void)
 {
   queue_in = (unsigned char *)bt_queue_buf;
   queue_out = (unsigned char *)bt_queue_buf;
-  //
-#ifndef BT_CONTROL_SELF_MODE
-  bt_work_state = BT_SATE_UNKNOW;
-#endif
-	mcu_ota_init();
-
 }
-

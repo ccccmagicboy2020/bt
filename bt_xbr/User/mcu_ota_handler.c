@@ -496,7 +496,7 @@ static void mcu_ota_data_req(uint8_t*recv_data,uint32_t recv_len)
 
 
 
-    if(state!=0)//³ö´í£¬»Ö¸´³õÊ¼×´Ì¬
+    if(state!=0)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ê¼×´Ì¬
     {
         TUYA_OTA_LOG("ota error so free!");
         mcu_ota_status_set(MCU_OTA_STATUS_NONE);
